@@ -46,6 +46,8 @@ function HelloWorld() {
 <HelloWorld />
 ```
 
+<p align="right"><a href="#rendering-views" style="text-decoration: none">[top]</a></p>
+
 ## Stateful views
 
 In Luent, render functions, much like class constructors and factory functions, run once per view creation rather than per view update.
@@ -73,6 +75,8 @@ function Counter() {
   </>
 }
 ```
+
+<p align="right"><a href="#rendering-views" style="text-decoration: none">[top]</a></p>
 
 ## Mounting an island
 
@@ -131,6 +135,7 @@ mountIsland(() => {
 
 Island containers may be any native element or a custom tag. Custom tag names must contain a dash. Mount to the island container by either passing in a css selector or the DOM node.
 
+<p align="right"><a href="#rendering-views" style="text-decoration: none">[top]</a></p>
 
 ## JSX transpilation
 
@@ -202,4 +207,5 @@ Luent transpiles JSX tags into `jsx()` calls with straightforward mental mapping
 
 :::
 
+<p align="right"><a href="#rendering-views" style="text-decoration: none">[top]</a></p>
 

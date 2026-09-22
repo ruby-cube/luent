@@ -30,6 +30,17 @@ function NotificationButton(setup: FromTag<{
   )
 }
 ```
+:::details CODE SWITCH
+**React:** `createPortal()`
+
+**Vue:** `<Teleport to="...">`
+
+**Solid:** `<Portal mount={...}>`
+
+:::
+
+<p align="right"><a href="#portals" style="text-decoration: none">[top]</a></p>
+
 
 ## Built-in portals
 Luent provides 5 built-in portal tags, `<o--window>`, `<o--document>`, `<o--html>`, `<o--head>` and `<o--body>`, as shorthands for `<o--portal to='body'>`, etc. They can also be used to [register events](/guide/event-bindings).
@@ -39,9 +50,11 @@ Luent provides 5 built-in portal tags, `<o--window>`, `<o--document>`, `<o--html
 </o--body>
 ```
 
+
 ## Head elements
 Elements may also be prefixed with `o-` as shorthand for rendering them into the document `<head>`. This is particularly useful for declaring stylesheets, metadata, and other head elements directly from components.
 
 ```tsx
 <o-link href='/src/counter.css' rel='stylesheet'/>
 ```
+<p align="right"><a href="#portals" style="text-decoration: none">[top]</a></p>

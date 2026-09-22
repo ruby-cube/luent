@@ -322,7 +322,7 @@ ionicTickTask(({ setup, ooo }) => {
    let ignore = false;
    mu($bio).value = null
    setup(() => {
-      ooo.await(fetchBio(person), result => {
+      oo.await(fetchBio(person), result => {
          if (ignore) return;
          mu($bio).value = result
       })
@@ -346,7 +346,7 @@ ionicTickTask(({ setup, ooo }) => {
 ionicTickTask(({ ooo, abort }) => {
    mu($bio).value = null
 
-   ooo.await(fetchBio(person, { abort }))
+   oo.await(fetchBio(person, { abort }))
       .then(result => {
          mu($bio).value = result
       })
@@ -407,7 +407,7 @@ queueIonicRenderTask(({ ooo, tether, setup }) => {
       }), 500)
    ).cleanup(clearInterval)
 
-   ooo.await(render, () => {
+   oo.await(render, () => {
       const { } = useSelection(x, y)
       const newTodo = IonicTodo(todo)
       console.log('other stuff', fromContext(ScoreBoard.stuff))
@@ -422,7 +422,7 @@ queueIonicRenderTask(({ ooo, tether, setup }) => {
       }), 500)
    ).cleanup(clearInterval)
 
-   ooo.await(render, () => {
+   oo.await(render, () => {
       const { } = useSelection(x, y)
       const newTodo = IonicTodo(todo)
       console.log('other stuff', fromContext(ScoreBoard.stuff))

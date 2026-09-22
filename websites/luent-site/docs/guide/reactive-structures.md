@@ -30,6 +30,17 @@ function moveRight() {
 }
 ```
 :::
+:::details CODE SWITCH
+**React:** `useState()`, `useReducer()`
+
+**Vue:** `shallowRef()`
+
+**Svelte:** `$state`
+
+**Solid:** `createSignal()`
+
+**Angular:** `signal()`
+:::
 
 <p align="right"><a href="#reactive-structures" style="text-decoration: none">[top]</a></p>
 
@@ -60,6 +71,17 @@ function moveRight() {
 }
 ```
 
+:::details CODE SWITCH
+**React:** `useSyncExternalStore()`
+
+**Vue:** `reactive()`
+
+**Svelte:** `$state`
+
+**Solid:** `createMutable()`
+
+:::
+
 
 <p align="right"><a href="#reactive-structures" style="text-decoration: none">[top]</a></p>
 
@@ -71,19 +93,131 @@ const list = ionic(['🍎', '🍊', '🍐'])
 list.push('🍌')
 list.splice(1, 1)
 ```
+:::details CODE SWITCH
+
+**Vue:** `reactive([])`
+
+**Svelte:** `$state([])`
+
+**Solid:** `createStore([])`, `createMutable([])`
+
+:::
 <p align="right"><a href="#reactive-structures" style="text-decoration: none">[top]</a></p>
 
 ### Ionic class instances
 Class instances may also be made reactive using `ionic()`. To learn more, see [Classes and Reactivity](/guide/reusable-logic#classes-and-reactivity)
 
+<p align="right"><a href="#reactive-structures" style="text-decoration: none">[top]</a></p>
+
+<!-- ### Ion access
+Property ions may be accessed using the `$of()` helper.
+```tsx
+
+``` -->
+
 ### Tracking ions
-### Triggering ions
+
+Track the ions of an ionic object by accessing the ion's state—either through property access or function call—within a tracked compound ion.
+
+**Tracked by a view:**
+```tsx
+<label on:dblclick={() => editTodo(todo)}>{() => todo.title}</label>
+```
+
+**Tracked by `track()`:**
+```tsx
+track(() => todo.title, () => {
+  console.log('title:': todo.title)
+})
+```
+
+**Tracked by an ionic task**
+```tsx
+ionicTick(() => {
+  console.log(todo.title)
+})
+```
+
+Alternatively, a persistent copy of the ion may be accessed using the `$of()` helper (rather than creating a new inline derivation each time). In NextScript, simply use the accessor operator `@`.
+```nsx
+<label on:dblclick={() => editTodo(todo)}>{todo.title@}</label>
+```
+```tsx
+<label on:dblclick={() => editTodo(todo)}>{$of(todo).$title}</label>
+```
+
+This is useful when a mutable ion is needed for a mutable binding
+```nsx
+<input
+  type="text"
+  mu:value={todo.title@}
+  at:attach={(node) { node.focus() }}
+  on:blur={(){ doneEdit(todo) }}
+  on:keyup={(e){ e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo) }}
+/>
+```
+```tsx
+<input
+  type="text"
+  mu:value={$of(todo).title}
+  at:attach={node => node.focus()}
+  on:blur={() => doneEdit(todo)}
+  on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
+/>
+```
+:::details CODE SWITCH
+**React:** `useEffect()`
+
+**Vue:** `watch()`, `watchEffect()`
+
+**Svelte:** `$effect`
+
+**Solid:** `createEffect()`
+
+**Angular:** `effect()`
+:::
 
 ### Nested Reactivity
-`ionic()` ionizes properties shallowly, meaning nested structures will not be made ionic.
-:::info Under Construction
-These docs are still being written. To see an example of nested reactivity, see [Folders demo]().
-:::
+`ionic()` ionizes properties shallowly, meaning nested structures will not be made ionic. Nested reactivity must be explicitly initialized using nested `ionic()` or passing in a nested reactivity initializer through the property's '-as' flag.
+
+**Nested `ionic()`**
+```tsx
+const user = ionic({
+  name: 'John Doe',
+  address: ionic({
+    number: 111,
+    street: 'Some Place',
+    city: 'Some City',
+    state: 'Some State'
+  })
+})
+```
+
+**Nested reactivity hooks**
+```tsx
+const user = ionic(getUser(id), { address: { '-as': ionic } })
+```
+```tsx
+const todos = ionic(getTodos(), { '@each': { '-as': ionic } })
+```
+
+
+### Ion hooks
+Hook into an ion's setter and getter with ion hooks.
+```tsx
+const user = ionic(getUser(id), { 
+  address: { 
+    '-as': ionic,
+    '@get'() { 
+      console.log('getting address') 
+    },
+    '@set'(value) { 
+      console.log('setting address', value) 
+    }
+  } 
+})
+```
+
 
 
 <p align="right"><a href="#reactive-structures" style="text-decoration: none">[top]</a></p>
@@ -105,6 +239,13 @@ function removeCompleted() {
   todos = todos.filter(todo => !todo.completed)
 }
 ```
+:::details CODE SWITCH
+
+**Vue:** `ref()`
+
+**Svelte:** `$state`
+
+:::
 
 <p align="right"><a href="#reactive-structures" style="text-decoration: none">[top]</a></p>
 

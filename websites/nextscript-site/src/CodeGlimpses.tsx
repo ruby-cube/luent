@@ -231,19 +231,15 @@ const flowNSX =
     <span class='status'>Sold out</span>
   )}
 </section>
-
-
 `
 
 
 const flowTSX =
   `<section>
-  {If(inStock, () =>
-    <>
-      <span class='status'>In stock</span>
-      <button on:click={addToCart}>Buy</button>
-    </>
-  )}
+  {If(inStock, () => <>
+    <span class='status'>In stock</span>
+    <button on:click={addToCart}>Buy</button>
+  </>)}
   {Else(() =>
     <span class='status'>Sold out</span>
   )}
@@ -253,12 +249,12 @@ const flowTSX =
 
 function GatewayFunction() {
   return <>
-    <h3>JSX gateway function</h3>
+    <h3>JSX flow gateway function</h3>
     <code><i>parameters</i> {':>'} <i>jsx</i></code>
     <p>
-      —shorthand for an arrow function expression that returns a JSX fragment
+      —shorthand for an arrow function expression that returns a JSX fragment in flow expressions
     </p>
-    <a href='/guide/jsx-syntax#jsx-gateway-function' class='medium brand'>Learn more</a>
+    <a href='/guide/jsx-syntax#jsx-flow-gateway-function' class='medium brand'>Learn more</a>
   </>
 }
 
@@ -274,21 +270,17 @@ const gatewayFnNSX =
     <hr/>
   )}
 </article>
-
-
 `
 
 const gatewayFnTSX =
   `<article>
-  {For(sections, section => 
-    <>
-      <section>
-        <h2>{section.title}</h2>
-        <p>{section.body}</p>
-      </section>
-      <hr/>
-    </>
-  )}
+  {For(sections, section => <>
+    <section>
+      <h2>{section.title}</h2>
+      <p>{section.body}</p>
+    </section>
+    <hr/>
+  </>)}
 </article>
 `
 

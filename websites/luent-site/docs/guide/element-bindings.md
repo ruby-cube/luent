@@ -15,7 +15,6 @@ JSX attributes may be written as either HTML/SVG attribute names or DOM property
 <div contentEditable="true">Write something...</div>
 ```
 
-<p align="right"><a href="#element-bindings" style="text-decoration: none">[top]</a></p>
 
 ### Static bindings
 Static bindings provide constant values.
@@ -23,7 +22,6 @@ Static bindings provide constant values.
 <div contenteditable={contentEditable}>Write something...</div>
 ```
 
-<p align="right"><a href="#element-bindings" style="text-decoration: none">[top]</a></p>
 
 ### Reactive bindings
 To make a binding reactive, pass in an ion.
@@ -63,15 +61,14 @@ function Text(setup: FromTag<{
   const { $isEditor, $isActive } = setup;
   const $html = ion('Write something...')
   return <>
-    <div contenteditable={() => $isEditor() && $isActive()}>
-      {{ 'mu:HTML': $html }}
+    <div contenteditable={() => $isEditor() && $isActive()} mu:HTMLSlot>
+      {$html}
     </div>
   </>
 }
 ```
 :::
 
-<p align="right"><a href="#element-bindings" style="text-decoration: none">[top]</a></p>
 
 ### Mutable bindings
 See [Mutation safety: Element bindings](/guide/mutation-safety#element-bindings).
@@ -105,6 +102,8 @@ element.setAttribute(attribute, value);
 ```
 
 ::: -->
+
+<p align="right"><a href="#element-bindings" style="text-decoration: none">[top]</a></p>
 
 ## Events
 
@@ -214,6 +213,8 @@ listen(window, "mousedown", () => {
   controller.abort();
 }, { signal: controller.signal });
 ``` -->
+
+<p align="right"><a href="#element-bindings" style="text-decoration: none">[top]</a></p>
 
 ## Styles
 
@@ -330,26 +331,43 @@ The `style` attribute may be written as a string or an object.
 #### Static styles
 
 ```tsx
-<div style="background-color: #efefef"></div>
+<div style="background-color: #efefef; color: red">Hello world</div>
 ```
 
 #### Reactive styles
 
-**Ion notation**
+**...via ion**
 
+A style ion updates the value of the style attributes. For even more fine-grained updates, use style objects or the `css` tag function.
 ```tsx
-<div style={() => `background-color: ${$darkMode() ? "#222" : "#fff"}`}></div>
+<div style={() => `
+  background-color: ${$darkMode() ? "#222" : "#fff"};
+  color: red
+`}>Hello world</div>
 ```
 
-**Object notation**
+**...via object**
 
+A style object enables Luent to update at the level of style properties. Style property names should be written as CSS property names and wrapped in quotes.
 ```tsx
-<div
-  style={{ "background-color": () => ($darkMode() ? "#222" : "#fff") }}
-></div>
+<div style={{ 
+  'background-color': () => $darkMode() ? "#222" : "#fff" 
+  'color': 'red'
+}}>Hello world</div>
 ```
 
-For reactive styles, object notation is preferred for readability and fine-grained updates. Style property names should be written as CSS property names and wrapped in quotes.
+<b>...via the <code>css</code> tag function</b>
+
+The `css` tag function returns a style object. The syntax allows drop-in migration between style bindings and stylesheets.
+```tsx
+<div style={css`
+  background-color: ${() => $darkMode() ? "#222" : "#fff"};
+  color: red;
+`}>Hello world</div>
+```
+
+<p align="right"><a href="#element-bindings" style="text-decoration: none">[top]</a></p>
+
 
 ## Slot
 
@@ -366,19 +384,21 @@ jsx('div', { Slot: () => ['count: ', $count] })
 
 ### Textarea
 ```tsx
-<textarea mu:text>{$text}</textarea>
+<textarea mu:TextSlot>{$text}</textarea>
 ```
 
 ### Inner HTML
 
 ```tsx
-<div trusted:innertml>{$html}</div>
+<div trusted:HTMLSlot>{$html}</div>
 ```
 
 ```tsx
-<div mu:html>{$html}</div>
+<div mu:HTMLSlot>{$html}</div>
 ```
 
 ```tsx
-<div html>{$html}</div>
+<div HTMLSlot>{$html}</div>
 ```
+
+<p align="right"><a href="#element-bindings" style="text-decoration: none">[top]</a></p>

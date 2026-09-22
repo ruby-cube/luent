@@ -1,47 +1,39 @@
-import { Await, For, Meanwhile, mountIsland } from "luent";
-import { ion } from "@luent/quarky";
-
-// based on Solid.js/Remix demo
-
-// TODO:
-// const $something = ion(null, {
-//    '-fetch': () => db.getSomething(),
-//    '-dispatch': value => db.setSomething(value),
-//    '-awaited': true
-// })
-
-const TEST_LATENCY_0 = 1000
-const TEST_LATENCY_1 = 500
-
-
-
 export function TestAsyncSelect() {
 
-  const $states = ion([], { '-fetch': db.fetchStates })
-  const $activeState = ion(() => $states()[0] ?? '', { '-mutable': true })
+  const $states = ion(db.fetchStates)
+  
+  const $selectedState = ion(() =>
+    oo.await($states, states => states[0]),
+    { '-mutable': true }
+  )
 
-  const $cities = ion([], { '-fetch': () => oo.await($states.pending, () => db.fetchCities($activeState())) })
-  const $activeCity = ion(() => $cities()[0], { '-mutable': true })
+  const $cities = ion(() =>
+    oo.await($selectedState, state => db.fetchCities(state))
+  )
+  const $selectedCity = ion(() =>
+    oo.await($cities, cities => cities[0]),
+    { '-mutable': true }
+  )
 
   return <>
-    <div class='test-view' data-test-latency={JSON.stringify([TEST_LATENCY_0, TEST_LATENCY_1])}>
-      {Await(<>
-        <select mu:value={$activeState} class='test-select-state'>
+    <div>
+      {Await(
+        <select mu:value={$selectedState}>
           {For($states, $state =>
             <option>{$state}</option>
           )}
         </select>
 
-        <select mu:value={$activeCity} class='test-select-city' disabled={() => !!$cities.pending}>
+        <select mu:value={$selectedCity} disabled={() => !!$cities.pending}>
           {For($cities, $city =>
             <option>{$city}</option>
           )}
         </select>
 
         <p style={{ color: () => $cities.pending ? 'gray' : 'black' }}>
-          Selection: {$activeCity}, {Await($cities, <>{$activeState()}</>)}
+          Selection: {$selectedCity}, {() => oo.await($cities, $selectedState)}
         </p>
-      </>)}
+      )}
       {Meanwhile(
         <>loading...</>
       )}
@@ -67,5 +59,3 @@ const db = {
     return []
   }
 }
-
-if (__TEST__) mountIsland(TestAsyncSelect, '#root')

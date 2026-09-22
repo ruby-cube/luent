@@ -1,4 +1,4 @@
-import { RenderView } from "../component/Component";
+import { RenderTag } from "../component/Component";
 import { AnyObject } from "@luent/types";
 import { createRootContext } from "../context/provide";
 import { popContext, pushContext } from "../context/context-stack";
@@ -7,7 +7,7 @@ import { load, queueInternalRender } from "@luent/quarky";
 import { mountDOMNodes, processJSXOutput, setUpNodeVine } from "../node/VineNode";
 import { RenderFunction } from "../node/makeJSXNode";
 
-export function mountIsland<T extends AnyObject>(App: RenderView<T> | RenderFunction, element: string | Element | HTMLElement | SVGAElement) {
+export function mountIsland<T extends AnyObject>(App: RenderTag<T> | RenderFunction, element: string | Element | HTMLElement | SVGAElement) {
   const rootContext = createRootContext()
   const flask = new Flask({ type: 'view' });
   const root = typeof element === 'string' ? document.querySelector(element) : element;

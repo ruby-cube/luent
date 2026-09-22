@@ -1,4 +1,4 @@
-import { Ion, Ionic, toIon, $fromContext, RenderView, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderTag, Style, template, Xray, FromTag } from "luent"
+import { Ion, Ionic, toIon, $fromContext, Context, ContextKey, css, fromContext, If, listen, NodeRef, RawJSXNode, RenderTag, Style, template, Xray, FromTag } from "luent"
 import { maybeFlip, Popover, positionPopover, positionTail } from "./Popover.kit";
 
 // TODO:
@@ -112,7 +112,7 @@ function PopoverContent(setup: FromTag<{
 
 
 function PopoverTail(setup: FromTag<{
-  as?: RenderView | string;
+  as?: RenderTag | string;
   offset?: Ion<number>
   'xray:shape'?: Xray<'div'>
   // 'shape:microclass'?: Ion<string> // FIX: should this just be shapeClasses? or should this be gathered into an object? yes. namespace object

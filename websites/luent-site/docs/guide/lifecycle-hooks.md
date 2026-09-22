@@ -11,6 +11,21 @@ Lifecycle hooks may take the form of:
 
 Inline hooks are useful when the lifecycle behavior belongs to a specific element or node. Function hooks should be used when the behavior belongs to the component or dynamic view.
 
+:::details CODE SWITCH
+**React:** `useEffect()`, `useLayoutEffect()`, cleanup
+
+**Vue:** `onMounted()`, `onUnmounted()`, `onActivated()`, `onDeactivated()`
+
+**Svelte:** `onMount()`, `onDestroy()`, `tick()`
+
+**Solid:** `onMount()`, `onCleanup()`, `createEffect()`
+
+**Angular:** `ngAfterViewInit`, `ngOnDestroy`, `afterNextRender()`
+:::
+
+<p align="right"><a href="#lifecycle-hooks" style="text-decoration: none">[top]</a></p>
+
+
 ## Hook Grammar
 
 Hooks are formed compositionally by combining:
@@ -85,6 +100,19 @@ atDetach(final => {
 
 See [The Render Cycle](/guide/the-render-cycle) to understand phase timing and usage.
 
+:::details CODE SWITCH
+**React:** `useLayoutEffect()`; `useEffect()`
+
+**Vue:** `onBeforeUpdate()`, `onUpdated()`, `nextTick()`
+
+**Svelte:** `tick()`
+
+**Angular:** `afterNextRender()`, `afterRenderEffect()`
+:::
+
+<p align="right"><a href="#lifecycle-hooks" style="text-decoration: none">[top]</a></p>
+
+
 
 ## Function Hooks
 
@@ -121,6 +149,9 @@ afterDetach(() => {
 })
 ```
 
+<p align="right"><a href="#lifecycle-hooks" style="text-decoration: none">[top]</a></p>
+
+
 
 ## Inline Hooks
 
@@ -155,3 +186,13 @@ Inline hook callbacks receive the associated DOM node.
   after:attach={node => node.scrollIntoView()}
 ></div>
 ```
+
+:::details CODE SWITCH
+
+**Svelte:** `use:` actions
+
+**Solid:** `ref` attribute
+
+:::
+
+<p align="right"><a href="#lifecycle-hooks" style="text-decoration: none">[top]</a></p>

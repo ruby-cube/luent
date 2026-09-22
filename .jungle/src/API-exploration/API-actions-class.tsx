@@ -5,9 +5,9 @@ import { Ionic } from "@luent/quarky";
 
 
 function ionicTodos(data: Todo[], { refetch }) {
-   return ionic(data, {
-      [EACH]: { as: ionicTodo }
-   })
+  return ionic(data, {
+    [EACH]: { as: ionicTodo }
+  })
 }
 
 // TODO: 
@@ -22,8 +22,8 @@ const $todos = AsyncIon(() => fetchTodos($userID))
 // - AsyncIon's promises can be awaited within the component or "from above"
 
 const $todos = AsyncIon({
-   fetch: () => fetchTodos($userID),
-   reawait: true
+  fetch: () => fetchTodos($userID),
+  reawait: true
 })
 
 function _(...args: any[]) { }
@@ -40,127 +40,127 @@ function _(...args: any[]) { }
 // },
 
 const $todos = AsyncIon({
-   initial: [],
-   fetch: () => ionicTodos(db.fetchTodos())
+  initial: [],
+  fetch: () => ionicTodos(db.fetchTodos())
 }, ($data, $todos) => ({
-   '@init'() {
-      onTodosUpdated(applyMutations => { // TODO: How do you coordinate these real-time updates with everything else?
-         applyMutations()
-      })
-   },
+  '@init'() {
+    onTodosUpdated(applyMutations => { // TODO: How do you coordinate these real-time updates with everything else?
+      applyMutations()
+    })
+  },
 
-   addTodo: Action({
-      dispatch({ ooo }, todo) {
-         ooo.await(db.addTodo(todo))
-            .then(() => $data.refetch())
-            .catch(err => { })
-      }
-   }),
+  addTodo: Action({
+    dispatch({ oo }, todo) {
+      oo.await(db.addTodo(todo))
+        .then(() => $data.refetch())
+        .catch(err => { })
+    }
+  }),
 
-   delTodo: Action({
-      dispatch({ ooo }, todo) {
-         ooo.await(db.delTodo(todo))
-            .then(() => $data.refetch())
-            .catch(err => { })
-      }
-   }),
+  delTodo: Action({
+    dispatch({ ooo }, todo) {
+      oo.await(db.delTodo(todo))
+        .then(() => $data.refetch())
+        .catch(err => { })
+    }
+  }),
 
-   deleteTodo: Action({
-      sync(index: number) {
-         return $todos().deleteTodo(index, 1)
-      },
-      dispatch({ ooo }, index) {
-         ooo.await(() => db.deleteTodo(index))
-            .catch(err => { })
-      },
-   }),
+  deleteTodo: Action({
+    sync(index: number) {
+      return $todos().deleteTodo(index, 1)
+    },
+    dispatch({ ooo }, index) {
+      oo.await(() => db.deleteTodo(index))
+        .catch(err => { })
+    },
+  }),
 
-   removeTodo: Action({
-      sync(index: number) {
-         return $todos().deleteTodo(index, 1)
-      },
-      dispatch({ ooo, output }, index) {
-         ooo.await(db.deleteTodo(index))
-            .catch(err => { })
-      },
-   }),
+  removeTodo: Action({
+    sync(index: number) {
+      return $todos().deleteTodo(index, 1)
+    },
+    dispatch({ ooo, output }, index) {
+      ooo.await(db.deleteTodo(index))
+        .catch(err => { })
+    },
+  }),
 
-   complexOp: Action({
-      dispatch({ ooo, output }, index) {
-         $something.value = 0
+  complexOp: Action({
+    dispatch({ ooo, output }, index) {
+      $something.value = 0
 
-         ooo.await(db.deleteTodo(index))
-            .catch(err => { })
-      },
-      atRace: rival => rival.cancel()
-   })
+      ooo.await(db.deleteTodo(index))
+        .catch(err => { })
+    },
+    atRace: rival => rival.cancel()
+  })
 }))
 
 
 function ionicTodo(data: Todo) {
-   const todo = ionic(new Todo(data), {
+  const todo = ionic(new Todo(data), {
 
-      author: {
-         as: IonicProfile,
-         '@get'(author) {
-            console.log()
-         },
-         '@set'({ value, previous }) {
-
-         }
+    author: {
+      as: IonicProfile,
+      '@get'(author) {
+        console.log()
       },
-
-      '@doSomething'({ input: [a], output }) {
-         if (a === 0) {
-            return (undefined)
-         }
-         else {
-            return (ionicProfile(output))
-         }
-      },
-
-      doSomething: {
-         '@call'({ input: [a], output }) {
-            if (a === 0) {
-               return (undefined)
-            }
-            else {
-               return (ionicProfile(output))
-            }
-         }
-      },
-
-      something: {
-         '@get'() {
-
-         },
-         '@set'() {
-
-         }
-      },
-
-      $completed: AsyncIon({
-         initial: data.completed,
-         optimistic: true,
-         dispatch({ ooo }, value) {
-            ooo.await(db.setCompleted(value))
-         },
-         // debounce: 500
-      }),
-
-      updateTitle: nestAsyncAction(updateTitle => ({
-         optimistic(title: string) {
-            todo.updateTitle(title)
-         }
-      })),
-
-      //@pure
-      isSomething() {
+      '@set'({ value, previous }) {
 
       }
-   })
+    },
 
-   return todo;
+    '@doSomething'({ input: [a], output }) {
+      if (a === 0) {
+        return (undefined)
+      }
+      else {
+        return (ionicProfile(output))
+      }
+    },
+
+    doSomething: {
+      '@call'({ input: [a], output }) {
+        if (a === 0) {
+          return (undefined)
+        }
+        else {
+          return (ionicProfile(output))
+        }
+      }
+    },
+
+    something: {
+      '@get'() {
+
+      },
+      '@set'() {
+
+      }
+    },
+
+    $completed: AsyncIon({
+      initial: data.completed,
+      optimistic: true,
+      dispatch({ ooo }, value) {
+        ooo.await(db.setCompleted(value))
+      },
+      // debounce: 500
+    }),
+
+    updateTitle: nestAsyncAction(updateTitle => ({
+      optimistic(title: string) {
+        todo.updateTitle(title)
+      }
+    })),
+
+    //@pure
+    isSomething() {
+
+    }
+  })
+
+  return todo;
 }
 
 

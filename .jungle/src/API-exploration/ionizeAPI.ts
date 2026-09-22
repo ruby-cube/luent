@@ -62,7 +62,7 @@ const files = ionize([...list], {
 
 
 const frog = ionize({
-   // absorbed ion, non-writable like `get name(){}`
+   // absorbed ion, non-mutable like `get name(){}`
    $name,
 
    // normal properties

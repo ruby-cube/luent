@@ -44,6 +44,20 @@ function App() {
   </:>
 }
 ```
+:::details CODE SWITCH
+**React:** custom hooks
+
+**Vue:** composables
+
+**Svelte:** runes/modules/stores
+
+**Solid:** primitives + custom utilities
+
+**Angular:** injectable services, signal stores
+:::
+
+<p align="right"><a href="#reusable-logic" style="text-decoration: none">[top]</a></p>
+
 
 ## Classes and reactivity
 Reusable stateful logic may also be defined through JavaScript classes and made reactive through Luent's `ionic()`.
@@ -111,6 +125,7 @@ function App() {
   </>
 }
 ```
+
 <!-- 
 ### Classes with private state
 
@@ -231,6 +246,7 @@ const counter = ionic(new Counter());
 counter.increment() // reactivity works
 ```
 
+
 ```tsx
 class Counter {
   private [Reactivity.key] = Reactivity()
@@ -294,3 +310,5 @@ const counter = ionic(new Counter());
 
 counter.increment() // reactivity works
 ```
+
+<p align="right"><a href="#reusable-logic" style="text-decoration: none">[top]</a></p>

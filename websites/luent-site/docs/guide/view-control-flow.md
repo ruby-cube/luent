@@ -23,6 +23,7 @@ Additionally, the following [specialized control flow series]() are provided for
 - `Await`/`Meanwhile`/`Twiddle`/`Catch`
 - `Try`/`Catch`
 
+<p align="right"><a href="#view-control-flow" style="text-decoration: none">[top]</a></p>
 
 ## JSX Flow Expressions
 Flow function calls, or JSX flow expressions, are only valid within JSX. The last parameter of a flow function, known as the view slot, takes in a render function. 
@@ -58,7 +59,7 @@ Some control flow functions may take in optional arguments *before* the slot arg
 </div>
 ```
 
-
+<p align="right"><a href="#view-control-flow" style="text-decoration: none">[top]</a></p>
 
 ## Iterative Rendering
 Luent provides two functions for view iterations: `For()` and `Thru()`. `For()` renders iterables while `Thru()` renders number ranges.
@@ -98,6 +99,8 @@ Static lists may also be rendered through a JavaScript array's `map` method.
 
 ### Reactive `For()`
 `For()` can also render collections reactively when passed either an ion or an ionic iterable.
+
+<p align="right"><a href="#view-control-flow" style="text-decoration: none">[top]</a></p>
 
 ### `For` unique items
 To render collections based on item identity, pass an identity accessor function as the second argument of `For()`. The identity accessor receives the item as its argument and can either return the item itself (if items are unique objects or strings) or a unique ID. 
@@ -145,6 +148,8 @@ function TodoList() {
 }
 ```
 
+<p align="right"><a href="#view-control-flow" style="text-decoration: none">[top]</a></p>
+
 ### `For` indices
 To render a reactive collection based on stable indices and changing values, omit the identity accessor. The render function will receive an item ion and a stable index. This form is concise and works well for simple lists that don't require reordering.
 
@@ -167,6 +172,8 @@ function Log() {
 }
 ```
 
+<p align="right"><a href="#view-control-flow" style="text-decoration: none">[top]</a></p>
+
 ### `Thru` count
 Like `For()`, `Thru()` may be rendered reactively or statically based on the reactivity of its first argument.
 
@@ -187,6 +194,8 @@ function RowBar(setup: FromTag<{
   )
 }
 ```
+
+<p align="right"><a href="#view-control-flow" style="text-decoration: none">[top]</a></p>
 
 ### `Thru` range 
 <span class='doc-tag'>WIP</span><span class='doc-tag'>Experimental</span>
@@ -232,7 +241,7 @@ function PaginatedTable(setup: FromTag<{
 }
 ```
 
-
+<p align="right"><a href="#view-control-flow" style="text-decoration: none">[top]</a></p>
 
 ## Conditional Rendering
 Luent provides three distinct control flow functions for static and reactive conditional rendering: 
@@ -241,6 +250,8 @@ Luent provides three distinct control flow functions for static and reactive con
 - `Match`/`Case` for diverse case rendering
 
 Luent also exposes a display-toggle attribute, `display-if` on elements to ergonomically show or hide an element. 
+
+<p align="right"><a href="#view-control-flow" style="text-decoration: none">[top]</a></p>
 
 ### Conditional display
 `display-if` is a hybrid of static and dynamic rendering. It lazily mounts the element to the DOM if its initial state is false. Once mounted, the element remains in the DOM and Luent toggles its CSS display property based on the state of `display-if`.
@@ -251,6 +262,8 @@ Luent also exposes a display-toggle attribute, `display-if` on elements to ergon
   {() => $active() ? 'hide' : 'show'}
 </button>
 ```
+
+<p align="right"><a href="#view-control-flow" style="text-decoration: none">[top]</a></p>
 
 ### Static-only conditionals
 Static conditional rendering may be also achieved through JavaScript ternaries and if/else statements.
@@ -285,6 +298,8 @@ function Foo(setup: {
 }
 ```
 
+<p align="right"><a href="#view-control-flow" style="text-decoration: none">[top]</a></p>
+
 ### `If`/`Else`
 The `If()`, `ElseIf()`, and `Else()` control flow functions render ordered conditional branching. `If`/`Else` series must start with an `If()` call. Additional branches (if any), must directly follow the opening `If()`.
 
@@ -307,6 +322,8 @@ function StatusMessage() {
   )
 }
 ```
+
+<p align="right"><a href="#view-control-flow" style="text-decoration: none">[top]</a></p>
 
 ### `Match`/`Case`
 `Match` matches an input, which may be reactive or static, against one or more `Case()` values. In contrast with `If`/`Else`, which checks branches in order, `Match()` performs keyed case selection.
@@ -331,6 +348,8 @@ function TabContent() {
   </>
 }
 ```
+
+<p align="right"><a href="#view-control-flow" style="text-decoration: none">[top]</a></p>
 
 ### `As(case)`
 `As()`, like `Match()`, renders a view as the active case. Unlike `Match()`, which maps explicit cases to different views, `As()` applies the same render function to its current case. It is especially useful when there is an indefinite number of cases.
@@ -396,3 +415,5 @@ function closeTab(tab: number) {
   )}
 </main>
 ```
+
+<p align="right"><a href="#view-control-flow" style="text-decoration: none">[top]</a></p>

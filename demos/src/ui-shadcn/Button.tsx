@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, RenderView, FromTag, setUpElement, NodeRef, template } from "luent"
+import { component, RenderTag, FromTag, setUpElement, NodeRef, template } from "luent"
 import { defineVariants, mergeTailwind } from "../utils/utils"
 import { VariantProps } from "class-variance-authority"
 
@@ -34,7 +34,7 @@ const buttonVariants = defineVariants(
 )
 
 function Button(setup: WithRef<'button'> & VariantProps<typeof buttonVariants> & FromTag<{
-  as?: RenderView | string
+  as?: RenderTag | string
 }>) {
   const {
     ref,

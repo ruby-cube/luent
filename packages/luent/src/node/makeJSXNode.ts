@@ -1,5 +1,5 @@
 import { Ion, isIon, isGetter, SuspenseIon, AsyncIon, SUSPENSE_QUARK, ASYNC_QUARK } from "@luent/quarky";
-import { RenderView, InferSlot, makeComponent } from "../component/Component";
+import { RenderTag, InferSlot, makeComponent } from "../component/Component";
 import { TagName, setUpElement, useDOMNode } from "../element/setUpElement";
 import { NodeRef, INTERNAL } from "./NodeRef";
 import { AnyObject, Booleanny, Falsey } from "@luent/types";
@@ -16,7 +16,7 @@ import { fromContext } from "../context/provide";
 import { ContextKey } from "../context/ContextKey";
 import { createNSElement, getXMLNamespace, newXMLNamespace, withXMLNamespace } from "../element/NSElement";
 
-export type TagType = RenderView | string
+export type TagType = RenderTag | string
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -87,13 +87,13 @@ export type ElementConfig<K extends TagName = TagName> = {
 // attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];
 
 type NodesArray<T> = ReturnType<NodeRef<T>>[] | NodesArray<T>[]
-type NodeSetup<T extends TagName | RenderView> = {
+type NodeSetup<T extends TagName | RenderTag> = {
   // ref?: NodeRef<T> | NodeRefsConfig,
   // provide?: Provided,
   // class?: ClassInput | ClassInput[],
   // style?: StyleInput | StyleInput[]
 }
-export type ComponentConfig<T extends RenderView = RenderView> =
+export type ComponentConfig<T extends RenderTag = RenderTag> =
   T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never
 
 export type GroupActivationType = ViewType | 'show'
@@ -180,7 +180,7 @@ export const HOST = ContextKey<Element>('?')
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeJSXNode(
-  nodeType: SVGTag | TagName | RenderView | 'o-link' | 'o--body' | 'o--portal' | 'o:preserve' | 'o:context' | 'o:transition' | any,
+  nodeType: SVGTag | TagName | RenderTag | 'o-link' | 'o--body' | 'o--portal' | 'o:preserve' | 'o:context' | 'o:transition' | any,
   Slot: undefined | (() => RawJSXNode[]) | InferSlot,
   config: ElementConfig | ComponentConfig,
 ): RawJSXNode | void {

@@ -144,7 +144,7 @@ export type {
   RawJSXNode,
   TagType,
 } from './node/makeJSXNode'
-export type { RenderView } from './component/Component'
+export type { RenderTag } from './component/Component'
 export type { ContextEntryKey } from './context/ContextKey'
 export type { FromTag, RenderTag, WithRef } from './component/bindings-types'
 export type { TagClass } from './element/styles'

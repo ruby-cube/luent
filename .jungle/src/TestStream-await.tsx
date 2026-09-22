@@ -23,15 +23,15 @@ export function TestVanillaStream() {
   //    await span(() => $eye.reset())
   // }, { '@stop': () => $eye.reset() })
 
-  const bugeyeB = Stream(ooo => {
-    ooo.do(() => $eye.bug())
+  const bugeyeB = Stream(oo => {
+    oo.do(() => $eye.bug())
       .interval(500, () => $eye.toggle(),
         { max: 5 })
       .do(() => $eye.reset())
   }, { '@stop': () => $eye.reset() })
 
-  const $eye = Stream(ooo => {
-    ooo.do(x => 2)
+  const $eye = Stream(oo => {
+    oo.do(x => 2)
       .interval(500, x => x === 1 ? 2 : 1,
         { max: 5 })
       .do(x => 1)
@@ -39,15 +39,15 @@ export function TestVanillaStream() {
 
   const $side = ion('l' as 'l' | 'r')
 
-  const turning = Stream(ooo => {
-    ooo.do(() => $side.value = 'r')
+  const turning = Stream(oo => {
+    oo.do(() => $side.value = 'r')
       .interval(1000, () => $side.value = $side.value === 'l' ? 'r' : 'l',
         { max: 3 })
       .do(() => $side.value = 'l')
   }, { '@stop': () => $side.value = 'l' })
 
-  const $side = Stream(ooo => {
-    ooo.do(x => 'r')
+  const $side = Stream(oo => {
+    oo.do(x => 'r')
       .interval(1000, x => x === 'l' ? 'r' : 'l',
         { max: 3 })
       .do(x => 'l')
@@ -56,8 +56,8 @@ export function TestVanillaStream() {
 
   const $running = ion(false as false | 3 | 4)
 
-  const running = Stream(ooo => {
-    ooo.do(() => $running.value = 3)
+  const running = Stream(oo => {
+    oo.do(() => $running.value = 3)
       .interval(125, () => $running.value = $running.value === 3 ? 4 : 3,
         { max: 32 })
       .do(() => $running.value = false)

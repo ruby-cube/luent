@@ -12,8 +12,8 @@ export function HabitTrackerDemo() {
     <Code
       filename='HabitTracker'
       trusted
-      main={{ name: 'nsx', code: HabitTracker.nsx }}
-      alt={{ name: 'tsx', code: HabitTracker.tsx, lang: 'tsx' }}
+      alt={{ name: 'nsx', code: HabitTracker.nsx }}
+      main={{ name: 'tsx', code: HabitTracker.tsx, lang: 'tsx' }}
       highlight={highlightCode}
       showSticky
     />

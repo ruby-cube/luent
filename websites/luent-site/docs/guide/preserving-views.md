@@ -15,6 +15,11 @@ When the view becomes active again, Luent will remount the preserved nodes rathe
   )}
 </o:preserve>
 ```
+:::details CODE SWITCH
+**React:** `<Activity mode={...}>`
+
+**Vue:** `<KeepAlive>`
+:::
 
 Views may also be selectively preserved by passing in the view type, 'preserve'. The default view type is 'create'.
 
@@ -59,3 +64,4 @@ function Foo() {
 }
 ```
 
+<p align="right"><a href="#preserving-views" style="text-decoration: none">[top]</a></p>

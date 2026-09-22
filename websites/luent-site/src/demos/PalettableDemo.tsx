@@ -40,8 +40,8 @@ export function PalettableDemo() {
           <Code
             filename='Palettable'
             trusted
-            main={{ name: 'nsx', code: Palettable.nsx }}
-            alt={{ name: 'tsx', code: Palettable.tsx, lang: 'tsx' }}
+            alt={{ name: 'nsx', code: Palettable.nsx }}
+            main={{ name: 'tsx', code: Palettable.tsx, lang: 'tsx' }}
             highlight={highlightCode}
             showSticky
             tab={$tab}
@@ -49,8 +49,8 @@ export function PalettableDemo() {
           <Code
           filename='ColorPalette'
             trusted
-            main={{ name: 'nsx', code: Palettable.nsxColorPalette }}
-            alt={{ name: 'tsx', code: Palettable.tsxColorPalette, lang: 'tsx' }}
+            alt={{ name: 'nsx', code: Palettable.nsxColorPalette }}
+            main={{ name: 'tsx', code: Palettable.tsxColorPalette, lang: 'tsx' }}
             highlight={highlightCode}
             showSticky
             tab={$tab}
@@ -58,8 +58,8 @@ export function PalettableDemo() {
           <Code
             trusted
             filename='ColorPalette'
-            main={{ name: 'nsx', code: Palettable.nsxGap }}
-            alt={{ name: 'tsx', code: Palettable.tsxGap, lang: 'tsx' }}
+            alt={{ name: 'nsx', code: Palettable.nsxGap }}
+            main={{ name: 'tsx', code: Palettable.tsxGap, lang: 'tsx' }}
             highlight={highlightCode}
             showSticky
             tab={$tab}
@@ -70,8 +70,8 @@ export function PalettableDemo() {
         <Code
           trusted
           filename='ColorsKit'
-          main={{ name: 'nsx', code: Palettable.nsxColorsKit }}
-          alt={{ name: 'tsx', code: Palettable.tsxColorsKit, lang: 'tsx' }}
+          alt={{ name: 'nsx', code: Palettable.nsxColorsKit }}
+          main={{ name: 'tsx', code: Palettable.tsxColorsKit, lang: 'tsx' }}
           highlight={highlightCode}
           showSticky
           tab={$tab}
@@ -81,8 +81,8 @@ export function PalettableDemo() {
         <Code
           trusted
           filename='DraggableKit'
-          main={{ name: 'nsx', code: Palettable.nsxDraggableKit }}
-          alt={{ name: 'tsx', code: Palettable.tsxDraggableKit, lang: 'tsx' }}
+          alt={{ name: 'nsx', code: Palettable.nsxDraggableKit }}
+          main={{ name: 'tsx', code: Palettable.tsxDraggableKit, lang: 'tsx' }}
           highlight={highlightCode}
           showSticky
           tab={$tab}
@@ -92,8 +92,8 @@ export function PalettableDemo() {
         <Code
           trusted
           filename='CelebrationKit'
-          main={{ name: 'nsx', code: Palettable.nsxCelebrationKit }}
-          alt={{ name: 'tsx', code: Palettable.tsxCelebrationKit, lang: 'tsx' }}
+          alt={{ name: 'nsx', code: Palettable.nsxCelebrationKit }}
+          main={{ name: 'tsx', code: Palettable.tsxCelebrationKit, lang: 'tsx' }}
           highlight={highlightCode}
           showSticky
           tab={$tab}

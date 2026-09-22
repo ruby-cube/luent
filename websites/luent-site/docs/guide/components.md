@@ -68,6 +68,7 @@ Components must not be `async` functions or return promises.
 To learn about async rendering and scheduling async tasks, see [Async Rendering](), [The Render Cycle](), [Lifecycle Hooks](), and [Awaiting Promises]().
 :::
 
+<p align="right"><a href="#components" style="text-decoration: none">[top]</a></p>
 
 ## The setup parameter
 
@@ -109,6 +110,18 @@ function MessageDisplay(setup: FromTag<{
 <MessageDisplay message={$msg} />
 ```
 
+:::details CODE SWITCH
+**React:** props
+
+**Vue:** `defineProps()`
+
+**Svelte:** `$props()`
+
+**Solid:** props
+
+**Angular:** `input()`, `@Input()`
+:::
+
 It is important to use the `FromTag` type helper to define the setup object as it serves as a translation layer between the component tag bindings and the component setup object.
 
 :::danger Omitting `FromTag` ...
@@ -137,6 +150,7 @@ function MessageDisplay(setup: {
 :::
 To learn more about the different types of component bindings see [Component Bindings](/guide/component-bindings).
 
+<p align="right"><a href="#components" style="text-decoration: none">[top]</a></p>
 
 ### Type Validation
 The `FromTag` type utility provides type validation for the component tag based on the object type passed into `FromTag`.
@@ -146,6 +160,7 @@ The `FromTag` type utility provides type validation for the component tag based 
 <MessageDisplay message={9} />
 ```
 
+<p align="right"><a href="#components" style="text-decoration: none">[top]</a></p>
 
 ### Ion Normalization
 A binding typed with `Ion<T>` validates the binding with `T | Ion<T>`. This allows the component consumer the flexibility to decide whether a binding should be reactive or not.
@@ -167,6 +182,8 @@ function MessageDisplay(setup: FromTag<{
   </>
 }
 ```
+
+<p align="right"><a href="#components" style="text-decoration: none">[top]</a></p>
 
 ### Optional setup bindings
 Components can make a setup binding optional by typing it as an optional property in the `FromTag` object type.
@@ -193,6 +210,7 @@ function Counter(setup: FromTag<{
 <Counter />
 ```
 
+<p align="right"><a href="#components" style="text-decoration: none">[top]</a></p>
 
 ### Setup defaults
 
@@ -220,6 +238,7 @@ function Counter(setup: FromTag<{
 <Counter />
 ```
 
+<p align="right"><a href="#components" style="text-decoration: none">[top]</a></p>
 
 ## Dynamic tags
 
@@ -227,7 +246,7 @@ HTML elements may be rendered dynamically as components by binding the tag name 
 
 ```tsx
 function Article(setup: FromTag<{
-  Heading?: 'h1' | 'h2' | 'h3' | RenderView,
+  Heading?: 'h1' | 'h2' | 'h3' | RenderTag,
   heading: string,
   text: string
 }>) {
@@ -242,6 +261,7 @@ function Article(setup: FromTag<{
 }
 ```
 
+
 ### Reactive dynamic tags
 Note that dynamic tags are not inherently reactive. To render dynamic tags reactively, use them in conjunction with [`As()`](/guide/view-control-flow.html#as-case).
 
@@ -255,8 +275,19 @@ Note that dynamic tags are not inherently reactive. To render dynamic tags react
   <Heading>{heading}</Heading>
 )}
 ```
+:::details CODE SWITCH
+**React:** dynamic component variable
 
+**Vue:** `<component :is="..." />`
 
+**Svelte:** `<svelte:component this={...} />`
+
+**Solid:** `<Dynamic component={...} />`
+
+**Angular:** `*ngComponentOutlet`
+:::
+
+<p align="right"><a href="#components" style="text-decoration: none">[top]</a></p>
 
 <!-- Instantiating views as components through JSX tag syntax enables features such as:
 - input normalization
@@ -508,3 +539,53 @@ function Dialog(setup: { Slot: RenderTag }) {
 }
 ``` -->
 
+## Scoped Styles
+<span class='doc-tag'>Planned</span>
+
+```nsx
+function Card(setup: FromTag<{
+  borderColor: string
+  Slot: RenderTag
+}>) {
+  const { Slot, borderColor } = setup;
+  return <>
+    <div class='card'>
+      <Slot/>
+    </div>
+
+    <o-style>
+      .card {
+        border: 1px solid ${borderColor};
+      }
+    </o-style>
+  </>
+}
+```
+```tsx
+function Card(setup: FromTag<{
+  borderColor: string
+  Slot: RenderTag
+}>) {
+  const { Slot, borderColor } = setup;
+  return <>
+    <div class='card'>
+      <Slot/>
+    </div>
+
+    {Style(css`
+      .card {
+        border: 1px solid ${borderColor};
+      }
+    `)}
+  </>
+}
+```
+:::details CODE SWITCH
+
+**Vue:** `<style scoped>`
+
+**Svelte:** `<style>`
+
+:::
+
+<p align="right"><a href="#components" style="text-decoration: none">[top]</a></p>

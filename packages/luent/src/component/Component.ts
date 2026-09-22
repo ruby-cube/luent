@@ -9,14 +9,14 @@ import { JSXComponentAs } from "@luent/nextscript";
 import type { ComponentKit } from "@luent/nextscript";
 import { composeHooks, composeRef, toSetup } from "./bindings";
 import { $from } from "../utils/destructure";
-import { RawJSXNode } from "packages/luent/dist";
+import { RenderTag } from "./bindings-types";
 
 
-export type RenderView<P extends never | AnyObject = never | AnyObject> = P extends never ? () => RawJSXNode : (setup?: P) => RawJSXNode
+// export type RenderTag<P extends never | AnyObject = never | AnyObject> = P extends never ? () => RawJSXNode : (setup?: FromTag<P>) => RawJSXNode
 
 export const component = JSXComponentAs;
 
-export type InferSlot<T extends RenderView = RenderView> =
+export type InferSlot<T extends RenderTag = RenderTag> =
   T extends (setup?: infer P) => any ?
   P extends { Slot: infer S } ?
   S
@@ -31,7 +31,7 @@ export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
   (setup?: P) => JSXNode
 
 export function makeComponent(
-  Component: RenderView,
+  Component: RenderTag,
   fromTag: ComponentConfig,
 ): ComponentKit<unknown> {
 

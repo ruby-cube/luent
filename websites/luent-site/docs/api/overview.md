@@ -25,6 +25,7 @@ The API reference is in the works. In the meantime, here is an overview of Luent
 - `ionicLayout()` to track an ionic task scheduled for the layout phase
 - `ionicTick()` to track an ionic task scheduled for the upcoming render cycle tick
 - `Finitron()` to create a finite reactive state machine
+- `$of()` to access property ions from an ionic object
 
 ## Component bindings
 - `FromTag` to provide type validation and annotations for tag bindings

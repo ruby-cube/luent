@@ -90,7 +90,7 @@ export default defineConfig({
             { text: 'Rendering Views', link: '/guide/rendering-views' },
             { text: 'Components', link: '/guide/components' },
             {
-              text: 'Reactive State*', link: '/guide/reactive-state', items: [
+              text: 'Reactive State', link: '/guide/reactive-state', items: [
                 // { text: 'Atomic Reactive State', link: '/guide/getter-syntax#accessor-variables' },
                 // { text: 'Derived Reactive State', link: '/guide/getter-syntax#accessor-variables' },
                 // { text: 'Inline Derivations', link: '/guide/getter-syntax#the-postfix-operator' },
@@ -99,7 +99,7 @@ export default defineConfig({
                 // { text: 'Debugging', link: '/guide/getter-syntax#the-postfix-operator' },
               ]
             },
-            { text: 'Reactive Structures*', link: '/guide/reactive-structures' },
+            { text: 'Reactive Structures', link: '/guide/reactive-structures' },
             {
               text: 'View Control Flow', link: '/guide/view-control-flow', items: [
                 // { text: 'Iterative Rendering', link: '/guide/' },
@@ -110,7 +110,7 @@ export default defineConfig({
               ]
             },
             {
-              text: 'Element Bindings*', link: '/guide/element-bindings', items: [
+              text: 'Element Bindings', link: '/guide/element-bindings', items: [
                 // { text: 'Events', link: '/guide/' },
                 // { text: 'Styles', link: '/guide/' },
                 // { text: 'Attributes', link: '/guide/' }

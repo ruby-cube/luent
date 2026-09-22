@@ -9,7 +9,7 @@
       <pre class='ns-hero-code__body'><code class='ns-hero-code__content'>{{`function Counter() {
   get count = ion(0);
   <:>
-    <button on:click={() => count++}>
+    <button on:click={(){ count++ \}\}>
       {count@}
     </button>
   </:>

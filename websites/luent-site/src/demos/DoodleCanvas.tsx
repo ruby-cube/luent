@@ -18,8 +18,8 @@ export function DoodleCanvasDemo() {
       <Code
         trusted
         filename='DrawingKit'
-        main={{ name: 'ns', code: nsKit }}
-        alt={{ name: 'ts', code: tsKit, lang: 'ts' }}
+        main={{ name: 'ts', code: tsKit, lang: 'ts' }}
+        alt={{ name: 'ns', code: nsKit }}
         highlight={highlightCode}
         showSticky
         tab={$tab}
@@ -27,8 +27,8 @@ export function DoodleCanvasDemo() {
       <Code
         trusted
         filename='DoodleCanvas'
-        main={{ name: 'nsx', code: nsx }}
-        alt={{ name: 'tsx', code: tsx, lang: 'tsx' }}
+        main={{ name: 'tsx', code: tsx, lang: 'tsx' }}
+        alt={{ name: 'nsx', code: nsx }}
         highlight={highlightCode}
         showSticky
         tab={$tab}

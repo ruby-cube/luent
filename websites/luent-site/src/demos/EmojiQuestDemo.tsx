@@ -12,8 +12,8 @@ export function EmojiQuestDemo() {
       <Code
         trusted
         filename='EmojiQuest'
-        main={{ name: 'nsx', code: EmojiQuest.nsx }}
-        alt={{ name: 'tsx', code: EmojiQuest.tsx, lang: 'tsx' }}
+        alt={{ name: 'nsx', code: EmojiQuest.nsx }}
+        main={{ name: 'tsx', code: EmojiQuest.tsx, lang: 'tsx' }}
         highlight={highlightCode}
         showSticky
         tab={$tab}
@@ -21,8 +21,8 @@ export function EmojiQuestDemo() {
       <Code
         trusted
         filename='EmojiQuest'
-        main={{ name: 'nsx', code: EmojiQuest.nsxPowerset }}
-        alt={{ name: 'tsx', code: EmojiQuest.tsxPowerset, lang: 'tsx' }}
+        alt={{ name: 'nsx', code: EmojiQuest.nsxPowerset }}
+        main={{ name: 'tsx', code: EmojiQuest.tsxPowerset, lang: 'tsx' }}
         highlight={highlightCode}
         showSticky
         tab={$tab}
@@ -30,8 +30,8 @@ export function EmojiQuestDemo() {
       <Code
         trusted
         filename='EmojiQuest'
-        main={{ name: 'nsx', code: EmojiQuest.nsxMessages }}
-        alt={{ name: 'tsx', code: EmojiQuest.tsxMessages, lang: 'tsx' }}
+        alt={{ name: 'nsx', code: EmojiQuest.nsxMessages }}
+        main={{ name: 'tsx', code: EmojiQuest.tsxMessages, lang: 'tsx' }}
         highlight={highlightCode}
         showSticky
         tab={$tab}
@@ -39,8 +39,8 @@ export function EmojiQuestDemo() {
       <Code
         trusted
         filename='Panel'
-        main={{ name: 'nsx', code: EmojiQuest.nsxPanel }}
-        alt={{ name: 'tsx', code: EmojiQuest.tsxPanel, lang: 'tsx' }}
+        alt={{ name: 'nsx', code: EmojiQuest.nsxPanel }}
+        main={{ name: 'tsx', code: EmojiQuest.tsxPanel, lang: 'tsx' }}
         highlight={highlightCode}
         showSticky
         tab={$tab}

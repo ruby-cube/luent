@@ -5,7 +5,7 @@ Most core features have been designed and implemented, but substantial tooling w
 :::
 
 ## JSX fragment return
-<code>() => { <i>statements;</i> <:> <i>JSX</i> </:>}</code>
+<code>function() { <:> <i>JSX</i> </:> }</code>
 
 A JSX fragment return is an auto-returning JSX fragment. It behaves like a return statement. Any code following its closing tag is unreachable.
 
@@ -99,11 +99,11 @@ const Counter = ({ count@ }) => {
 <code>{<i>FlowFn</i>(<i>jsx</i>)}</code>
 | <code>{<i>FlowFn</i>(<i>...arguments</i>, <i>jsx</i>)}</code>
 
-A JSX flow expression is a [JSX call expression](/guide/terminology#jsx-call-expression) where the callee is a [JSX flow-branded](#jsx-flow-branded-functions) function and the final argument—the slot argument—is one of the following entities:
+A JSX flow expression is a [JSX call expression](/guide/terminology#jsx-call-expression) where the callee is a Pascal-cased function and the final argument—the slot argument—is one of the following entities:
 - an element-leading [JSX block](/guide/terminology#jsx-block)
 - a fragment-leading [JSX block](/guide/terminology#jsx-block)
 - [a JSX factory](/guide/terminology#jsx-factory)
-- [a JSX gateway function](#jsx-gateway-function)
+- [a JSX flow gateway function](#jsx-flow-gateway-function)
 
 ```nsx
 <section>
@@ -118,7 +118,7 @@ A JSX flow expression is a [JSX call expression](/guide/terminology#jsx-call-exp
 </section>
 
 <div>
-  {If(folder, :>  // with JSX gateway function
+  {If(folder, :>  // with JSX flow gateway function
     {If(open,
       <ul>
         {For(folder.items, item =>  // with JSX factory
@@ -133,41 +133,6 @@ A JSX flow expression is a [JSX call expression](/guide/terminology#jsx-call-exp
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
-### JSX flow brand
-
-A JSX flow-branded function is a function who satisfies the `JSXFlowBrand` and `JSXFlowFunction` interfaces.
-
-::: info Type definitions
-```tsx
-declare const JSX_FLOW: unique symbol;
-
-interface JSXFlowBrand<T extends string = string> { 
-  [JSX_FLOW]: T 
-}
-
-interface JSXFlowFunction<A extends any[] = []> {
-  (...args: [...A, JSXFlowSlot]): JSXElement
-}
-
-type JSXFlowSlot = () => JSXElement
-```
-:::
-
-Frameworks and libraries can use `JSXFlowBrand` to define control-flow helpers such as `If()`.
-
-```tsx
-import type { JSXFlowBrand, JSXFlowSlot, JSXElement } from '@luent/nextscript';
-
-declare const If: {
-  (condition: unknown, slot: JSXFlowSlot): JSXElement
-} & JSXFlowBrand<'if'>
-```
-
-
-The brand is a compile-time signal. It tells the NextScript preprocessor that the function participates in JSX flow transformations. Certain JSX flow types such as `'if'` and `'else'` also participate in [type-guarding](#type-guarding) transforms across an if-else flow series.
-
-
-<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
 ### Slot transform
 The slot argument of a JSX flow expression forms an implicit JSX fragment factory if it is an element- or fragment-leading [JSX block](/guide/terminology#jsx-block).
@@ -262,12 +227,12 @@ In the example above, no optional chaining is required when passing `user.name` 
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
-## JSX gateway function
+## JSX flow gateway function
 <!-- `(parameters) <:> jsx` | `<:> jsx` -->
 <code>(<i>parameters</i>) :> <i>jsx</i></code> | 
 <code>:> <i>jsx</i></code>
 
-A JSX gateway function is shorthand for an arrow function expression that returns a JSX fragment. It may only appear as the final argument of a [JSX flow expression](#jsx-flow-expressions). 
+A JSX flow gateway function is shorthand for an arrow function expression that returns a JSX fragment. It may only appear as the slot argument of a [JSX flow expression](#jsx-flow-expressions).
 
 Parameter parentheses may be omitted if there are one or no parameters. The JSX gateway, `:>`, must be followed by a [JSX block](/guide/terminology#jsx-block)
 <br></br>
@@ -332,6 +297,8 @@ const renderFoo = (x) :>
 ```
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+
+
 
 ## JSX statements fence
 <!-- `(parameters) <:> jsx` | `<:> jsx` -->
@@ -414,7 +381,7 @@ JSX statements fences form a container for JavaScript statements that appear wit
 
 A JSX style tag is a special JSX tag whose slot is parsed as template literal text. Plain curly braces are treated as text while curly braces prefixed with a dollar sign, `${}`, serve as JavaScript expression containers. 
 
-The slot is transformed into a tagged template literal call (`css` by default). The tag function must be provided by the JSX runtime.
+It is transformed into a tagged template literal call (`jsxCSS` by default). The tag function must be provided by the JSX runtime.
 
 ```nsx
 const FONT_SIZE = 16;
@@ -433,27 +400,25 @@ function Foo() {
 ```
 :::info transpiled tsx
 ```tsx
-import { css } from 'luent/jsx-runtime'
+import { jsxCSS } from 'luent/jsx-runtime'
 const FONT_SIZE = 16;
 
 function Foo() {
   return <>
     <div class='message'>Hello world</div>
-    <style>
-      {css`
-        .message {
-          color: blue;
-          font-size: ${FONT_SIZE}
-        }
-      `}
-    </style>
+    {jsxCSS`
+      .message {
+        color: blue;
+        font-size: ${FONT_SIZE}
+      }
+    `)}
   </>
 }
 ```
 :::
 
 
-The `lang` attribute is used as the name of the tag function of the tagged template literal. If a `lang` is not specified, the tag function will default to `css`.
+The `lang` attribute is used to modify the name of the tag function, using the pattern <code>jsx<i>LANG</i></code>. If a `lang` is not specified, the tag function will default to `jsxCSS`.
 ```nsx
 <style lang='scss'>
   .message {
@@ -464,14 +429,12 @@ The `lang` attribute is used as the name of the tag function of the tagged templ
 ```
 :::info transpiled tsx
 ```tsx
-<style lang='scss'>
-  {scss`
-    .message {
-      color: blue;
-      font-size: ${FONT_SIZE}
-    }
-  `}
-</style>
+{jsxSCSS`
+  .message {
+    color: blue;
+    font-size: ${FONT_SIZE}
+  }
+`}
 ```
 :::
 
@@ -496,14 +459,12 @@ export default configureNextScript({
 ```
 :::info transpiled tsx
 ```tsx
-<o-style>
-  {css`
-    .message {
-      color: blue;
-      font-size: ${FONT_SIZE}
-    }
-  `}
-</o-style>
+{jsxCSS['o-style']`
+  .message {
+    color: blue;
+    font-size: ${FONT_SIZE}
+  }
+`}
 ```
 :::
 
@@ -514,7 +475,7 @@ export default configureNextScript({
 <code><<i>node</i> style=\`css rules\`></<i>node</i>></code>
 
 
-JSX style binding values that are wrapped in backticks will be transformed into tagged template literals, using the `css` tag function provided by the JSX runtime.
+JSX style binding values that are wrapped in backticks will be transformed into tagged template literals, using the `jsxStyle` tag function provided by the JSX runtime.
 
 ```nsx
 <div
@@ -549,6 +510,35 @@ JSX style binding values that are wrapped in backticks will be transformed into 
 :::
 
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+
+## JSX inline function expression
+<code><<i>node</i> <i>attribute</i>={(){ <i>statements</i> }}></<i>node</i>></code> <span class='doc-tag'>Experimental</span><span class='doc-tag'>Planned</span>
+
+JSX inline function expressions are shorthands for binding a function expression to a JSX attribute. They provide two benefits over typical implicit-return arrow functions:
+
+- potential access to the current node through `this` (if implemented by the framework)
+- ergonomic editability of the function body. For example, adding and removing `console.log`s during development doesn't require adding and removing a block body to an arrow function.
+
+```nsx
+<button on:click={(){ doSomething(this) }}>
+  click
+</button>
+```
+
+:::info transpiled tsx
+```tsx
+<button on:click={function() { doSomething(this) }}>
+  click
+</button>
+```
+:::
+:::info tsx alternative
+```tsx
+<button on:click={event => { doSomething(event.currentTarget) }}>
+  click
+</button>
+```
+:::
 
 
 ## JSX component return

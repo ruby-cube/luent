@@ -1,4 +1,4 @@
-import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, queueLayout, listen, awaitTick, queueTask, awaiting } from "luent";
+import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, queueLayout, listen, awaitTick, queueTask, awaiting, queueRender } from "luent";
 import { codeHtml, trusted } from "./code-utils";
 import { TOOLTIP_CONFIG, TooltipKit } from "@luent/luent-ui";
 import { HoverInfo } from "./HoverInfo";
@@ -56,12 +56,9 @@ export function Code(setup: FromTag<{
   } = setup;
 
   const $stickyBtn = NodeRef('button')
-  const $container = NodeRef('div')
-  const $nav = NodeRef('nav')
+  const $container = NodeRef('div') as unknown as NodeRef<HTMLDivElement>
+  const $nav = NodeRef('nav') as unknown as NodeRef<HTMLElement>
   const $showSticky = ion(false)
-
-
-
 
   return <>
     <div class='code-container'>
@@ -70,26 +67,33 @@ export function Code(setup: FromTag<{
           <span class='filename'>{filename}.{() => $tab() === 'main' ? main.lang ?? main.name : alt.lang ?? alt.name}</span>
           : <span></span>
         }
-        <CodeToggle display-if={() => !$showSticky()} tab={$tab} main={main.name} alt={alt.name} />
+        <CodeToggle
+          tab={$tab}
+          main={main.name}
+          alt={alt.name}
+          style={{
+            visibility: () => $showSticky() ? 'hidden' : 'visible',
+            pointerEvents: () => $showSticky() ? 'none' : 'auto'
+          }}
+          aria-hidden={() => $showSticky() ? 'true' : 'false'}
+        />
       </nav>
       {If(showSticky, () => {
-
-        let containerInView = false;
-        let navInView = false;
-
         atMount(() => {
-          const stickyButton = $stickyBtn()
-          const stickyContainer = $container()
-          const nav = $nav()
+          const stickyButton = $stickyBtn() as unknown as HTMLDivElement
+          const stickyContainer = $container() as unknown as HTMLDivElement
+          const nav = $nav() as unknown as HTMLElement
           if (!stickyButton || !stickyContainer || !nav) return;
-          const stickyContainerNode = stickyContainer as HTMLDivElement
-          const navNode = nav as HTMLElement
 
           function updateStickyPlacement() {
             if (!stickyButton || !stickyContainer) return
-            const containerRect = stickyContainer.getBoundingClientRect()
-            const rightOffset = Math.max(0, window.innerWidth - containerRect.right + 8)
-            stickyButton.style.right = `${rightOffset}px`
+            queueLayout(() => {
+              const containerRect = stickyContainer.getBoundingClientRect()
+              const rightOffset = Math.max(0, window.innerWidth - containerRect.right + 8)
+              queueRender(() => {
+                stickyButton.style.right = `${rightOffset}px`
+              })
+            })
           }
 
           function isLocalNavShown() {
@@ -101,53 +105,53 @@ export function Code(setup: FromTag<{
             return rect.height > 0 && rect.width > 0
           }
 
-          let localNavShown = isLocalNavShown()
-          let observer: IntersectionObserver | undefined
+          let stickyVisible = false
+          const CONTAINER_BOTTOM_OFFSET_PX = 8
 
-          function attachObserver() {
-            observer?.disconnect()
-            observer = new IntersectionObserver((entries) => {
-              entries.forEach(entry => {
-                if (entry.target === stickyContainerNode) containerInView = entry.isIntersecting;
-                if (entry.target === navNode) navInView = entry.isIntersecting;
-              });
-              if (containerInView && !navInView) {
-                $showSticky.value = true;
-                updateStickyPlacement()
-              } else {
-                $showSticky.value = false;
-              }
-            }, {
-              threshold: 0,
-              root: null,
-              // Trigger earlier when the mobile local nav is visible.
-              rootMargin: localNavShown ? '-160px 0px 0px 0px' : '-120px 0px 0px 0px'
+          function stickyTopOffset() {
+            // Match the rootMargin behavior that depended on mobile local nav visibility.
+            return isLocalNavShown() ? 160 : 120
+          }
+
+          function updateStickyVisibility(nextVisible: boolean) {
+            if (nextVisible === stickyVisible) return
+            stickyVisible = nextVisible
+            $showSticky.value = nextVisible
+            if (nextVisible) {
+              updateStickyPlacement()
+            }
+          }
+
+          function syncStickyVisibility() {
+            queueLayout(() => {
+              const navRect = nav.getBoundingClientRect()
+              const containerRect = stickyContainer.getBoundingClientRect()
+              const topOffset = stickyTopOffset()
+              const shouldShow = navRect.bottom <= topOffset
+                && containerRect.bottom > topOffset + CONTAINER_BOTTOM_OFFSET_PX
+
+              queueRender(() => {
+                updateStickyVisibility(shouldShow)
+              })
             })
-
-            observer.observe(stickyContainerNode)
-            observer.observe(navNode)
           }
+          syncStickyVisibility()
 
-          attachObserver()
+          listen(window, 'scroll', () => {
+            syncStickyVisibility()
+          }, { passive: true })
 
-          function refreshObserverIfLocalNavChanged() {
-            const nextLocalNavShown = isLocalNavShown()
-            if (nextLocalNavShown === localNavShown) return
-            localNavShown = nextLocalNavShown
-            attachObserver()
-          }
-
-          updateStickyPlacement()
           listen(window, 'resize', () => {
             updateStickyPlacement()
-            refreshObserverIfLocalNavChanged()
+            syncStickyVisibility()
           }, { passive: true })
-          listen(window, 'scroll', updateStickyPlacement, { passive: true })
 
           atUnmount(() => {
-            observer?.disconnect()
+            stickyVisible = false
+            $showSticky.value = false
           })
         })
+
         return <>
           <CodeToggle
             display-if={$showSticky}
@@ -271,7 +275,7 @@ function CodeBlock(setup: FromTag<{ tab: CodeTab, highlight: (code: string, lang
     },
     '-awaited': true
   })
-  const $container = NodeRef('div')
+  const $container = NodeRef('div') as unknown as NodeRef<HTMLDivElement>
 
   const delay = useDelay()
 
@@ -331,8 +335,8 @@ export function CodeToggle(setup: FromTag<{
   const { $tab, main, alt, ...rest } = setup;
   let mainWidth = 0;
 
-  const $mainNode = NodeRef('span')
-  const $knob = NodeRef('span')
+  const $mainNode = NodeRef('span') as unknown as NodeRef<HTMLSpanElement>
+  const $knob = NodeRef('span') as unknown as NodeRef<HTMLSpanElement>
   const $toggling = ion(false)
 
   function transitionToggle(node: HTMLElement | undefined) {

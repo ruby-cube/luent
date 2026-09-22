@@ -20,17 +20,17 @@ function DrawingApp() {
     context.clearRect(0, 0, canvas.width, canvas.height)
   }
 
-  return (
+  return <>
     <div class="canvas-app">
       <button type="button" on:click={clearCanvas}>Clear</button>
       <canvas
         ref={$canvas} /* pass ref to node */
         width="900"
         height="500"
-			  {...DrawingKit($canvas())}
+        {...DrawingKit($canvas())}
       ></canvas>
     </div>
-  )
+  </>
 }
 ```
 
@@ -40,18 +40,33 @@ const tds = NodeRef('td', [])
 ```
 ```tsx
 <tr>
-   <th>{row}</th>
-   {Thru(cols.length, (_, col) =>
-      <td ref={[tds, [row, col]]}>
-         <Cell
-            value={(cells[col][row])}
-            setCellValue={value => { cells[col][row] = value }}
-            calcCellValue={evalCell}
-         ></Cell>
-      </td>
-   )}
+  <th>{row}</th>
+  {Thru(cols.length, (_, col) =>
+    <td ref={[tds, [row, col]]}>
+      <Cell
+        value={(cells[col][row])}
+        setCellValue={value => { cells[col][row] = value }}
+        calcCellValue={evalCell}
+      ></Cell>
+  </td>
+  )}
 </tr>
 ```
+
+:::details CODE SWITCH
+**React:** `useRef()` + ref={}
+
+**Vue:** `useTemplateRef()` + ref={}
+
+**Solid:** ref={}
+
+**Svelte:** `$state()` + bind:this
+
+**Angular:** `viewChild('element')` + #element
+:::
+
+<p align="right"><a href="#node-access" style="text-decoration: none">[top]</a></p>
+
 
 
 ## Component Nodes
@@ -60,7 +75,7 @@ A component may expose data and methods to its consumer through the `expose()` m
 
 ```nsx
 function Dialog(setup: FromTag<{ 
-  Slot: RenderView 
+  Slot: RenderTag 
 }>) {
   const { Slot } = setup;
   get opened = ion(false)
@@ -81,7 +96,7 @@ function Dialog(setup: FromTag<{
 ```
 ```tsx
 function Dialog(setup: FromTag<{ 
-  Slot: RenderView 
+  Slot: RenderTag 
 }>) {
   const { Slot } = setup;
   const opened = ion(false)
@@ -130,6 +145,19 @@ function Parent() {
 }
 ```
 
+:::details CODE SWITCH
+**React:** `forwardRef()`, `useImperativeHandle()`
+
+**Vue:** `defineExpose()`
+
+**Svelte:** `export`
+
+**Angular:** `@ViewChild(ChildComponent)`
+:::
+
+<p align="right"><a href="#node-access" style="text-decoration: none">[top]</a></p>
+
+
 ## Pre-created Elements
 <span class='doc-tag'>Experimental</span>
 
@@ -159,6 +187,10 @@ function DrawingApp() {
 }
 ```
 
+<p align="right"><a href="#node-access" style="text-decoration: none">[top]</a></p>
+
+
+
 ## Pre-existing Elements
 <span class='doc-tag'>Experimental</span>
 
@@ -184,5 +216,9 @@ function makeDraggable(node: HTMLElement, item: Item) {
 ```
 
 
+
 ## Inline hooks
 Nodes may also be accessed through [inline hooks](/guide/lifecycle-hooks#inline-hooks)
+
+
+<p align="right"><a href="#node-access" style="text-decoration: none">[top]</a></p>

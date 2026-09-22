@@ -42,6 +42,19 @@ export default {
   USER
 }
 ```
+:::details CODE SWITCH
+**React:** `createContext()`
+
+**Vue:** `InjectionKey<T>`
+
+**Svelte:** `createContext()`
+
+**Solid:** `createContext()`
+
+**Angular:** `InjectionToken<T>`
+:::
+
+<p align="right"><a href="#context-bindings" style="text-decoration: none">[top]</a></p>
 
 ## Accessing the binding
 **Simple access**
@@ -85,12 +98,25 @@ function UserProfile(setup: FromTag<{
 }
 ```
 
+<p align="right"><a href="#context-bindings" style="text-decoration: none">[top]</a></p>
+
 ## Providing the binding
 ```tsx
 <o:context map={USER(user)}>
   <Workspace />
 </o:context>
 ```
+:::details CODE SWITCH
+**React:** `<Context.Provider value={...}>`, `useContext()`
+
+**Vue:** `provide()`, `inject()`
+
+**Svelte:** `setContext()`, `getContext()`
+
+**Solid:** `<Context.Provider value={...}>`, `useContext()`
+
+**Angular:** provider tree + `inject()`
+:::
 
 #### Providing multiple bindings
 
@@ -128,6 +154,7 @@ There are four main types of component bindings:
 - views
 - events 
 
+<p align="right"><a href="#context-bindings" style="text-decoration: none">[top]</a></p>
 
 <!-- ## Data
 ### Static bindings
@@ -158,6 +185,7 @@ function UserProfile() {
   </>
 }
 ```
+<p align="right"><a href="#context-bindings" style="text-decoration: none">[top]</a></p>
 
 
 ## Mutable bindings
@@ -179,6 +207,7 @@ function UserProfile() {
   <Workspace />
 </o:context>
 ```
+<p align="right"><a href="#context-bindings" style="text-decoration: none">[top]</a></p>
 
 ## Events
 <span class='doc-tag'>WIP</span><span class='doc-tag'>Experimental</span>
@@ -214,4 +243,6 @@ function Form() {
   <App />
 </o:context>
 ```
+
+<p align="right"><a href="#context-bindings" style="text-decoration: none">[top]</a></p>
 

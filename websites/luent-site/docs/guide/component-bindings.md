@@ -30,12 +30,15 @@ function Counter(setup: FromTag<{
 
 For information on type validation of bindings, optional bindings, and default values, see [The Setup Parameter](/guide/components#the-setup-parameter)
 
+
 ## Providing bindings
 Bindings are provided at component instantiation through JSX tag and attribute syntax.
 
 ```tsx
 <Counter limit={100} onClick={e => console.log('count:', e.count)} />
 ```
+
+<p align="right"><a href="#component-bindings" style="text-decoration: none">[top]</a></p>
 
 ## Types of bindings
 
@@ -73,6 +76,7 @@ function Counter(setup: FromTag<{
 }
 ``` -->
 
+
 ## Data
 Data bindings provide a component with data. The bindings may be static or reactive.
 
@@ -100,7 +104,8 @@ function Counter(setup: FromTag<{
 ```tsx
 <Counter limit={100} />
 ```
-<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+
+<p align="right"><a href="#component-bindings" style="text-decoration: none">[top]</a></p>
 
 
 ### Reactive bindings
@@ -140,7 +145,8 @@ function Counter(setup: FromTag<{
 <Counter limit={100} />
 ```
 
-<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+<p align="right"><a href="#component-bindings" style="text-decoration: none">[top]</a></p>
+
 
 ### Nested reactivity
 Static and reactive bindings may contain nested reactivity through ionic structures.
@@ -172,14 +178,17 @@ function App() {
   </>
 }
 ```
-<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+
+<p align="right"><a href="#component-bindings" style="text-decoration: none">[top]</a></p>
 
 ### Mutable bindings
 By default, component bindings are deeply read-only, enforced at compile time*. However, mutable bindings may be marked as mutable through mutability annotations. To learn more see [Mutation Safety](/guide/mutation-safety).
 
 :::warning * NOT YET AVAILABLE
-Mutation safety checking is currently under development and not yet ready to use. However, mutability annotations may be beneficial regardless of mutation safety enforcement.
+Mutation-safety checking is currently under development and not yet ready to use. However, mutability annotations may be beneficial regardless of mutation safety enforcement.
 :::
+
+<p align="right"><a href="#component-bindings" style="text-decoration: none">[top]</a></p>
 
 
 ## Actions
@@ -204,6 +213,8 @@ function Counter(setup: FromTag<{
 />
 
 ```
+
+<p align="right"><a href="#component-bindings" style="text-decoration: none">[top]</a></p>
 
 ## Events
 Components may emit events and consumers may register event handlers on the component through event bindings. The binding name must be camel-cased according to the pattern <code>on<i>[Event]</i></code>.
@@ -245,6 +256,8 @@ function Counter(setup: FromTag<{
 }
 ```
 
+<p align="right"><a href="#component-bindings" style="text-decoration: none">[top]</a></p>
+
 
 ## Views
 
@@ -255,7 +268,7 @@ A component must explicitly declare a `Slot` component in order to allow slot co
 
 ```tsx
 function Card(setup: FromTag<{
-  Slot: RenderView
+  Slot: RenderTag
 }>) {
   const { Slot } = setup;
   return <>
@@ -289,6 +302,8 @@ jsx(Card, {
 **Vue:** slots
 :::
 
+<p align="right"><a href="#component-bindings" style="text-decoration: none">[top]</a></p>
+
 
 ### Named views
 Slot components do not receive any parameters. To render a component that receives setup bindings or to render multiple components, declare named view bindings. 
@@ -296,8 +311,8 @@ Slot components do not receive any parameters. To render a component that receiv
 Named view bindings must be Pascale-cased in order to be instantiated through JSX syntax.
 ```tsx
 function ClubsCard(setup: FromTag<{
-  Heading: RenderView<{ symbol: string }>
-  Description: RenderView
+  Heading: RenderTag<{ symbol: string }>
+  Description: RenderTag
 }>) {
   const { Heading, Description } = setup;
   return <>
@@ -362,6 +377,8 @@ jsx(ClubsCard, {
 - namespaced bindings
 - callbacks -->
 
+<p align="right"><a href="#component-bindings" style="text-decoration: none">[top]</a></p>
+
 
 ## Forwarded Bindings
 ### Auto-binding
@@ -402,6 +419,8 @@ function Counter(setup: FromTag<'button', {
 **Vue:** (approx.) inherited attributes, fallthrough attributes
 :::
 
+<p align="right"><a href="#component-bindings" style="text-decoration: none">[top]</a></p>
+
 ### X-ray binding
 To offer even more flexibility in bindings, a component may specify multiple nodes for a parent to bind additional data, methods, attributes or events to through x-ray binding.
 ```tsx
@@ -434,4 +453,6 @@ function Counter(setup: FromTag<'div', {
   </>
 }
 ```
+
+<p align="right"><a href="#component-bindings" style="text-decoration: none">[top]</a></p>
 

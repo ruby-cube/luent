@@ -85,14 +85,14 @@ export function ionize<T extends AnyObject, M>(target: T, setup?: M & ThisType<I
 }
 
 
-type OptionFlags = '-writable' | '-fetch' | '-refetch' | '-watch' | '-derive'
+type OptionFlags = '-mutable' | '-fetch' | '-refetch' | '-track' | '-derive'
 
 type IonMethods<M> = { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
 
 type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>]
    ? T // [T] extends [AtomicIon] to prevent type-narrowing
    : [T] extends [Derivation<infer R>]
-   ? M extends { '-writable': boolean } // TODO: distinguish true vs false without requiring devs to write { '-writable': true as const}
+   ? M extends { '-mutable': boolean } // TODO: distinguish true vs false without requiring devs to write { '-mutable': true as const}
    ? MutableIon<R> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
    : M extends { '@set': Function }
    ? MutableIon<R> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
@@ -116,10 +116,10 @@ function asIon(
    }
 
    if (isFunction(initialState)) {
-      if (setup && '-writable' in setup) {
-         const watch = setup['-watch']
-         delete setup['-writable']
-         delete setup['-watch']
+      if (setup && '-mutable' in setup) {
+         const watch = setup['-track']
+         delete setup['-mutable']
+         delete setup['-track']
          return createHybridIon({ derive: initialState, watch }, setup)
       }
       return createMemoizedDerivation(<Derivation>initialState, setup)
@@ -127,16 +127,16 @@ function asIon(
 
    if (setup && '-derive' in setup) {
       const derive = setup['-derive']
-      const watch = setup['-watch']
+      const watch = setup['-track']
       delete setup['-derive']
-      delete setup['-watch']
+      delete setup['-track']
       return createHybridIon({ derive, initial: initialState, watch }, setup)
    }
    if (setup && '-fetch' in setup) {
       const fetch = setup['-fetch']
-      const watch = setup['-watch'] // TODO:
+      const watch = setup['-track'] // TODO:
       delete setup['-fetch']
-      delete setup['-watch']
+      delete setup['-track']
       return AsyncIon(initialState, fetch, setup)
    }
    return createAtomicIon(initialState, setup)

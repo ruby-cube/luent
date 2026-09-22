@@ -30,6 +30,9 @@ If reactions are triggered or tasks scheduled during any update phase, the rende
 
 In a typical application, most tasks and reactions are post-update work.
 
+<p align="right"><a href="#the-render-cycle" style="text-decoration: none">[top]</a></p>
+
+
 ## The Sync Phase
 
 The sync phase runs synchronously after a reactive mutation. It is designed for data synchronization that cannot be expressed as a derivation, such as external data.
@@ -73,6 +76,9 @@ Unlike sync phase tasks, prelude tasks run after all synchronous mutations have 
 
 Unless an update is marked as instant, the prelude phase is interruptible so that higher-priority updates, such as animations or user interactions, may render first.
 
+<p align="right"><a href="#the-render-cycle" style="text-decoration: none">[top]</a></p>
+
+
 ## The Render Phase
 
 The render phase performs DOM mutation work. It is used to schedule tasks that directly modify DOM nodes.
@@ -93,6 +99,9 @@ queueRender(() => {
   if (el) el.style.opacity = "1";
 });
 ```
+
+<p align="right"><a href="#the-render-cycle" style="text-decoration: none">[top]</a></p>
+
 
 ## The Layout Phase
 
@@ -119,6 +128,9 @@ awaitTick(() => {
   saveDraft($form());
 });
 ```
+
+<p align="right"><a href="#the-render-cycle" style="text-decoration: none">[top]</a></p>
+
 
 ## Scheduling Tasks
 
@@ -213,6 +225,9 @@ queueTask(() => {
 })
 ``` -->
 
+<p align="right"><a href="#the-render-cycle" style="text-decoration: none">[top]</a></p>
+
+
 ## Scheduling Reactions
 
 `track()` defaults to running reactions in the tick phase. To schedule the reaction for a different phase, pass in the phase option with one of the provided constants: `SYNC`, `PRELUDE`, `RENDER`, `LAYOUT`.
@@ -223,6 +238,9 @@ track($documents, () => {
 }, { phase: PRELUDE })
 ```
 
+<p align="right"><a href="#the-render-cycle" style="text-decoration: none">[top]</a></p>
+
+
 ## Scheduling Ionic Tasks
 
 Ionic tasks run during the specified phase and automatically re-run when their tracked ions change state.
@@ -232,3 +250,5 @@ Ionic tasks run during the specified phase and automatically re-run when their t
 - `ionicRenderTask()` for render phase tasks
 - `ionicLayout()` for layout phase tasks
 - `ionicTick()` for tick phase tasks
+
+<p align="right"><a href="#the-render-cycle" style="text-decoration: none">[top]</a></p>

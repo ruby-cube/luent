@@ -8,7 +8,7 @@ By default, element and component bindings in the receiving scope are deeply rea
 There is, however, good reason to mutate non-locally, given that direct mutation is the most ergonomic and performant way to synchronize state across component or element boundaries. For this, Luent provides explicit mutable bindings that are statically traceable so that nonlocal mutations may be performed in a safer manner.
 
 :::warning † NOT YET AVAILABLE
-Mutation safety checking is currently under development and not yet ready to use. This documentation serves as a preview of the feature and as a guide to using mutability annotations, which may be beneficial even without enforcement.
+Mutation-safety checking is currently under development and not yet ready to use. This documentation serves as a preview of the feature and as a guide to using mutability annotations, which may be beneficial even without enforcement.
 :::
 
 ## Local mutation
@@ -101,8 +101,10 @@ Mutability annotations may be used on select element bindings:
 <Todos mu:todos={$todos} />
 ```
 
+
+
 <!-- Mutable bindings are marked in the providing scope with `mu:` or `m:` annotations. The `mu:` annotation allows receiving scopes to deeply mutate reference values of mutable bindings, either through property assignment or method calls. The `m:` annotation allows mutation through method calls only. -->
-<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+<p align="right"><a href="#mutation-safety" style="text-decoration: none">[top]</a></p>
 
 ### Element bindings
 
@@ -121,13 +123,15 @@ Compare with the more verbose one-way binding implementation:
 ```
 
 :::details CODE SWITCH
-Vue: `v-model`
 
-Svelte: `bind:`
+**Vue:** `v-model`
 
-Angular: `[(attribute)]`
+**Svelte:** `bind:`
+
+
+**Angular:** `[(ngModel)]`
 :::
-<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+<p align="right"><a href="#mutation-safety" style="text-decoration: none">[top]</a></p>
 
 
 ### Component bindings
@@ -164,7 +168,8 @@ function Counter(setup: FromTag<{
   </:>
 }
 ```
-<p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
+
+<p align="right"><a href="#mutation-safety" style="text-decoration: none">[top]</a></p>
 
 ## More on mutability annotations
 
@@ -298,3 +303,4 @@ This creates a trail of mutability annotation breadcrumbs from the state-owner s
 
 
 
+<p align="right"><a href="#mutation-safety" style="text-decoration: none">[top]</a></p>

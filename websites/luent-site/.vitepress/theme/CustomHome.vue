@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useData } from 'vitepress'
 
 type HeroAction = {
@@ -35,6 +35,25 @@ function iconSrc(icon: FeatureItem['icon']) {
   if (typeof icon === 'string') return icon
   return icon?.src ?? ''
 }
+
+async function copyToClipboard(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    console.log('Text copied to clipboard successfully!');
+  } catch (err) {
+    console.error('Failed to copy text: ', err);
+  }
+}
+
+const copyClicked = ref(false)
+
+function reCopyClicked() {
+  copyClicked.value = true;
+  setTimeout(() => {
+    copyClicked.value =false;
+  }, 1500) 
+}
+
 </script>
 
 <template>
@@ -55,9 +74,10 @@ function iconSrc(icon: FeatureItem['icon']) {
             >
             {{ action.text }} <span class="arrow">→</span>
           </a>
-          <button class="btn install">
+          <button class="btn install" @click="reCopyClicked(); copyToClipboard('npm create luent')">
             npm create luent
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            <svg v-if='copyClicked' xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
           </button>
         </div>
       </div>

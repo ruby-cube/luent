@@ -279,11 +279,11 @@ section#code-glimpses {
 
 
 /* Toggle language preference */
-body.lang-mode-tsx .vp-doc [class*='language-nsx'] {
+body.lang-mode-tsx .vp-doc [class*='language-nsx'], body.lang-mode-tsx .vp-doc [class*='language-ns'] {
   display: none;
 }
 
-body:not(.lang-mode-tsx) .vp-doc [class*='language-tsx'] {
+body:not(.lang-mode-tsx) .vp-doc [class*='language-tsx'], body:not(.lang-mode-tsx) .vp-doc [class*='language-ts'] {
   display: none;
 }
 

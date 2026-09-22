@@ -52,7 +52,7 @@ console.log(count) // 20 ⁉️
 <!-- `variable` -->
 <code><i>variable</i></code>
 
-Similar to JavaScript accessor properties, an accessor variable will absorb its getter function such that reading the variable will call the getter rather than access it.
+Similar to JavaScript accessor properties, an accessor variable will absorb its getter function such that reading the variable will invoke the getter rather than access it.
 
 ```nsx
 get count = ref(0)
@@ -127,7 +127,7 @@ count // hover [ get count: number ]
 
 <code>{ get <i>property</i>() { <i>...</i> } }</code>
 
-Accessor properties are a feature of JavaScript where getter and setter functions are absorbed into a property such that reads and writes call the getter and setter, respectively.
+Accessor properties are a feature of JavaScript that associates getter and setter functions with a property. Reading the property invokes its getter, while writing to it invokes its setter.
 
 ```nsx
 const foo = {
@@ -144,14 +144,14 @@ const foo = {
 console.log(foo.bar) // true
 ```
 
-In NextScript, accessor properties may also be defined via colon notation and property definition.
+In NextScript, accessor properties may also be defined via **colon notation** in object literals and **property definition** in class declarations.
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
 ### Colon notation
 <!-- `{ get property: getter }` -->
 <code>{ get <i>property</i>: <i>getter</i> }</code>
 
-Accessor properties may be declared through colon notation.
+<!-- Accessor properties may be declared through colon notation. -->
 ```nsx
 const foo = {
   total: 0,
@@ -165,7 +165,7 @@ const foo = {
 <!-- `class Obj { get property = getter }` -->
 <code>class <i>Obj</i> { get <i>property</i> = <i>getter</i> }</code>
 
-Accessor properties may be defined through property definition in class declarations.
+<!-- Accessor properties may be defined through property definition in class declarations. -->
 ```nsx
 class Foo {
   total = 0
@@ -427,10 +427,30 @@ get { bar, count } = foo;
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
 ### Aliasing in destructuring
+<span class='doc-tag'>Experimental</span><span class='doc-tag'>Planned</span>
+
 ```nsx
 const { bar, count@: count } = foo;
 const { bar, count@: num@ } = foo;
 get { bar, count: num } = foo;
+```
+
+<p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
+
+### Destructuring assignment
+<span class='doc-tag'>Experimental</span><span class='doc-tag'>Planned</span>
+
+```nsx
+let first = () => 'John';
+let last = () => 'Doe';
+
+[first@, last@] = getFullname()
+
+function getFullname() {
+  return [ion('Jane', ion('Doe'))]
+}
+
+console.log('name', first) // Jane
 ```
 
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
