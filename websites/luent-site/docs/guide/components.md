@@ -155,6 +155,10 @@ To learn more about the different types of component bindings see [Component Bin
 ### Type Validation
 The `FromTag` type utility provides type validation for the component tag based on the object type passed into `FromTag`.
 
+```nsx
+// ❌ Type 'number' is not assignable to type 'string | Ion<string>'
+<MessageDisplay message={9} />
+```
 ```tsx
 // ❌ Type 'number' is not assignable to type 'string | Ion<string>'
 <MessageDisplay message={9} />
@@ -167,6 +171,21 @@ A binding typed with `Ion<T>` validates the binding with `T | Ion<T>`. This allo
 
 The component itself normalizes the binding to an accessor by accessing it with a `$` prefix (or with the `@` postfix in NextScript) and treats it as potentially reactive. This prevents cluttering the code with `isIon()` checks.
 
+```nsx
+function MessageDisplay(setup: FromTag<{
+  message: Ion<string>
+}>) {
+  const { message@ } = setup;
+
+  track(message@, () => {
+    console.log('The message changed!')
+  })
+
+  <:>
+    <p>{message@}</p>
+  </:>
+}
+```
 ```tsx
 function MessageDisplay(setup: FromTag<{
   message: Ion<string>
@@ -188,23 +207,44 @@ function MessageDisplay(setup: FromTag<{
 ### Optional setup bindings
 Components can make a setup binding optional by typing it as an optional property in the `FromTag` object type.
 
+```nsx
+function Counter(setup: FromTag<{
+  limit?: number
+}>) {
+  const { limit } = setup;
+
+  get count = ion(0)
+
+  <:>
+    <button 
+      on:click={() => count++ }
+      disabled={limit ? (count === limit)@ : undefined}
+    >
+      {count@}
+    </button>
+  </:>
+}
+```
 ```tsx
 function Counter(setup: FromTag<{
-   limit?: number
+  limit?: number
 }>) {
-   const { limit } = setup;
+  const { limit } = setup;
 
-   const $count = ion(0)
+  const $count = ion(0)
 
-   return <>
-      <button 
-        on:click={() => $count.value++ }
-        disabled={limit ? () => $count() === limit : undefined}
-      >
-        {$count}
-      </button>
-   </>
+  return <>
+    <button 
+      on:click={() => $count.value++ }
+      disabled={limit ? () => $count() === limit : undefined}
+    >
+      {$count}
+    </button>
+  </>
 }
+```
+```nsx
+<Counter />
 ```
 ```tsx
 <Counter />
@@ -216,23 +256,44 @@ function Counter(setup: FromTag<{
 
 Components may provide a default value for a setup binding by typing it as optional and providing a default value during destructuring.
 
+```nsx
+function Counter(setup: FromTag<{
+  limit?: number
+}>) {
+  const { limit = 100 } = setup;
+
+  get count = ion(0)
+
+  <:>
+    <button 
+      on:click={() => count++ }
+      disabled={() => count === limit}
+    >
+      {count@}
+    </button>
+  </:>
+}
+```
 ```tsx
 function Counter(setup: FromTag<{
-   limit?: number
+  limit?: number
 }>) {
-   const { limit = 100 } = setup;
+  const { limit = 100 } = setup;
 
-   const $count = ion(0)
+  const $count = ion(0)
 
-   return <>
-      <button 
-        on:click={() => $count.value++ }
-        disabled={() => $count() === limit}
-      >
-        {$count}
-      </button>
-   </>
+  return <>
+    <button 
+      on:click={() => $count.value++ }
+      disabled={() => $count() === limit}
+    >
+      {$count}
+    </button>
+  </>
 }
+```
+```nsx
+<Counter />
 ```
 ```tsx
 <Counter />
@@ -244,6 +305,22 @@ function Counter(setup: FromTag<{
 
 HTML elements may be rendered dynamically as components by binding the tag name to a Pascal-cased variable.
 
+```nsx
+function Article(setup: FromTag<{
+  Heading?: 'h1' | 'h2' | 'h3' | RenderTag,
+  heading: string,
+  text: string
+}>) {
+  const { Heading = 'h1', heading, text } = setup; 
+
+  <:>
+    <article>
+      <Heading>{heading}</Heading>
+      <p>{text}</p>
+    </article>
+  </:>
+}
+```
 ```tsx
 function Article(setup: FromTag<{
   Heading?: 'h1' | 'h2' | 'h3' | RenderTag,

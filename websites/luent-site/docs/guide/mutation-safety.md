@@ -14,6 +14,19 @@ Mutation-safety checking is currently under development and not yet ready to use
 ## Local mutation
 
 Local mutation is encouraged as it preserves pure local reasoning of state changes. If a child component needs to mutate state received from a parent or ancestor, it may mutate state indirectly through callbacks:
+```nsx
+// child
+function IncrementButton(setup: FromTag<{
+  count: Ion<number>;
+  increment: () => void; // callback
+}>) {
+  const { count@, increment } = setup;
+
+  <:>
+    <button on:click={increment}>{count@}</button>
+  </:>
+}
+```
 ```tsx
 // child
 function IncrementButton(setup: FromTag<{
@@ -25,6 +38,21 @@ function IncrementButton(setup: FromTag<{
   return <>
     <button on:click={increment}>{$count}</button>
   </>
+}
+```
+```nsx
+// parent
+function Counter() {
+  get count = ion(0, {
+    increment() { count++ }
+  })
+
+  <:>
+    <IncrementButton 
+      count={count@}
+      increment={() => count@.increment()}
+    />
+  </:>
 }
 ```
 ```tsx
@@ -44,6 +72,19 @@ function Counter() {
 ```
 
 ...or through event bindings:
+```nsx
+// child
+function IncrementButton(setup: FromTag<{
+  count: Ion<number>;
+  onClick: (e: MouseEvent) => void; // event
+}>) {
+  const { count@, onClick } = setup;
+
+  <:>
+    <button on:click={onClick}>{count@}</button>
+  </:>
+}
+```
 ```tsx
 // child
 function IncrementButton(setup: FromTag<{
@@ -58,6 +99,21 @@ function IncrementButton(setup: FromTag<{
 }
 ```
 
+```nsx
+// parent
+function Counter() {
+  get count = ion(0, {
+    increment() { count++ }
+  })
+
+  <:>
+    <IncrementButton 
+      count={count@}
+      onClick={() => count@.increment()} 
+    />
+  </:>
+}
+```
 ```tsx
 // parent
 function Counter() {
@@ -92,11 +148,17 @@ Mutability annotations at binding sites tell the compiler to allow nonlocal muta
 - **no annotation**: no property assignments or method calls allowed
 
 Mutability annotations may be used on select element bindings:
+```nsx
+<input mu:value={newTodo@} />
+```
 ```tsx
 <input mu:value={$newTodo} />
 ```
 
 ...as well as component bindings, as defined by the component:
+```nsx
+<Todos mu:todos={todos@} />
+```
 ```tsx
 <Todos mu:todos={$todos} />
 ```
@@ -112,12 +174,18 @@ Input elements such as `<input>` and `<select>` expose mutable bindings on attri
 
 This forms a two-way binding where the input element is permitted to mutate the ion for concise synchronization of DOM state and component state:
 
+```nsx
+<input mu:value={newTodo@} />
+```
 ```tsx
 <input mu:value={$newTodo} />
 ```
 
 Compare with the more verbose one-way binding implementation:
 
+```nsx
+<input value={newTodo@} on:input={e => newTodo = e.target.value} />
+```
 ```tsx
 <input value={$newTodo} on:input={e => $newTodo.value = e.target.value} />
 ```
@@ -140,7 +208,7 @@ Components define mutable bindings through the type annotation of its setup para
 
 
 **Method-call enabled binding**
-```tsx
+```nsx
 function Counter(setup: FromTag<{
   'm:count': Ion<number> & {
     increment: () => void;
@@ -150,13 +218,27 @@ function Counter(setup: FromTag<{
 
   <:>
     {count@}
-    <button on:click={e => count@.increment()}>+</button>
+    <button on:click={() => count@.increment()}>+</button>
   </:>
+}
+```
+```tsx
+function Counter(setup: FromTag<{
+  'm:count': Ion<number> & {
+    increment: () => void;
+  };
+}>) {
+  const { m: { $count } } = setup;
+
+  return <>
+    {$count}
+    <button on:click={() => $count.increment()}>+</button>
+  </>
 }
 ```
 
 **Mutable binding**
-```tsx
+```nsx
 function Counter(setup: FromTag<{
   'mu:count': MutableIon<number>
 }>) {
@@ -165,6 +247,18 @@ function Counter(setup: FromTag<{
   <:>
     {count@}
     <button on:click={e => count++}>+</button>
+  </:>
+}
+```
+```tsx
+function Counter(setup: FromTag<{
+  'mu:count': MutableIon<number>
+}>) {
+  const { mu: { $count } } = setup;
+
+  <:>
+    {$count}
+    <button on:click={() => $count.value++}>+</button>
   </:>
 }
 ```
@@ -179,7 +273,7 @@ Note that in the providing scope, mutability annotations indicate the *possibili
 ### All methods are suspect
 The mutation safety compiler does not distinguish between accessor methods and mutator methods. All nested nonlocal methods are considered potential mutators and must be annotated with `m:` or `mu:` in order to be called.
 
-```tsx
+```nsx
 function CountDisplay(setup: FromTag<{
   'm:count': Ion<number> & { isNegative(): boolean }
 }>) {
@@ -193,8 +287,22 @@ function CountDisplay(setup: FromTag<{
   </:>
 }
 ```
-
 ```tsx
+function CountDisplay(setup: FromTag<{
+  'm:count': Ion<number> & { isNegative(): boolean }
+}>) {
+  const { $count } = setup;
+
+  return <>
+    {$count}
+    {If(() => $count.isNegative(), 
+      <p class='msg'>Stop being so negative!</p>
+    )}
+  </>
+}
+```
+
+```nsx
 function Counter(setup: FromTag<{
   'm:count': Ion<number> & { increment(): void }
 }>) {
@@ -207,11 +315,24 @@ function Counter(setup: FromTag<{
 }
 ```
 
+```tsx
+function Counter(setup: FromTag<{
+  'm:count': Ion<number> & { increment(): void }
+}>) {
+  const { $count } = setup;
+
+  return <>
+    {$count}
+    <button on:click={e => $count.increment()}>+</button>
+  </>
+}
+```
+
 ### Constrained permissions
 In the receiving scope, mutability annotations tell the mutation safety compiler to allow mutations and method calls for the annotated binding. They do not override TypeScript `readonly` modifiers or runtime mutation blockers, such as `Object.freeze()`.
 
 In this example, the TypeScript compiler prevents the mutation of count despite the mutability annotation.
-```tsx
+```nsx
 function Counter(setup: FromTag<{
   'mu:count': Ion<number> & { readonly value: number }
 }>) {
@@ -226,12 +347,30 @@ function Counter(setup: FromTag<{
   </:>
 }
 ```
+```tsx
+function Counter(setup: FromTag<{
+  'mu:count': Ion<number> & { readonly value: number }
+}>) {
+  const { mu: { $count } } = setup;
+
+  function increment() {
+    count++ // ❌ Cannot assign to 'value' because it is a read-only property.
+  }
+  
+  return <>
+    {/* ... */}
+  </>
+}
+```
 
 In this example, a runtime error will be thrown because `count` has been frozen.
-```tsx
+```nsx
 <Counter mu:count={Object.freeze(count@)}
 ```
 ```tsx
+<Counter mu:count={Object.freeze($count)}
+```
+```nsx
 function Counter(setup: FromTag<{
   'mu:count': MutableIon<number>
 }>) {
@@ -241,6 +380,18 @@ function Counter(setup: FromTag<{
     {count@}
     <button on:click={e => count++}>+</button>
   </:>
+}
+```
+```tsx
+function Counter(setup: FromTag<{
+  'mu:count': MutableIon<number>
+}>) {
+  const { mu: { $count } } = setup;
+
+  return <>
+    {$count}
+    <button on:click={e => $count.value++}>+</button>
+  </>
 }
 ```
 
@@ -254,6 +405,27 @@ function Counter(setup: FromTag<{
 
 Mutability annotations enable nested property assignments and method calls. Mutability is propagated across reassignments and destructuring in addition to normal property access.
 
+```nsx
+function NameEditor(setup: FromTag<{
+  'mu:user': { name: { first: string, last: string } }
+}>) {
+  const { mu: { user } } = setup;
+
+  <:>
+    <form on:submit={e => {
+      e.preventDefault();
+      user.name.first = e.target[0].value;
+      user.name.last = e.target[1].value;
+    }}>
+      <label>first:</label>
+      <input type='text' value={user.name.first}></input>
+      <label>last:</label>
+      <input type='text' value={user.name.last}></input>
+      <button type="submit" hidden />
+    </form>
+  </:>
+}
+```
 ```tsx
 function NameEditor(setup: FromTag<{
   'mu:user': { name: { first: string, last: string } }
@@ -280,7 +452,7 @@ function NameEditor(setup: FromTag<{
 
 Mutation capabilities enabled by mutability annotations are confined to local boundaries. In order to propagate mutation capabilities to a nested scope, mutability must be marked again at the nested boundary.
 
-```tsx
+```nsx
 function Foo(setup: FromTag<{ 
   'mu:bar': Bar
 }>) {
@@ -290,6 +462,19 @@ function Foo(setup: FromTag<{
     <Bar mu:bar={bar}>
     {/* ... */}
   </:>
+}
+
+```
+```tsx
+function Foo(setup: FromTag<{ 
+  'mu:bar': Bar
+}>) {
+  const { mu: { bar } } = setup
+
+  return <>
+    <Bar mu:bar={bar}>
+    {/* ... */}
+  </>
 }
 
 ```

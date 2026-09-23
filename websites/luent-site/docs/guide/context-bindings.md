@@ -19,16 +19,28 @@ Create a context key by calling `ContextKey()` and passing in a type argument. T
 or a module that  -->
 
 **Required context entry**
+```nsx
+const USER = ContextKey<User>()
+```
 ```tsx
 const USER = ContextKey<User>()
 ```
 
 **Optional context entry**
+```nsx
+const USER = ContextKey<User>('?')
+```
 ```tsx
 const USER = ContextKey<User>('?')
 ```
 
 **Optional with default value**
+```nsx
+const USER = ContextKey<User>(() => { 
+  name: 'John Doe', 
+  description: 'Nothing special'
+})
+```
 ```tsx
 const USER = ContextKey<User>(() => { 
   name: 'John Doe', 
@@ -37,6 +49,11 @@ const USER = ContextKey<User>(() => {
 ```
 
 We recommend exporting context keys in a default export so that modules that import the keys can namespace them as needed.
+```nsx
+export default {
+  USER
+}
+```
 ```tsx
 export default {
   USER
@@ -58,10 +75,18 @@ export default {
 
 ## Accessing the binding
 **Simple access**
+```nsx
+function UserProfile() {
+  const user = fromContext(USER);
+  <:>
+    <h1>{user.name}</h1>
+    <p>{user.description}</p>
+  </:>
+}
+```
 ```tsx
 function UserProfile() {
   const user = fromContext(USER);
-
   return <>
     <h1>{user.name}</h1>
     <p>{user.description}</p>
@@ -70,10 +95,18 @@ function UserProfile() {
 ```
 
 **Providing default value**
+```nsx
+function UserProfile() {
+  const user = fromContext(USER) ?? new User();
+  <:>
+    <h1>{user.name}</h1>
+    <p>{user.description}</p>
+  </:>
+}
+```
 ```tsx
 function UserProfile() {
   const user = fromContext(USER) ?? new User();
-
   return <>
     <h1>{user.name}</h1>
     <p>{user.description}</p>
@@ -85,6 +118,18 @@ function UserProfile() {
 
 Tag bindings typed using `FromContext` are automatically optional. If a tag binding is not provided, the nearest context binding will be accessed.
 
+```nsx
+function UserProfile(setup: FromTag<{
+  user: FromContext<typeof USER>
+}>) {
+  const { user = fromContext(USER) } = setup;
+
+  <:>
+    <h1>{user.name}</h1>
+    <p>{user.description}</p>
+  </:>
+}
+```
 ```tsx
 function UserProfile(setup: FromTag<{
   user: FromContext<typeof USER>
@@ -101,6 +146,11 @@ function UserProfile(setup: FromTag<{
 <p align="right"><a href="#context-bindings" style="text-decoration: none">[top]</a></p>
 
 ## Providing the binding
+```nsx
+<o:context map={USER(user)}>
+  <Workspace />
+</o:context>
+```
 ```tsx
 <o:context map={USER(user)}>
   <Workspace />
@@ -121,6 +171,11 @@ function UserProfile(setup: FromTag<{
 #### Providing multiple bindings
 
 Multiple context bindings may be provided from a single <code>{'<o:context>'}</code> node.
+```nsx
+<o:context map={[USER(user), THEME(theme)]}>
+  <Workspace />
+</o:context>
+```
 ```tsx
 <o:context map={[USER(user), THEME(theme)]}>
   <Workspace />
@@ -130,6 +185,21 @@ Multiple context bindings may be provided from a single <code>{'<o:context>'}</c
 #### Merging keys
 
 Merge context keys to provide the same binding across multiple decoupled components.
+```nsx
+import UserProfile from './UserProfile'
+import Settings from './Settings'
+
+const USER = mergeKeys(UserProfile.USER, Settings.USER);
+
+function App() {
+  const user = getUser();
+  <:>
+    <o:context map={USER(user)}>
+      <Workspace />
+    </o:context>
+  </:>
+}
+```
 ```tsx
 import UserProfile from './UserProfile'
 import Settings from './Settings'
@@ -161,14 +231,16 @@ There are four main types of component bindings:
 ### Reactive bindings -->
 ## Ion normalization
 **Creating a context key**
+```nsx
+const USER = ContextKey<Ion<User>>()
+```
 ```tsx
 const USER = ContextKey<Ion<User>>()
 ```
 **Declaring & accessing the binding**
 ```nsx
 function UserProfile() {
-  const user@ = fromContext(USER)@
-
+  get user = fromContext(USER)@
   <:>
     <h1>{(user.name)@}</h1>
     <p>{(user.description)@}</p>
@@ -178,7 +250,6 @@ function UserProfile() {
 ```tsx
 function UserProfile() {
   const $user = fromContext$(USER)
-
   return <>
     <h1>{() => $user().name}</h1>
     <p>{() => $user().description}</p>
@@ -190,10 +261,19 @@ function UserProfile() {
 
 ## Mutable bindings
 **Declaring & accessing a mutable binding**
+```nsx
+function UserProfile() {
+  const user = fromContext(MU(USER));
+  <:>
+    <h1>{(user.name)@}</h1>
+    <p>{(user.description)@}</p>
+    <ProfileEditor mu:user={user} />
+  </:>
+}
+```
 ```tsx
 function UserProfile() {
   const user = fromContext(MU(USER));
-
   return <>
     <h1>{() => user.name}</h1>
     <p>{() => user.description}</p>
@@ -202,6 +282,11 @@ function UserProfile() {
 }
 ```
 **Providing a mutable binding**
+```nsx
+<o:context map={MU(USER)(user)}>
+  <Workspace />
+</o:context>
+```
 ```tsx
 <o:context map={MU(USER)(user)}>
   <Workspace />
@@ -218,11 +303,25 @@ This feature is not yet available.
 Contextual events bubble up the tree.
 
 **Creating an event key**
+```nsx
+const FIELD_CHANGE = EventKey<{ text: string }>()
+```
 ```tsx
 const FIELD_CHANGE = EventKey<{ text: string }>()
 ```
 
 **Accessing a contextual event emitter**
+```nsx
+function Form() {
+  const emitFieldChange = fromContext(FIELD_CHANGE);
+
+  <:>
+    <input type='text' 
+      on:change={e => emitFieldChange({ text: e.target.value })}
+    />
+  </:>
+}
+```
 ```tsx
 function Form() {
   const emitFieldChange = fromContext(FIELD_CHANGE);
@@ -236,6 +335,13 @@ function Form() {
 ```
 
 **Registering a contextual event handler**
+```nsx
+<o:context map={[
+  ON(FIELD_CHANGE)(e => console.log(e.text))
+]}>
+  <App />
+</o:context>
+```
 ```tsx
 <o:context map={[
   ON(FIELD_CHANGE)(e => console.log(e.text))

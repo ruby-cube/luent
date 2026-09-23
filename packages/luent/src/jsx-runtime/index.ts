@@ -3,7 +3,6 @@ import { isPlainObject, normalizeToArray } from "@luent/utils";
 import { writeJSXNode } from "../server/writeJSXNode";
 import { makeJSXNode, RawJSXNode } from "../node/makeJSXNode";
 import { TagName } from "../element/setUpElement";
-import { RenderTag } from "../component/Component";
 import { RenderTag } from "../component/bindings-types";
 export type { JSX } from "./types/index";
 

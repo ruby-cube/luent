@@ -301,7 +301,7 @@ UnifiedReactivity.$tab = $CodeTab()
 function UnifiedReactivity($tab: Ion<'main' | 'alt'>) {
   return <>
     <p>
-      Manage atomic, derived, and structured reactive state under a unified reactivity model using the primitives <code>ion()</code> and <code>ionic()</code>.
+      Manage atomic, derived, async, and structured reactive state under a unified reactivity model using the primitives <code>ion()</code> and <code>ionic()</code>.
     </p>
     <p style='text-wrap: balance'>
       {If(() => $tab() === 'main',
@@ -332,6 +332,9 @@ get qty = ion(1, {
 // derived
 get total = ion(() => count * qty);
 
+// async
+get posts = ion([], { '-fetch': fetchRecentPosts });
+
 // structured
 const menu = ionic(['apples', 'peaches', 'pears']);
 
@@ -341,8 +344,7 @@ const user = ionic(new User())
 
 `
 
-// // async
-// get posts = ion(fetchRecentPosts);
+
 
 UnifiedReactivity.ts =
   `// atomic
@@ -355,6 +357,9 @@ const $qty = ion(1, {
 
 // derived
 const $total = ion(() => $count() * $qty());
+
+// async
+const $posts = ion([], { '-fetch': fetchRecentPosts });
 
 // structured
 const menu = ionic(['apples', 'peaches', 'pears']);

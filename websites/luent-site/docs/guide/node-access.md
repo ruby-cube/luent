@@ -9,6 +9,31 @@ DOM elements and component instances may be accessed from the view by passing a 
 ### Single node refs
 Node refs are created by passing the tag name or component factory to `NodeRef()`. This will return a getter function. The value of the ref will be undefined until the node is created.
 
+```nsx
+function DrawingApp() {
+  get canvas = NodeRef('canvas') // create ref
+
+  function clearCanvas() {
+    const context = canvas?.getContext("2d")
+    if (!canvas || !context) return;
+    context.clearRect(0, 0, canvas.width, canvas.height)
+  }
+
+  return <>
+    <div class="canvas-app">
+      <button type="button" on:click={clearCanvas}>Clear</button>
+      <canvas
+        ref={canvas@} /* pass ref to node */
+        width="900"
+        height="500"
+        {...DrawingKit(canvas)}
+      ></canvas>
+    </div>
+  </>
+}
+
+```
+
 ```tsx
 function DrawingApp() {
   const $canvas = NodeRef('canvas') // create ref
@@ -35,8 +60,25 @@ function DrawingApp() {
 ```
 
 ### Iterative node refs
+```nsx
+const tds = NodeRef('td', [])
+```
 ```tsx
 const tds = NodeRef('td', [])
+```
+```nsx
+<tr>
+  <th>{row}</th>
+  {Thru(cols.length, (_, col) =>
+    <td ref={[tds, [row, col]]}>
+      <Cell
+        value={(cells[col][row])}
+        setCellValue={value => { cells[col][row] = value }}
+        calcCellValue={evalCell}
+      ></Cell>
+  </td>
+  )}
+</tr>
 ```
 ```tsx
 <tr>
@@ -163,6 +205,29 @@ function Parent() {
 
 Alternatively to node refs, pre-created elements may be rendered to the view using `asJSX()`. 
 
+```nsx
+function DrawingApp() {
+  const canvas = DOMNode('canvas');
+  const Canvas = asJSX(canvas)
+
+  function clearCanvas() {
+    const context = canvas.getContext("2d")
+    if (!context) return;
+    context.clearRect(0, 0, canvas.width, canvas.height)
+  }
+
+  return (
+    <div class="canvas-app">
+      <button type="button" on:click={clearCanvas}>Clear</button>
+      <Canvas
+        width="900"
+        height="500"
+			  {...DrawingKit(canvas)}
+      ></Canvas>
+    </div>
+  )
+}
+```
 ```tsx
 function DrawingApp() {
   const canvas = DOMNode('canvas');

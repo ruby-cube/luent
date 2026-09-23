@@ -5,7 +5,7 @@ import { asTrackedAtom, isTrackableAtom, Atom, TrackedAtom } from "./Atom"
 import { isFunction, isObject, noop } from "@luent/utils";
 import { isIon, toValue } from "../ion/utils";
 import { WatchSubjects } from "./Watcher";
-import { Compound, popTracker, pushTracker } from "./Compound";
+import { Compound, Particle, popTracker, pushTracker } from "./Compound";
 import type { QuarkyIonicProxy } from "../ionic/ModelQuark";
 import { Traceable, TraceableEntity } from "../debug/Traceable";
 import { Stateful } from "../abstract/Stateful";
@@ -276,8 +276,8 @@ export class IonSubject implements StatefulSubject, TraceableEntity {
 
   asTraceable?: Traceable | undefined
 
-  get particles() {
-    return this.subject.particles // TODO: what about proxy Subject
+  get particles(): Particle[] {
+    return [...this.subject.particles, ...(this.nestedSubject?.particles ?? [])]
   }
 
   constructor(
@@ -324,6 +324,96 @@ export class IonSubject implements StatefulSubject, TraceableEntity {
   }
 }
 
+
+/**
+ * Primitive subject for derivation ions and ionic tasks.
+ */
+export class AsyncSubject extends Compound implements Subject, TraceableEntity {
+  reactive: boolean = true;
+
+  // get stale() {
+  //    return this.state.get() === STALE
+  // }
+
+  // previous = new SimpleState(undefined)
+  // state = new SimpleState(STALE)
+
+  asTraceable?: Traceable | undefined;
+
+  constructor(
+    private fn: () => Promise<unknown>,
+    private retrack: boolean,
+    private warnNoAtoms = true
+  ) {
+    super()
+  }
+
+  private call = () => {
+    this.call = () => toValue(this.retrackedCall());
+    return this.trackAtoms(this.fn)
+  }
+
+  trackedCall() {
+    const value = this.call()
+    if (this.particles.length === 0) this.reactive = false;
+    return value;
+  }
+
+  reaction: Reaction | undefined
+
+  private retrackedCall() { // TODO: retrack call only if stale
+    if (!this.retrack || !this.reactive)
+      return this.fn()
+    // if (!this.stale) {
+    //    console.log('### not stale')
+    //    return this.state.get()
+    // }
+    const reaction = this.reaction
+    if (!reaction) throw new Error('Must call linkReaction before retracking')
+    reaction.unlink()
+    this.untrackAtoms()
+    const output = this.trackAtoms(this.fn)
+    this.forEachAtom(atom => {
+      linkReactionToAtom(atom, reaction)
+    })
+    // this.state.set(output)
+    return output;
+  }
+
+  linkReaction(reaction: Reaction): void {
+    this.reaction = reaction;
+    this.forEachAtom(atom => {
+      linkReactionToAtom(atom, reaction)
+    })
+  }
+
+
+  private trackAtoms(fn: () => any) {
+    pushTracker(this);
+    try {
+      return fn();
+    }
+    finally {
+      popTracker();
+      if (__DEV__ && this.warnNoAtoms && this.particles.length === 0) {
+        console.warn(`Ionic compound has no dependencies (and therefore no reactivity)`, this)
+      }
+    }
+  }
+}
+
+// async function loadUserProjects(userId: string) {
+//   const subject = getSubject()
+//   try {
+//     const user = await fetchUser(userId)
+//     const projects = await subject.tracked(() => fetchProjects(user.organizationId))
+//     return { user, projects }
+
+//   } catch (error) {
+//     console.error("Failed to load user or projects:", error)
+//     return null
+//   }
+// }
 
 // /**
 //  * - relinks value to reaction if value is ionized

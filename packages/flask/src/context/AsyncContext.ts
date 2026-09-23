@@ -136,8 +136,8 @@ export function $_run_with_(context: ContextSnapshot, fn: Function, obj?: AnyObj
 
 export function $_wrap_with_context(fn: Function) {
    const context = $_snap_context()
-   return () => {
-      $_run_with_(context, fn)
+   return (...args: any[]) => {
+      $_run_with_(context, () => fn(...args))
    }
 }
 

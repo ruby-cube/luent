@@ -91,7 +91,7 @@ Keep in mind, derivations are:
   const $foo = ion(() => $bar.value++) // ❌
   ```
 
-<!-- - **synchronously tracked:** Only reactive state that is accessed *synchronously* within a derivation can be tracked. If you need to track reactive state that is accessed asynchronously, include an access statement at the top of the derivation. -->
+- **synchronously tracked:** Only reactive state that is accessed *synchronously* within a derivation can be tracked. If you need to track reactive state that is accessed asynchronously, use the `-fetch` option (see [Async Rendering](/guide/async-rendering)).
   <!-- ```tsx
   // example?
   track()
@@ -167,7 +167,7 @@ console.log('The count is', $count()); // call the ion
 An ion's state may also be accessed through its `value` property. This is primarily useful for operators that both read and write state, such as the increment operator,`++`.
 
 ```nsx
-console.log(count@.value++)
+console.log(count++)
 ```
 ```tsx
 console.log($count.value++)
@@ -182,14 +182,14 @@ To update an ion's state, set its `value` property:
 
 ```nsx
 /* assignment */
-count@.value = 5
+count = 5
 
 /* compound assignment */
-count@.value += 2
-count@.value++
+count += 2
+count++
 
 /* destructuring assignment */
-[count@.value] = array
+[count] = array
 ```
 ```tsx
 /* assignment */
@@ -325,6 +325,8 @@ const $state = ion('Oregon', { '-derive': () => $states()[0] })
 
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 
+### Async ions
+See [Async Rendering](/guide/async-rendering)
 
 ## Ion hooks
 ```tsx

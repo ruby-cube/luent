@@ -32,12 +32,22 @@ Hooks are formed compositionally by combining:
 - a lifecycle transition (e.g. `mount`/`unmount`)
 - a timing prefix that corresponds to a render-cycle phase (e.g. `before`/`at`/`after`)
 
+```ns
+beforeMount(/*...*/)
+afterAttach(/*...*/)
+atDetach(/*...*/)
+```
 ```ts
 beforeMount(/*...*/)
 afterAttach(/*...*/)
 atDetach(/*...*/)
 ```
 
+```nsx
+<div before:mount={/*...*/}></div>
+<div after:attach={/*...*/}></div>
+<div at:detach={/*...*/}></div>
+```
 ```tsx
 <div before:mount={/*...*/}></div>
 <div after:attach={/*...*/}></div>
@@ -79,6 +89,16 @@ detach
 └─ unmount
 ```
 
+```ns
+atAttach(initial => {
+  if (initial) ...
+})
+
+atDetach(final => {
+  if (final) ...
+})
+
+```
 ```ts
 atAttach(initial => {
   if (initial) ...
@@ -135,6 +155,19 @@ All available function hooks:
 
 **Examples**
 
+```ns
+beforeMount(() => {
+  console.log('the view is created but not yet mounted')
+})
+
+atAttach(() => {
+  console.log('the view is attach but not painted')
+})
+
+afterDetach(() => {
+  console.log('the detach has been painted')
+})
+```
 ```ts
 beforeMount(() => {
   console.log('the view is created but not yet mounted')
@@ -175,12 +208,23 @@ All available inline hooks:
 
 Inline hook callbacks receive the associated DOM node.
 
+```nsx
+<input
+  at:mount={node => node.indeterminate = true}
+/>
+```
+
 ```tsx
 <input
   at:mount={node => node.indeterminate = true}
 />
 ```
 
+```nsx
+<div
+  after:attach={node => node.scrollIntoView()}
+></div>
+```
 ```tsx
 <div
   after:attach={node => node.scrollIntoView()}

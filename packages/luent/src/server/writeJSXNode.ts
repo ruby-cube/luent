@@ -1,4 +1,4 @@
-import { RenderTag, InferSlot } from "../component/Component";
+import { InferSlot } from "../component/Component";
 import { TagName } from "../element/setUpElement";
 import { ComponentConfig, ElementConfig, makeView, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { writeComponent, writeElement, processJSXOutput } from "./writeHTML";

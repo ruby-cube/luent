@@ -3,6 +3,16 @@
 
 The render function passed to `Catch()` receives the thrown error and a retry function that attempts to render the failed view again.
 
+```nsx
+<div>
+  {Try(
+    <Foo/>
+  )}
+  {Catch((error, retry) =>
+    <ErrorNotice error={error} retry={retry}/>
+  )}
+</div>
+```
 ```tsx
 <div>
   {Try(
@@ -17,13 +27,13 @@ The render function passed to `Catch()` receives the thrown error and a retry fu
 ## Rendering errors elsewhere
 Errors do not need to be rendered in place of the failed view. Use `ErrableView()` when error state should be exposed elsewhere. This is useful when the error UI belongs in a shared location, such as a banner, sidebar, toast region, or page-level notice.
 
-```tsx
+```nsx
 function FooApp() {
   const errable = ErrableView()
 
-  return (
+  <:>
     <Notices>
-      {If($of(errable).error, 
+      {If(errable.error@, 
         <ErrorNotice error={errable.error} retry={() => errable.retry()}/>
       )}
     </Notices>
@@ -34,6 +44,27 @@ function FooApp() {
       )}
       {Catch(errable)}
     </div>
-  )
+  </:>
+}
+```
+
+```tsx
+function FooApp() {
+  const errable = ErrableView()
+
+  return <>
+    <Notices>
+      {If($of(errable).$error, 
+        <ErrorNotice error={errable.error} retry={() => errable.retry()}/>
+      )}
+    </Notices>
+    <div>
+      <h1>Welcome</h1>
+      {Try(
+        <Foo/>
+      )}
+      {Catch(errable)}
+    </div>
+  </>
 }
 ```

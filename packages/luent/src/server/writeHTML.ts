@@ -1,6 +1,5 @@
 import { isFunction, isObject, isString, normalizeToArray } from "@luent/utils";
 import { composeBindings, toSetup } from "../component/bindings";
-import { RenderTag } from "../component/Component";
 import { RenderTag } from "../component/bindings-types";
 import { ComponentConfig, ElementConfig, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { $from } from "../utils/destructure";

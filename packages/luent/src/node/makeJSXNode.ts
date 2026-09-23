@@ -1,6 +1,6 @@
 import { Ion, isIon, isGetter, SuspenseIon, AsyncIon, SUSPENSE_QUARK, ASYNC_QUARK } from "@luent/quarky";
-import { RenderTag, InferSlot, makeComponent } from "../component/Component";
-import { TagName, setUpElement, useDOMNode } from "../element/setUpElement";
+import { InferSlot, makeComponent } from "../component/Component";
+import { TagName, setUpElement } from "../element/setUpElement";
 import { NodeRef, INTERNAL } from "./NodeRef";
 import { AnyObject, Booleanny, Falsey } from "@luent/types";
 import { Portal } from "../boundaries/Portal";

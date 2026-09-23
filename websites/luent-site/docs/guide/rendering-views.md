@@ -112,10 +112,10 @@ There are three main steps to mounting an island:
 ```nsx
 // main.nsx
 mountIsland(() => {
-  const $count = ion(0)
+  get count = ion(0)
   <:>
-    <button on:click={()=> $count.value++}>
-      {$count}
+    <button on:click={()=> count++}>
+      {count@}
     </button>
   </:>
 }, "counter-app");

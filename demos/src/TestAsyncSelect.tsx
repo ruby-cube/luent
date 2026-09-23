@@ -1,5 +1,5 @@
 import { Await, For, Meanwhile, mountIsland } from "luent";
-import { ion } from "@luent/quarky";
+import { ion, ooo } from "@luent/quarky";
 
 // based on Solid.js/Remix demo
 
@@ -17,11 +17,20 @@ const TEST_LATENCY_1 = 500
 
 export function TestAsyncSelect() {
 
-  const $states = ion([], { '-fetch': db.fetchStates })
-  const $activeState = ion(() => $states()[0] ?? '', { '-mutable': true })
+  const $states = ion([], {
+    '-fetch': db.fetchStates
+  })
+  const $activeState = ion(() => $states()[0], {
+    '-mutable': true
+  })
 
-  const $cities = ion([], { '-fetch': () => oo.await($states.pending, () => db.fetchCities($activeState())) })
-  const $activeCity = ion(() => $cities()[0], { '-mutable': true })
+  const $cities = ion([], {
+    '-fetch': async () => { await $states.pending; return db.fetchCities($activeState()) },
+    // '-track': [$activeState]
+  })
+  const $activeCity = ion(() => $cities()[0], {
+    '-mutable': true
+  })
 
   return <>
     <div class='test-view' data-test-latency={JSON.stringify([TEST_LATENCY_0, TEST_LATENCY_1])}>
@@ -39,7 +48,7 @@ export function TestAsyncSelect() {
         </select>
 
         <p style={{ color: () => $cities.pending ? 'gray' : 'black' }}>
-          Selection: {$activeCity}, {Await($cities, <>{$activeState()}</>)}
+          Selection: {$activeCity}, {Await($cities, $activeState)}
         </p>
       </>)}
       {Meanwhile(

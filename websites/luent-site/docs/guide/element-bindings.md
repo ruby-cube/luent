@@ -6,18 +6,27 @@
 JSX attributes may be written as either HTML/SVG attribute names or DOM property names.
 
 **With HTML attribute name**
-```jsx
+```nsx
+<div contenteditable="true">Write something...</div>
+```
+```tsx
 <div contenteditable="true">Write something...</div>
 ```
 
 **With DOM property name**
-```jsx
+```nsx
+<div contentEditable="true">Write something...</div>
+```
+```tsx
 <div contentEditable="true">Write something...</div>
 ```
 
 
 ### Static bindings
 Static bindings provide constant values.
+```nsx
+<div contenteditable={contentEditable}>Write something...</div>
+```
 ```tsx
 <div contenteditable={contentEditable}>Write something...</div>
 ```
@@ -27,8 +36,16 @@ Static bindings provide constant values.
 To make a binding reactive, pass in an ion.
 
 **Atomic ion**
+```nsx
+get disabled = ion(false);
+```
 ```tsx
 const $disabled = ion(false);
+```
+```nsx
+<button on:click={open} disabled={disabled@}>
+  open
+</button>
 ```
 ```tsx
 <button on:click={open} disabled={$disabled}>
@@ -53,7 +70,21 @@ const $disabled = ion(false);
 :::warning Potentially inert ions
 Keep in mind that since component setup bindings are [normalized to ions](/guide/components.html#ion-normalization), ions derived from inputs are potentially inert. Passing in an externally derived ion therefore does not guarantee reactivity.
 
-```jsx
+```nsx
+function Text(setup: FromTag<{
+  isEditor: Ion<boolean>
+  isActive: Ion<boolean>
+}>) {
+  const { isEditor@, isActive@ } = setup;
+  get html = ion('Write something...')
+  return <>
+    <div contenteditable={() => isEditor && isActive} mu:HTMLSlot>
+      {html@}
+    </div>
+  </>
+}
+```
+```tsx
 function Text(setup: FromTag<{
   isEditor: Ion<boolean>
   isActive: Ion<boolean>
@@ -109,10 +140,16 @@ element.setAttribute(attribute, value);
 
 Event handlers may be registered with event binding syntax, which binds an event handler function to events prefixed with the `on` namespace. This differs from inline HTML events, which bind scripts rather than functions. Under the hood, Luent attaches the event handler to the element with `Element.addEventListener()` and registers cleanup for when the view is discarded.
 
+```nsx
+<button on:click={submit}>submit</button>
+```
 ```tsx
 <button on:click={submit}>submit</button>
 ```
 
+```nsx
+<button on:click={(e) => console.log("clicked", count++)}>+</button>
+```
 ```tsx
 <button on:click={(e) => console.log("clicked", count++)}>+</button>
 ```
@@ -130,6 +167,9 @@ view.onDiscard(() => element.removeEventListener(event, handler));
 
 To handle an event during the capture phase, postfix the `on` namespace with a `v`, which visually represents downward event propagation.
 
+```nsx
+<button onv:click={submit}>submit</button>
+```
 ```tsx
 <button onv:click={submit}>submit</button>
 ```
@@ -138,6 +178,12 @@ To handle an event during the capture phase, postfix the `on` namespace with a `
 
 Luent extends the native event object with a method that checks if a selector matches the event target. This can be used to filter out specific event targets.
 
+```nsx
+<div on:click={(e) => e.from(".delete-btn") || selectItem(id)}>
+  <button class="delete-btn">X</button>
+  {item}
+</div>
+```
 ```tsx
 <div on:click={(e) => e.from(".delete-btn") || selectItem(id)}>
   <button class="delete-btn">X</button>
@@ -145,6 +191,14 @@ Luent extends the native event object with a method that checks if a selector ma
 </div>
 ```
 
+```nsx
+<div on:click={(e) => e.from("p") && selectItem(e.target.dataset.id)}>
+  <h1>{heading}</h1>
+  {For(items, (item) => (
+    <p data-id={item.id}>{item}</p>
+  ))}
+</div>
+```
 ```tsx
 <div on:click={(e) => e.from("p") && selectItem(e.target.dataset.id)}>
   <h1>{heading}</h1>
@@ -158,12 +212,12 @@ Luent extends the native event object with a method that checks if a selector ma
 
 To handle events on the window, document, html, head, or body, use the built-in [portal tags](/guide/portals#built-in-tags).
 
-```tsx
+```nsx
 <o--document on:click={deselect} />
 ```
 
 ```tsx
-<o--body on:click={deselect} />
+<o--document on:click={deselect} />
 ```
 <!-- 
 ### Transient Listeners
@@ -228,6 +282,9 @@ The `class` attribute may be written as a string, ion, object, or array.
 
 For static classes, pass a string.
 
+```nsx
+<div class="square"></div>
+```
 ```tsx
 <div class="square"></div>
 ```
@@ -238,22 +295,34 @@ The class attribute may be reactively updated through ions, either passed direct
 
 **Ion notation**
 
+```nsx
+get shape = ion("circle" as "square" | "circle");
+```
 ```tsx
 const $shape = ion("circle" as "square" | "circle");
 ```
 
+```nsx
+<div class={shape@}></div>
+```
 ```tsx
 <div class={$shape}></div>
 ```
 
 **Object notation**
 
+```nsx
+get selected = ion(false);
+```
 ```tsx
 const $selected = ion(false);
 ```
 
+```nsx
+<div class={{ "selected": selected@, "list-item": (count > 1)@ }}></div>
+```
 ```tsx
-<div class={{ selected: $selected, "list-item": () => $count() > 1 }}></div>
+<div class={{ "selected": $selected, "list-item": () => $count() > 1 }}></div>
 ```
 
 Luent adds each class when its value is truthy and removes any classes with falsey values. Object notation is preferred for fine-grained updates.
@@ -266,14 +335,20 @@ Static and dynamic classes may be mixed with object or array notation.
 
 **Object notation**
 
+```nsx
+<div class={{ "square": true, "selected": selected@ }}></div>
+```
 ```tsx
-<div class={{ square: true, selected: $selected }}></div>
+<div class={{ "square": true, "selected": $selected }}></div>
 ```
 
 **Array notation**
 
+```nsx
+<div class={["square", { "selected": selected@ }]}></div>
+```
 ```tsx
-<div class={["square", { selected: $selected }]}></div>
+<div class={["square", { "selected": $selected }]}></div>
 ```
 
 ### Microclass attribute
@@ -288,6 +363,9 @@ Unlike the standard `class` attribute, microclasses participate in utility class
 
 #### Static microclasses
 
+```nsx
+<div microclass="size-2.5 rotate-45 rounded-[2px] bg-foreground fill-foreground z-50"></div>
+```
 ```tsx
 <div microclass="size-2.5 rotate-45 rounded-[2px] bg-foreground fill-foreground z-50"></div>
 ```
@@ -298,10 +376,20 @@ Reactive microclass strings may be generated through ionic derivations.
 
 **with class ions**
 
+```nsx
+get rotation = ion(45);
+```
 ```tsx
 const $rotation = ion(45);
 ```
 
+```nsx
+<div
+  microclass={(
+    `size-2.5 rotate-${rotation} rounded-[2px] bg-foreground fill-foreground z-50`
+  )@}
+></div>
+```
 ```tsx
 <div
   microclass={() =>
@@ -312,10 +400,21 @@ const $rotation = ion(45);
 
 **with boolean ions**
 
+```nsx
+get rounded = ion(true);
+```
+
 ```tsx
 const $rounded = ion(true);
 ```
 
+```nsx
+<div
+  microclass={(
+    `size-2.5 rotate-45 ${rounded ? "rounded-[2px]" : ""} bg-foreground fill-foreground z-50`
+  )@}
+></div>
+```
 ```tsx
 <div
   microclass={() =>
@@ -330,6 +429,9 @@ The `style` attribute may be written as a string or an object.
 
 #### Static styles
 
+```nsx
+<div style="background-color: #efefef; color: red">Hello world</div>
+```
 ```tsx
 <div style="background-color: #efefef; color: red">Hello world</div>
 ```
@@ -339,6 +441,12 @@ The `style` attribute may be written as a string or an object.
 **...via ion**
 
 A style ion updates the value of the style attributes. For even more fine-grained updates, use style objects or the `css` tag function.
+```nsx
+<div style={(`
+  background-color: ${darkMode ? "#222" : "#fff"};
+  color: red
+`)@}>Hello world</div>
+```
 ```tsx
 <div style={() => `
   background-color: ${$darkMode() ? "#222" : "#fff"};
@@ -349,6 +457,12 @@ A style ion updates the value of the style attributes. For even more fine-graine
 **...via object**
 
 A style object enables Luent to update at the level of style properties. Style property names should be written as CSS property names and wrapped in quotes.
+```nsx
+<div style={{ 
+  'background-color': (darkMode ? "#222" : "#fff")@
+  'color': 'red'
+}}>Hello world</div>
+```
 ```tsx
 <div style={{ 
   'background-color': () => $darkMode() ? "#222" : "#fff" 
@@ -359,6 +473,12 @@ A style object enables Luent to update at the level of style properties. Style p
 <b>...via the <code>css</code> tag function</b>
 
 The `css` tag function returns a style object. The syntax allows drop-in migration between style bindings and stylesheets.
+```nsx
+<div style={css`
+  background-color: ${($darkMode ? "#222" : "#fff")@};
+  color: red;
+`}>Hello world</div>
+```
 ```tsx
 <div style={css`
   background-color: ${() => $darkMode() ? "#222" : "#fff"};
@@ -373,30 +493,45 @@ The `css` tag function returns a style object. The syntax allows drop-in migrati
 
 ### Text nodes
 
+```nsx
+<div>count: {count@}</div>
+```
 ```tsx
 <div>count: {$count}</div>
 ```
 :::info transpiled
-```tsx
+```jsx
 jsx('div', { Slot: () => ['count: ', $count] })
 ```
 :::
 
 ### Textarea
+```nsx
+<textarea mu:TextSlot>{text@}</textarea>
+```
 ```tsx
 <textarea mu:TextSlot>{$text}</textarea>
 ```
 
 ### Inner HTML
 
+```nsx
+<div trusted:HTMLSlot>{html@}</div>
+```
 ```tsx
 <div trusted:HTMLSlot>{$html}</div>
 ```
 
+```nsx
+<div mu:HTMLSlot>{html@}</div>
+```
 ```tsx
 <div mu:HTMLSlot>{$html}</div>
 ```
 
+```nsx
+<div HTMLSlot>{html@}</div>
+```
 ```tsx
 <div HTMLSlot>{$html}</div>
 ```
