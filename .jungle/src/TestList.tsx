@@ -1,5 +1,5 @@
 import { component, template, For } from "luent";
-import { ionize, watch } from "@luent/quarky";
+import { ionize, observe } from "@luent/quarky";
 let id = 4;
 
 function genId() {
@@ -24,7 +24,7 @@ export function PlainList() {
       list.splice(2, 0, { id: genId(), name: 'tom thumb' })
    }
 
-   watch(list, () => {
+   observe(list, () => {
       console.log('list changed')
    })
 

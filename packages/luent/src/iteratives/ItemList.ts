@@ -1,6 +1,6 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask } from "@luent/flask";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, VineNode } from "../node/VineNode";
-import {createAtomicIon, Ion, MaybeIonized, MutableIon, queueRender, trackForRender, queueInternalRender } from "@luent/quarky";
+import {createAtomicIon, Ion, MaybeIonized, MutableIon, awaitRender, trackForRender, queueInternalRender } from "@luent/quarky";
 import { RenderItem } from "./For";
 import { __DEV__buildAsyncPath, TRACE } from "@luent/flask";
 import { RawJSXNode } from "../node/makeJSXNode";

@@ -2,7 +2,7 @@ import { getFlask } from "@luent/flask";
 import { MaybeIon } from "../component/bindings-types";
 import { normalizeToRenderFunction, RawJSXNode } from "../node/makeJSXNode";
 import { ListKit, toAsyncRenderItem } from "./ItemList";
-import { queueInternalRender, queuePrelude, queueRender, Ion, Ionic, isGetter, PRELUDE, queueTask, toIon, toValue, watch } from "@luent/quarky";
+import { queueInternalRender, awaitPrelude, awaitRender, Ion, Ionic, isGetter, PRELUDE, queueTask, toIon, toValue, observe } from "@luent/quarky";
 import { isIonicProxy } from "@luent/quarky/core";
 import { __DEV__buildAsyncPath, TRACE } from "@luent/flask";
 import { ForIndex, Nullish } from "./IndexedList";
@@ -52,8 +52,8 @@ const [pushList, popList, getList] = createStack<any>()
 
 export function atListChanged(task: () => void) {
   const list = getList()
-  queueInternalRender(() => { // QUESTION: Why is this important? When watch was being set up synchronously, any items that were initially loaded would not transition properly and inserted items would get unnecessarily transitioned in. queuePrelude is too early and messes up consecutively inserted items
-    watch(list, task, { phase: PRELUDE })
+  queueInternalRender(() => { // QUESTION: Why is this important? When observe was being set up synchronously, any items that were initially loaded would not transition properly and inserted items would get unnecessarily transitioned in. awaitPrelude is too early and messes up consecutively inserted items
+    observe(list, task, { phase: PRELUDE })
   })
 }
 

@@ -1,5 +1,5 @@
 import { component, template, For, If, Else, FromTag, listen } from "luent"
-import { watch, ionicTickTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, defineDeepIonize } from "@luent/quarky"
+import { observe, ionicTickTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, defineDeepIonize } from "@luent/quarky"
 
 // PRO: no need to return an object and destructure (unless you need to pass a single bound method or ions to a render function)
 // CONS: Not as composable as kits

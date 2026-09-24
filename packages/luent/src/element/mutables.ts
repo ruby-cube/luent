@@ -1,4 +1,4 @@
-import { isGetter, isIon, MutableIon, queueRender, queueTask, RUN_EAGERLY, swiftUpdate, toValue, trackForRender, Ion, watch } from "@luent/quarky";
+import { isGetter, isIon, MutableIon, awaitRender, queueTask, RUN_EAGERLY, swiftUpdate, toValue, trackForRender, Ion, observe } from "@luent/quarky";
 import { MaybeIon } from "../component/bindings-types";
 import { AnyObject } from "@luent/types";
 
@@ -67,7 +67,7 @@ function bindMutable(element: AnyObject, key: PropertyKey, mutable: MaybeIon<any
         ion.value = element[key]
       })
     })
-    watch(mutable, () => {
+    observe(mutable, () => {
       forMutableIon(mutable, ion => {
         element[key] = ion.value
       })

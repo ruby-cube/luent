@@ -1,4 +1,4 @@
-import { createMemoizedDerivation, Ion, PRELUDE, queueRender, SYNC, toRaw, toValue, watch, trackForRender, queueInternalRender } from "@luent/quarky";
+import { createMemoizedDerivation, Ion, PRELUDE, awaitRender, SYNC, toRaw, toValue, observe, trackForRender, queueInternalRender } from "@luent/quarky";
 import { AnyObject } from "@luent/types";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, VineNode } from "../node/VineNode";
@@ -34,12 +34,12 @@ export class IndexedListKit extends VineNode {
       const $list = createMemoizedDerivation(() => this.toArray(toValue(input)))
       let array = [...$list()]
       
-      // NOTE: IMPORTANT: We must set up the watcher BEFORE rendering
+      // NOTE: IMPORTANT: We must set up the observer BEFORE rendering
       // This ensure the order of reactions run in such a way that
       // there is no need for optional chaining $item().property
       // to avoid cannot read property of undefined when removing an item
       
-      watch(input, ({ current }) => {
+      observe(input, ({ current }) => {
          this.reconcile(array, $list)
          array = [...$list()]
       }, { phase: PRELUDE })

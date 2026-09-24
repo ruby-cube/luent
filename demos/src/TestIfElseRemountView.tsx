@@ -1,5 +1,5 @@
 import { component, template, If, Else, ElseIf, NodeRef, mountIsland, ViewType, Style, css } from "luent";
-import { Ion, ion, queueRender, queueTask, toValue, watch } from "@luent/quarky";
+import { Ion, ion, awaitRender, queueTask, toValue, observe } from "@luent/quarky";
 import "./style.css"
 
 

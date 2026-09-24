@@ -1,16 +1,16 @@
-import { afterMount, afterUnmount, queueLayout, atMount, queuePrelude, queueRender, awaitTick, atUnmount, beforeMount, beforeUnmount, Else, If, ion } from "luent"
+import { afterMount, afterUnmount, awaitLayout, atMount, awaitPrelude, awaitRender, awaitTick, atUnmount, beforeMount, beforeUnmount, Else, If, ion } from "luent"
 
 export function TestRenderCycle() {
   const $open = ion(true)
   console.warn('@@@ ROOT setup')
 
-  queuePrelude(() => {
+  awaitPrelude(() => {
     console.warn('@@@ ROOT at prelude')
   })
-  queueLayout(() => {
+  awaitLayout(() => {
     console.warn('@@@ ROOT at layout')
   })
-  queueRender(() => {
+  awaitRender(() => {
     console.warn('@@@ ROOT at render')
   })
   awaitTick(() => {
@@ -41,13 +41,13 @@ export function TestRenderCycle() {
 function MyComp() {
   console.warn('@@@ setup')
 
-  queuePrelude(() => {
+  awaitPrelude(() => {
     console.warn('@@@ at prelude')
   })
-  queueLayout(() => {
+  awaitLayout(() => {
     console.warn('@@@ at layout')
   })
-  queueRender(() => {
+  awaitRender(() => {
     console.warn('@@@ at render')
   })
   awaitTick(() => {

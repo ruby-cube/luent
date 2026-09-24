@@ -1,7 +1,7 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFlask, getFlask } from "@luent/flask";
 import { AsyncRender, DOMNode, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode"
 import { ViewType, If } from "./If";
-import { createMemoizedDerivation, getSuspenseCount, Ion, PRELUDE, queueRender, queueTask, SuspenseIon, watch, trackForRender, queueInternalRender } from "@luent/quarky";
+import { createMemoizedDerivation, getSuspenseCount, Ion, PRELUDE, awaitRender, queueTask, SuspenseIon, observe, trackForRender, queueInternalRender } from "@luent/quarky";
 import { Booleanny } from "@luent/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { __DEV__buildAsyncPath, TRACE } from "@luent/flask";
@@ -171,7 +171,7 @@ export class IfElseKit extends VineNode {
           })
         }
         else {
-          watch(suspense, ({ current: promise }) => {
+          observe(suspense, ({ current: promise }) => {
             if (promise) {
               const id = this.pendingSwitch = ++this._pendingSwitchID
               this.pendingDeactivatedKit = prevKit

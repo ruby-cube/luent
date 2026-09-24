@@ -3,7 +3,7 @@
    - refetch
 --
 EFFECT SYSTEM
-[ ] watch( , { phase: 'sync' | 'prelude' | 'internal render' | 'render' | 'postlude' })
+[ ] observe( , { phase: 'sync' | 'prelude' | 'internal render' | 'render' | 'postlude' })
 [ ] responsive rendering
    - console.warn when rendering exceeds 50ms
 [ ] PhaseEffectQueue and new effect cycle system
@@ -36,7 +36,7 @@ DO ACTION
 This means we must separate derivation access from render
 
 
-- watch()
+- observe()
    - sync
    - prelude
    - (internal jsx render)
@@ -190,7 +190,7 @@ doAction(async (action) => {
 })
 
 
-watch($state, () => {
+observe($state, () => {
    if ($currentAction()) {
       await $currentAction().complete
       textNode.text = $state();
@@ -244,7 +244,7 @@ function MyComponent() {
 
    const countUpdate = getCountUpdate()
 
-   watch($count, (count) => {
+   observe($count, (count) => {
       dispatchCountUpdate(count)
    }, {
       lazy: 1000

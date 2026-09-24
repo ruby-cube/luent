@@ -1,5 +1,5 @@
 import { $_run_with_, $_snap_context, $_wrap_with_context, getFlask } from "@luent/flask";
-import { queueRender, awaitTick } from "@luent/quarky";
+import { awaitRender, awaitTick } from "@luent/quarky";
 
 
 export function beforeMount(task: () => void) {
@@ -16,17 +16,17 @@ export function beforeAttach(task: (initial: boolean) => void) {
 
 export function atMount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onInitialMount(() => { queueRender(contextTask) });
+   getFlask().onInitialMount(() => { awaitRender(contextTask) });
 }
 export function atRemount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onRemount(() => { queueRender(contextTask) });
+   getFlask().onRemount(() => { awaitRender(contextTask) });
 }
 
 export function atAttach(task: (initial: boolean) => void) {
    const context = $_snap_context()
-   getFlask().onInitialMount(() => { queueRender(() => $_run_with_(context, () => task(true))) });
-   getFlask().onRemount(() => { queueRender(() => $_run_with_(context, () => task(false))) });
+   getFlask().onInitialMount(() => { awaitRender(() => $_run_with_(context, () => task(true))) });
+   getFlask().onRemount(() => { awaitRender(() => $_run_with_(context, () => task(false))) });
 }
 
 export function afterMount(task: () => void) {
@@ -62,20 +62,20 @@ export function beforeDetach(task: (final: boolean) => void) {
 
 export function atUnmount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onDiscard(() => { queueRender(contextTask) });
+   getFlask().onDiscard(() => { awaitRender(contextTask) });
 }
 
 export function atDemount(task: () => void) {
    const contextTask = $_wrap_with_context(task)
-   getFlask().onDemount(() => { queueRender(contextTask) });
+   getFlask().onDemount(() => { awaitRender(contextTask) });
 }
 
 export function atDetach(task: (final: boolean) => void) {
    const discardTask = $_wrap_with_context(() => task(true))
    const demountTask = $_wrap_with_context(() => task(false))
 
-   getFlask().onDiscard(() => { queueRender(discardTask) });
-   getFlask().onDemount(() => { queueRender(demountTask) });
+   getFlask().onDiscard(() => { awaitRender(discardTask) });
+   getFlask().onDemount(() => { awaitRender(demountTask) });
 }
 
 export function afterUnmount(task: () => void) {

@@ -8,13 +8,13 @@ describe('NextScript transform with offsets', () => {
    it('transforms block derivation expressions', () => {
       const { code, edits } = preprocessNSX(
          `get foo = ref(0);\n` +
-         `watch({ const a = 0; return a }@);` +
+         `observe({ const a = 0; return a }@);` +
          `get count = ref(0);\n` +
          `count = 2`
       )
       expect(code).toBe(
          `let foo = ref(0);\n` +
-         `watch((ª=>{ const a = 0; return a }));` +
+         `observe((ª=>{ const a = 0; return a }));` +
          `let count = ref(0);\n` +
          `count = 2`
       )
@@ -25,7 +25,7 @@ describe('NextScript transform with offsets', () => {
       expect(generated.code).toBe(
          `import { assertª, assertµ } from "@luent/nextscript";\n` +
          `const foo = assertª(ref(0));\n` +
-         `watch((() => {\n` + `\tconst a = 0;\n\treturn a;\n}\n));\n` + // TODO: remove parentheses if not IIDE
+         `observe((() => {\n` + `\tconst a = 0;\n\treturn a;\n}\n));\n` + // TODO: remove parentheses if not IIDE
          `const count = assertª(ref(0));\n` +
          `assertµ(count).value = 2;\n`
       )
@@ -34,13 +34,13 @@ describe('NextScript transform with offsets', () => {
    it('transforms async block derivation expressions', () => {
       const { code, edits } = preprocessNSX(
          `get foo = ref(0);\n` +
-         `watch({ const res = await a; return res }@);` +
+         `observe({ const res = await a; return res }@);` +
          `get count = ref(0);\n` +
          `count = 2`
       )
       expect(code).toBe(
          `let foo = ref(0);\n` +
-         `watch((ª=>{ const res = await a; return res }));` +
+         `observe((ª=>{ const res = await a; return res }));` +
          `let count = ref(0);\n` +
          `count = 2`
       )
@@ -51,7 +51,7 @@ describe('NextScript transform with offsets', () => {
       expect(generated.code).toBe(
          `import { assertª, assertµ } from "@luent/nextscript";\n` +
          `const foo = assertª(ref(0));\n` +
-         `watch((async () => {\n` + `\tconst res = await a;\n\treturn res;\n}\n));\n` + // TODO: remove parentheses if not IIDE
+         `observe((async () => {\n` + `\tconst res = await a;\n\treturn res;\n}\n));\n` + // TODO: remove parentheses if not IIDE
          `const count = assertª(ref(0));\n` +
          `assertµ(count).value = 2;\n`
       )
@@ -60,13 +60,13 @@ describe('NextScript transform with offsets', () => {
    it('transforms immediately invoked block derivation expressions', () => {
       const { code, edits } = preprocessNSX(
          `get foo = ref(0);\n` +
-         `watch({ const a = 0; return a }@());` +
+         `observe({ const a = 0; return a }@());` +
          `get count = ref(0);\n` +
          `count = 2`
       )
       expect(code).toBe(
          `let foo = ref(0);\n` +
-         `watch((ª=>{ const a = 0; return a })());` +
+         `observe((ª=>{ const a = 0; return a })());` +
          `let count = ref(0);\n` +
          `count = 2`
       )
@@ -78,7 +78,7 @@ describe('NextScript transform with offsets', () => {
       expect(generated.code).toBe(
          `import { assertª, assertµ } from "@luent/nextscript";\n` +
          `const foo = assertª(ref(0));\n` +
-         `watch((() => {\n` + `\tconst a = 0;\n\treturn a;\n}\n)());\n` + // TODO: remove parentheses if not IIDE
+         `observe((() => {\n` + `\tconst a = 0;\n\treturn a;\n}\n)());\n` + // TODO: remove parentheses if not IIDE
          `const count = assertª(ref(0));\n` +
          `assertµ(count).value = 2;\n`
       )
@@ -87,13 +87,13 @@ describe('NextScript transform with offsets', () => {
    it('transforms async immediately invoked block derivation expressions', () => {
       const { code, edits } = preprocessNSX(
          `get foo = ref(0);\n` +
-         `watch({ const res = await a; return res }@());` +
+         `observe({ const res = await a; return res }@());` +
          `get count = ref(0);\n` +
          `count = 2`
       )
       expect(code).toBe(
          `let foo = ref(0);\n` +
-         `watch((ª=>{ const res = await a; return res })());` +
+         `observe((ª=>{ const res = await a; return res })());` +
          `let count = ref(0);\n` +
          `count = 2`
       )
@@ -105,7 +105,7 @@ describe('NextScript transform with offsets', () => {
       expect(generated.code).toBe(
          `import { assertª, assertµ } from "@luent/nextscript";\n` +
          `const foo = assertª(ref(0));\n` +
-         `watch((async () => {\n` + `\tconst res = await a;\n\treturn res;\n}\n)());\n` + // TODO: remove parentheses if not IIDE
+         `observe((async () => {\n` + `\tconst res = await a;\n\treturn res;\n}\n)());\n` + // TODO: remove parentheses if not IIDE
          `const count = assertª(ref(0));\n` +
          `assertµ(count).value = 2;\n`
       )

@@ -43,7 +43,7 @@ function AsyncModel<D extends AnyObject>(initialData: D, fetch: () => D, config:
    const model = transform(initialData)
    const update = config.update ?? chooseUpdater(model)
 
-   watch(fetch, ({ current: promise }) => {
+   observe(fetch, ({ current: promise }) => {
       promise.then(data => {
 
          instantUpdate(() => {

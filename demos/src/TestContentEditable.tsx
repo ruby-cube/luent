@@ -1,8 +1,8 @@
-import { ion, track } from "luent"
+import { ion, observe } from "luent"
 
 export function TestContentEditable() {
   const $text = ion('Write something...')
-  track($text, () => {
+  observe($text, () => {
     console.log('$text')
   })
   return <>

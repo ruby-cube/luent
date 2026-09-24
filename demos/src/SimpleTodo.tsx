@@ -1,5 +1,5 @@
 import { $from, $of, component, Else, For, If } from "luent";
-import { ion, ionic, watch } from "@luent/quarky";
+import { ion, ionic, observe } from "@luent/quarky";
 
 let id = 0
 function genUID() {
@@ -51,7 +51,7 @@ export function BulletJournal() {
     }
   }
 
-  watch($activeTodo, () => {
+  observe($activeTodo, () => {
     console.log('@@@ active todo', $activeTodo())
   })
 

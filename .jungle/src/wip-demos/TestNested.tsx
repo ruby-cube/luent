@@ -1,5 +1,5 @@
 import { component, template } from "luent";
-import { finiton, ion, watch } from "@luent/quarky";
+import { finiton, ion, observe } from "@luent/quarky";
 
 export function TestNested() {
    const $isActive = ion(true, {
@@ -14,9 +14,9 @@ export function TestNested() {
       }
    })
 
-   watch($isActive, ({ current: isActive }) => {
+   observe($isActive, ({ current: isActive }) => {
       console.log('### isActive', isActive)
-      watch($isHappy, ({ current: isHappy }) => {
+      observe($isHappy, ({ current: isHappy }) => {
          console.log('### isHappy', isHappy)
       }, { eager: true })
    }, { eager: true })

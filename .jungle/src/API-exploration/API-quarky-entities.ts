@@ -4,10 +4,10 @@
 // Compound { particles }
 // Particles (Atom | Compound) & TraceableEntities & Stateful
 
-// *Subject extends Compound (directly watched)
-// - FunctionSubject
-// - ModelSubject
-// - MultiSubject
+// *Substance extends Compound (directly watched)
+// - FunctionSubstance
+// - ModelSubstance
+// - MultiSubstance
 
 // Interfaces
 // Stateful { getState(): unknown }
@@ -26,8 +26,8 @@
 
 // (watchers)
 // - Multisubject (multi compound)
-// - Ion Subject (multi compound)
-// - Ionic Subject (model compound)
+// - Ion Substance (multi compound)
+// - Ionic Substance (model compound)
 
 // - Ionic Task (compound) (functional compound, no state)
 

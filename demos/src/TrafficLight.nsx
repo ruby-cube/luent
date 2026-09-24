@@ -1,4 +1,4 @@
-import { component, css, ion, SYNC, track as watch, Finitron } from "luent";
+import { component, css, ion, SYNC, track as observe, Finitron } from "luent";
 import "./style.css"
 
 export function TrafficLight() {

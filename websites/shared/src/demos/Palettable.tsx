@@ -1,4 +1,4 @@
-import { Ion, queueTask, As, asJSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, Style, Thru, track, awaitTick } from "luent";
+import { Ion, queueTask, As, asJSX, css, For, fromContext, FromTag, If, ion, ionic, Style, Thru, observe, awaitTick } from "luent";
 import { moveUniqueItems } from "@luent/utils";
 
 export function Palettable() {
@@ -717,7 +717,7 @@ function goalHue(baseHue: number) {
 
 function CelebrationKit($sorted: Ion<boolean>, onComplete: () => void) {
 
-  track($sorted, () => {
+  observe($sorted, () => {
     if ($sorted()) {
       setTimeout(celebrate, 250) // 250 to ensure item transitions are complete
     }
@@ -1716,7 +1716,7 @@ function shuffle<T>(array: T[]): T[] {
 Palettable.nsxCelebrationKit = `
 function CelebrationKit(sorted@: Ion<boolean>, onComplete: () => void) {
 
-  track(sorted@, () => {
+  observe(sorted@, () => {
     if (sorted) {
       setTimeout(celebrate, 250)
     }
@@ -1764,7 +1764,7 @@ function CelebrationKit(sorted@: Ion<boolean>, onComplete: () => void) {
 Palettable.tsxCelebrationKit = `
 function CelebrationKit($sorted: Ion<boolean>, onComplete: () => void) {
 
-  track($sorted, () => {
+  observe($sorted, () => {
     if ($sorted()) {
       setTimeout(celebrate, 250)
     }

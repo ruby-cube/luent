@@ -1,83 +1,123 @@
-import { $listen, SustainedListenerOptions } from "@luent/flask";
-import { getPhase, scheduleEagerReaction, WatchDebugOptions } from "./Watcher";
+import { $listen, getFlask, SustainedListenerOptions } from "@luent/flask";
+import { getPhase, scheduleEagerReaction, ObserverDebugOptions } from "./Observer";
 import { Glass } from "@luent/types";
 import { Reaction } from "./Reaction";
-import { FunctionSubject } from "./Subject";
-import { Traceable } from "../debug/Traceable";
+import { linkReactionToAtom } from "./Substance";
+import { Traceable, TraceableEntity } from "../debug/Traceable";
 import { LAYOUT, Phase, PRELUDE, RENDER, SYNC, TICK } from "./RenderCycle";
+import { Ion } from "../ion/Ion";
+import { Compound, popTracker, pushTracker } from "./Compound";
 
 
 type _IonicTaskOptions = {
-   phase?: Phase;
-   sync?: boolean;
-   retrack?: boolean; // defaults to true
-} & Glass<SustainedListenerOptions & WatchDebugOptions>
+  phase?: Phase;
+  sync?: boolean;
+} & Glass<SustainedListenerOptions & ObserverDebugOptions>
 
-type IonicTask = (initial: boolean) => void
+
+
+
+type Tracker = <T>(ion: Ion<T>) => T
+
+type IonicTask = (track: Tracker, initial: boolean) => void
 
 function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
 
-   const retrack = options?.retrack === undefined ? true : options.retrack
-   const phase = getPhase(options)
+  const phase = getPhase(options)
 
-   let initial = true;
+  let initial = true;
+  let reaction: Reaction
+  let substance: AsyncSubstance | null
 
-   const wrappedReaction = () => {
-      try {
-         task(initial)
-      }
-      finally {
-         initial = false;
-      }
-   }
+  const wrappedReaction = () => {
+    const output = task(fn => substance!.trackAtoms(fn), initial)
+    getFlask().onDiscard(() => {
+      substance!.clearAtoms()
+      substance = new AsyncSubstance(reaction)
+    })
+    return output;
+  }
 
-   const subject = new FunctionSubject(wrappedReaction, retrack)
-   subject.asTraceable = new Traceable('ionic task:' + options?.devName) // TODO: add phase details
-
-
-   // TODO: options.preserve means non-pausable watcher
-   // const preserve = options?.preserve
+  // TODO: options.preserve means non-pausable observer
+  // const preserve = options?.preserve
 
 
-   return $listen(() => subject.trackedCall(), options || {}, {
-      enroll(_task) {
-         const reaction = new Reaction(_task, phase)
-         scheduleEagerReaction(() => {
-            _task()
-            subject.linkReaction(reaction)
-         }, phase)
-         return reaction;
-      },
-      remove(reaction: Reaction) {
-         reaction.destroy()
-      }
-   });
+  return $listen(wrappedReaction, options || {}, {
+    enroll(_task) {
+      reaction = new Reaction(_task, phase);
+      scheduleEagerReaction(() => {
+        substance = new AsyncSubstance(reaction)
+        _task() // This is the initial call
+        initial = false
+      }, phase)
+      return reaction;
+    },
+    remove(reaction: Reaction) {
+      reaction.destroy()
+    }
+  });
 }
 
 type IonicTaskOptions = { [K in keyof _IonicTaskOptions as K extends 'phase' ? never : K]: _IonicTaskOptions[K] }
 
 
-export function ionicPrelude(task: IonicTask, options?: IonicTaskOptions) {
-   return _queueIonicTask(task, { ...options ?? {}, phase: PRELUDE })
+export function awaitPrelude(task: IonicTask, options?: IonicTaskOptions) {
+  return _queueIonicTask(task, { ...options ?? {}, phase: PRELUDE })
 }
 
 export function runIonicTask(task: IonicTask, options?: IonicTaskOptions) {
-   return _queueIonicTask(task, { ...options ?? {}, phase: SYNC })
+  return _queueIonicTask(task, { ...options ?? {}, phase: SYNC })
 }
 
-export function ionicRender(task: IonicTask, options?: IonicTaskOptions) {
-   return _queueIonicTask(task, { ...options ?? {}, phase: RENDER })
+export function awaitRender(task: IonicTask, options?: IonicTaskOptions) {
+  return _queueIonicTask(task, { ...options ?? {}, phase: RENDER })
 }
 
-export function ionicLayout(task: IonicTask, options?: IonicTaskOptions) {
-   return _queueIonicTask(task, { ...options ?? {}, phase: LAYOUT })
+export function awaitLayout(task: IonicTask, options?: IonicTaskOptions) {
+  return _queueIonicTask(task, { ...options ?? {}, phase: LAYOUT })
 }
 
 // export function queueIonicPostlude(task: IonicTask, options?: IonicTaskOptions) {
 //    return _queueIonicTask(task, { ...options ?? {}, phase: POSTLUDE })
 // }
 
-export function ionicTick(task: IonicTask, options?: IonicTaskOptions) {
-   return _queueIonicTask(task, { ...options ?? {}, phase: TICK })
+export function awaitTick(task: IonicTask, options?: IonicTaskOptions) {
+  return _queueIonicTask(task, { ...options ?? {}, phase: TICK })
 }
 
+
+
+
+/**
+ * Primitive substance for derivation ions and ionic tasks.
+ */
+export class AsyncSubstance extends Compound implements TraceableEntity {
+
+  constructor(
+    private reaction: Reaction,
+    private devName?: string
+  ) {
+    super()
+    this.asTraceable = __DEV__ ? new Traceable('ionic task:' + devName): undefined // TODO: add phase details
+  }
+
+  asTraceable: Traceable | undefined
+
+  trackAtoms(fn: () => any) {
+    pushTracker(this);
+    try {
+      return fn();
+    }
+    finally {
+      this.forEachAtom(atom => {
+        linkReactionToAtom(atom, this.reaction)
+      })
+      popTracker();
+    }
+  }
+
+  clearAtoms() {
+    this.reaction.unlink()
+    this.untrackAtoms()
+  }
+}

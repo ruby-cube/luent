@@ -70,7 +70,7 @@ function $MorphicPort(initialKey: string | AtomicIon<any>, switchMap: { [key: st
    const $key = ion(initialKey)
    const renderphase = ion(switchMap[$key()])
 
-   watch($key, (key) => {
+   observe($key, (key) => {
       renderphase.update(switchMap[key])
    })
 
@@ -112,7 +112,7 @@ class MorphlingKit {
 
 function setUpMorphling(morphlingKit: MorphlingKit) {
    const renderphase = morphlingKit.renderphase
-   watch(renderphase, (render) => {
+   observe(renderphase, (render) => {
       const output = render()
    }, { phase: RENDER })
 }

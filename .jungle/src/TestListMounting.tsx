@@ -1,5 +1,5 @@
 import { component, template, Else, ElseIf, For, If } from "luent";
-import { $activeUpdate, ionic, ion, Ionic, PRELUDE, atRender, queueTask, watch } from "@luent/quarky";
+import { $activeUpdate, ionic, ion, Ionic, PRELUDE, atRender, queueTask, observe } from "@luent/quarky";
 
 export function TestListMounting() {
    let count = 0
@@ -71,7 +71,7 @@ function Counter(input: { log?: (msg: string) => void }) {
 //    const $count = ion(0)
 //    const $countB = ion('B0')
 
-//    watch($count, () => {
+//    observe($count, () => {
 //       atRender(() => {
 //          $countB.value = 'B' + $count()
 //          console.log('$$$', $countB())

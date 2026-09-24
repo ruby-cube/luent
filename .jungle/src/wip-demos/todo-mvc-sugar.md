@@ -1,6 +1,6 @@
 ```tsx
 import { template, For, If, Else, FromTag } from "%rue/luent"
-import { watch, ionicTickTask, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "%rue/quarky"
+import { observe, ionicTickTask, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "%rue/quarky"
 import { PRELUDE } from "../../../../packages/luent/src/render-cycle"
 import { create } from "domain"
 import { inTrackedScope } from "../../../../packages/quarky/src/compound/Compound"

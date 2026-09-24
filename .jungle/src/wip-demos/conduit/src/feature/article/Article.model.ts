@@ -2,7 +2,7 @@
 import { Ion, Ionic } from "@luent/quarky";
 import { Article as ArticleData, Profile } from "../../../api";
 import { AsyncIon } from "luent";
-import { watch } from "node:fs";
+import { observe } from "node:fs";
 import { ArticleDatabase } from "../../db/ArticleDatabase";
 
 class Article implements ArticleData {

@@ -12,22 +12,22 @@ if (import.meta.env.DEV) {
 //    })
 // })
 
-// watch($count, () => {
+// observe($count, () => {
 //    console.log('SYNC $count', $count())
 // }, { phase: SYNC })
 
-// watch($count, () => {
+// observe($count, () => {
 //    console.log('PRELUDE $count', $count())
 // }, { phase: PRELUDE })
 
-// watch($count, () => {
+// observe($count, () => {
 //    console.log('RENDER $count', $count())
 // }, { phase: RENDER })
 
-// watch($count, () => {
+// observe($count, () => {
 //    console.log('LAYOUT $count', $count())
 // }, { phase: LAYOUT })
 
-// watch($count, () => {
+// observe($count, () => {
 //    console.log('TICK $count', $count())
 // }, { phase: TICK })

@@ -1,5 +1,5 @@
 import { component, template } from "luent";
-import { dev, ion, PRELUDE, SYNC, watch } from "@luent/quarky";
+import { dev, ion, PRELUDE, SYNC, observe } from "@luent/quarky";
 
 // COMPOUNDS
 // [] multisubject
@@ -26,31 +26,31 @@ export function TestDev() {
    // dev.logAtoms($quadruple)
    // dev.traceMutations($quadruple)
 
-   watch($count, () => {
+   observe($count, () => {
       console.log('*** heheh A')
    }, {
       phase: SYNC,
       // once: true,
-      devName: 'watch: () => $quadruple()',
+      devName: 'observe: () => $quadruple()',
       // 'dev.traceTriggers': true,
       'dev.logAtoms': true
    })
-   watch($count, () => {
+   observe($count, () => {
       console.log('*** heheh B')
    }, {
       phase: SYNC,
       // once: true,
-      devName: 'watch: () => $quadruple()2',
+      devName: 'observe: () => $quadruple()2',
       // 'dev.traceTriggers': true,
       'dev.logAtoms': true
    })
 
-   // watch(() => $quadruple(), () => {
+   // observe(() => $quadruple(), () => {
    //    console.log('*** heheh')
    // }, {
    //    // phase: SYNC,
    //    // once: true,
-   //    devName: 'watch: () => $quadruple()',
+   //    devName: 'observe: () => $quadruple()',
    //    // 'dev.traceTriggers': true,
    //    // 'dev.logAtoms': true
    // })

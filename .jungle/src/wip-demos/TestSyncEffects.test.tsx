@@ -1,4 +1,4 @@
-import { ion, watch } from "@luent/quarky";
+import { ion, observe } from "@luent/quarky";
 import { describe, expect, it, vi } from "vitest";
 
 //NOTE: Infinite loops should be eliminated from an app, not supported. Infinite loop prevention is for debugging and tracking down loops.
@@ -19,7 +19,7 @@ describe('infinite loop prevention', () => {
 
       const $something = ion('')
 
-      watch($count, () => {
+      observe($count, () => {
          console.log('--start effect increment')
          $something.value = 'frog' + $count()
          callMeOnceA()
@@ -28,7 +28,7 @@ describe('infinite loop prevention', () => {
          sync: true
       })
 
-      watch($count, () => {
+      observe($count, () => {
          console.log('---effect!')
          callMeOnceB()
       }, {
@@ -70,14 +70,14 @@ describe('infinite loop prevention', () => {
          }
       })
 
-      watch($count, () => {
+      observe($count, () => {
          console.log('---effect!')
          callMeOnceB()
       }, {
          sync: true
       })
 
-      watch($count, () => {
+      observe($count, () => {
          console.log('--start effect increment')
          $count.value = $count() + 1;
          callMeOnceA()
@@ -128,7 +128,7 @@ describe('infinite loop prevention', () => {
 
       const $count2 = ion(0)
 
-      watch($count, () => {
+      observe($count, () => {
          console.log('--start effect increment')
          $count2.value = $count() + 1;
          callMeOnceA()
@@ -137,7 +137,7 @@ describe('infinite loop prevention', () => {
          sync: true
       })
 
-      watch($count2, () => {
+      observe($count2, () => {
          console.log('--start effect2 increment')
          $count.value = $count2() + 1;
          callMeOnceB()
@@ -146,7 +146,7 @@ describe('infinite loop prevention', () => {
          sync: true
       })
 
-      watch($count, () => {
+      observe($count, () => {
          console.log('---effect')
          callMeOnceC()
       }, {
@@ -184,14 +184,14 @@ describe('infinite loop prevention', () => {
 
       const $count2 = ion(0)
 
-      watch($count, () => {
+      observe($count, () => {
          console.log('---effect')
          callMeOnceC()
       }, {
          sync: true
       })
 
-      watch($count, () => {
+      observe($count, () => {
          console.log('--start effect increment')
          $count2.value = $count() + 1;
          callMeOnceA()
@@ -200,7 +200,7 @@ describe('infinite loop prevention', () => {
          sync: true
       })
 
-      watch($count2, () => {
+      observe($count2, () => {
          console.log('--start effect2 increment')
          $count.value = $count2() + 1;
          callMeOnceB()
@@ -246,14 +246,14 @@ describe('infinite loop prevention', () => {
          }
       })
 
-      watch($count, () => {
+      observe($count, () => {
          console.log('--start effect increment')
          $count.value = $count() + 1;
          callMeOnceA()
          console.log('--end effect increment')
       }, { phase: PRELUDE })
 
-      watch($count, () => {
+      observe($count, () => {
          console.log('---effect!')
          callMeOnceB()
          res(undefined)
@@ -322,20 +322,20 @@ describe('infinite loop prevention', () => {
          }
       })
 
-      watch($count, () => {
+      observe($count, () => {
          console.log('---effect!')
          callMeOnceB()
          console.log('**count', count)
       }, { phase: PRELUDE })
 
-      watch($count, () => {
+      observe($count, () => {
          console.log('--start effect increment')
          $count.value = $count() + 1;
          callMeOnceA()
          console.log('--end effect increment')
       }, { phase: PRELUDE })
 
-      watch($count, () => {
+      observe($count, () => {
          console.log("!!!!!!!!")
          res(undefined)
       }, { phase: PRELUDE })
@@ -412,27 +412,27 @@ describe('infinite loop prevention', () => {
 
       const $count2 = ion(0)
 
-      watch($count, () => {
+      observe($count, () => {
          console.log('--start effect increment')
          $count2.value = $count() + 1;
          callMeOnceA()
          console.log('--end effect increment')
       }, { phase: PRELUDE })
 
-      watch($count2, () => {
+      observe($count2, () => {
          console.log('--start effect2 increment')
          $count.value = $count2() + 1;
          callMeOnceB()
          console.log('--end effect2 increment')
       }, { phase: PRELUDE })
 
-      watch($count, () => {
+      observe($count, () => {
          console.log('---effect')
          callMeOnceC()
       }, { phase: PRELUDE })
 
 
-      watch($count, () => {
+      observe($count, () => {
          console.log('!!!!')
          res(undefined)
       }, { phase: PRELUDE })

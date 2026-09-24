@@ -1,4 +1,4 @@
-import { Else, FromTag, If, NodeRef, css, component, Style, Ion, ion, queueTask, watch, Finitron, ionic  } from "luent";
+import { Else, FromTag, If, NodeRef, css, component, Style, Ion, ion, queueTask, observe, Finitron, ionic  } from "luent";
 import "./reset.css"
 
 
@@ -87,7 +87,7 @@ export function VideoPlayer() {
       }
    })
 
-   watch(() => player.is('x:ready'), () => {
+   observe(() => player.is('x:ready'), () => {
       console.log('@@@ ready!!')
    })
 

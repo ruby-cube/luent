@@ -28,7 +28,7 @@ export function TestAsyncTabs() {
   }
 
   setInterval(() => {
-     $count.value++
+    $count.value++
   }, 1000)
 
   return <>
@@ -52,7 +52,7 @@ export function TestAsyncTabs() {
     {Await($suspense =>
       <div class={() => `tab ${$suspense() && 'pending'}`}>
         <o:preserve>
-          {As($tab, view => 
+          {As($tab, view =>
             <div before:attach={() => tabViews[$tab()] = view}>
               <Tab page={tabNames[$tab()]} count={$count} />
             </div>

@@ -16,10 +16,10 @@ export interface PendableState {
 
 function getState(state: PendableState) {
    if (state.pendingUpdate && state.pendingUpdate === getActiveUpdate()) {
-      // console.trace('getting pending state', state.pending)
+      // console.log('getting pending state', state.pending)
       return state.pending;
    }
-   // console.trace('getting current state', state.current)
+  //  console.log('getting current state', state.current)
    return state.current
 }
 
@@ -110,6 +110,7 @@ export class SimpleState implements PendableState {
    }
 
    commitUpdate() {
+    if (this.pending === 'Florida') console.log('commit Florida', this.pending)
       // console.log('commit update', this.current, this.pending)
       return this.current = this.pending
    }

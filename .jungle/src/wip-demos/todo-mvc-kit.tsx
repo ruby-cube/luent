@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, template, For, If, Else, fromRoot, ContextKey, ContextEntryKey, fromGround } from "luent"
-import { watch,  ionicTickTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, EACH, defineDeepIonize, MutableIon, defineIon } from "@luent/quarky"
+import { observe,  ionicTickTask, ionize, Ionized, Ion, makeIon, createIon, $$, update, EACH, defineDeepIonize, MutableIon, defineIon } from "@luent/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/x_RenderCycle"
 import { create } from "domain"
 import { inTrackedScope } from "../../../../packages/quarky/src/reactivity/Compound"

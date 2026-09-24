@@ -44,7 +44,7 @@ You have no idea whether there is a long task downstream or whether it has many 
 # The Effect Cycle
 - event handler (synchronous effects)
 Scheduled with microtasks
-- pre-render: for manual derivations (using watch to sync two ions) and updating state, like $index()
+- pre-render: for manual derivations (using observe to sync two ions) and updating state, like $index()
 - render === atAttach/beforeDetach (use measureLayout to batch reads)
 Scheduled on idle
 - post-render (useEffect)

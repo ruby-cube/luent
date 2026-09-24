@@ -1,5 +1,5 @@
 import { createStack, debug } from "@luent/utils";
-import { watch } from "../reactivity/Watcher";
+import { observe } from "../reactivity/Observer";
 import { QUARK } from "../abstract/Quark";
 import { UnionToIntersection } from "@luent/types";
 import { untracked } from "../reactivity/Compound";
@@ -76,7 +76,7 @@ import { createAtomicIon } from "../ion/AtomicIon";
 // - what happens if the method is async? Should we require transitions to be sync?
 // - when do you call tasks? before or after you call the method? if you call it after, you have access to both prev and new states
 
-// watch($power, ({ state }) => {
+// observe($power, ({ state }) => {
 //    handleCase(state, {
 //       on: () => $trafficLight.init()
 //       ,
@@ -320,7 +320,7 @@ export function Finitron<S extends FiniteStates, M>(states: S, methods?: M & Met
       const parent = getFinitron()
       if (parent) {
          queueTask(() => { // must queue because parent.state has not been set yet and will trigger reaction early when set
-            watch(() => parent.state, ({ previous }) => {
+            observe(() => parent.state, ({ previous }) => {
                finitron.deactivate()
             }, { phase: PRELUDE, once: true })
          })

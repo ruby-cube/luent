@@ -249,12 +249,12 @@ function FruitBasket({ $selectedFruit, fruitStore }) {
 
 // EFFECTS
 
-// watch ions
+// observe ions
 
 export function Counter() {
    const $count = ion(0)
 
-   watch($count, () => {
+   observe($count, () => {
       console.log('count is now', $count())
    })
 
@@ -269,13 +269,13 @@ export function Counter() {
 }
 
 // state change event object
-watch($count, ({ current, previous }) => {
+observe($count, ({ current, previous }) => {
    console.log('count is now', current)
    console.log('count was', previous)
 })
 
 // clean up hook
-watch($count, () => {
+observe($count, () => {
    const timeout = setTimeout(() => {
       console.log('timed out!')
    }, 1000)
@@ -290,24 +290,24 @@ ionicTickTask(() => {
 }) // default poster render
 
 // Effect Cycle Phases
-watch($count, ({ current, previous }) => {
+observe($count, ({ current, previous }) => {
    console.log('count:', current)
 }, { phase: SYNC })
 
-watch($count, ({ current, previous }) => {
+observe($count, ({ current, previous }) => {
    doStateChanges(current)
 }, { phase: PRELUDE })
 
-watch($count, ({ current, previous }) => {
+observe($count, ({ current, previous }) => {
    manipulateDOM(current)
 }, { phase: RENDER })
 
-watch($count, ({ current, previous }) => {
+observe($count, ({ current, previous }) => {
    updateDatabase(current)
 }, { phase: POSTLUDE })
 
 
-watch($count, () => {
+observe($count, () => {
    console.log('pre-render phase')
 
    await __render___()
@@ -353,7 +353,7 @@ $username.value = 'Bubby';
 
 player.name === 'Bubby' // true
 
-watch(player.$name, () => {
+observe(player.$name, () => {
    console.log('player name changed!')
 })
 

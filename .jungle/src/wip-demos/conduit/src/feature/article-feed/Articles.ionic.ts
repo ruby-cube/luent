@@ -215,7 +215,7 @@ function ionicArticle(data: ArticleData) {
             }
           })
 
-          watch(this.$favorited, sync(() => {
+          observe(this.$favorited, sync(() => {
             $count.stale = true;
           }))
         },

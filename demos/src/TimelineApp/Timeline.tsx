@@ -1,5 +1,5 @@
 
-import { Ion, queueTask, As, JSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, Style, Thru, track, Else } from "luent";
+import { Ion, queueTask, As, JSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, Style, Thru, observe, Else } from "luent";
 import { moveUniqueItems } from "@luent/utils";
 
 export function DayView(setup: FromTag<{

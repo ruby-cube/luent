@@ -1,4 +1,4 @@
-import { Ion, isGetter, queueRender, trackForRender, toValue, queueInternalRender } from "@luent/quarky";
+import { Ion, isGetter, awaitRender, trackForRender, toValue, queueInternalRender } from "@luent/quarky";
 import { MaybeIon } from "../component/bindings-types";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, toAsyncRender, VineNode } from "../node/VineNode";

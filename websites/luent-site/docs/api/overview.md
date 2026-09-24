@@ -15,15 +15,15 @@ The API reference is in the works. In the meantime, here is an overview of Luent
 #### Primary reactivity
 - `ion()` to create simple and derived reactive state
 - `ionic()` to create structured reactive state
-- `track()` to track ions for state changes and link a reaction to those changes
+- `observe()` to observe state changes in ions and react to those changes
 
 #### Secondary reactivity
 - `ionize()` to create an ion of an ionic structure (equivalent to `ion(ionic(x))`)
-- `ionicCall()` to track a synchronous ionic task 
-- `ionicPrelude()` to track an ionic task scheduled for the prelude phase
-- `ionicRender()` to track an ionic task scheduled for the render phase
-- `ionicLayout()` to track an ionic task scheduled for the layout phase
-- `ionicTick()` to track an ionic task scheduled for the upcoming render cycle tick
+- `observedCall()` to observe a synchronous task and rerun it on change.
+- `awaitPrelude()` to observe a prelude-phase task and rerun it on change.
+- `awaitRender()` to observe a render-phase task and rerun it on change.
+- `awaitLayout()` to observe a layout-phase task and rerun it on change.
+- `awaitTick()` to observe a task scheduled for the upcoming render cycle tick and rerun it on change.
 - `Finitron()` to create a finite reactive state machine
 - `$of()` to access property ions from an ionic object
 
@@ -104,20 +104,21 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 <!-- - `DOMNode()` <span class='doc-tag'>Experimental</span> to create a DOM node  -->
 
 ## Async rendering
-- `Suspense()` to batch async state
+- `$Pending()` to create a promise ion that batches the promises of other fetched-state ions.
+- `$Fetched()` to create an ion with asynchronously updated state
+- `Dispatch()` to create async actions
 - `Lazy()` to create a lazy loaded component or render function
-- `Action()` to create async actions
-<!-- - `LaxUpdate()` to create async updates -->
+<!-- - `Lax()` to create async updates -->
 <!-- - `lax()` for async updates -->
 
 ## Async tasks
 - `awaiting()` for awaiting promises without losing context
-- `ooo` for async sequences that preserve context
+<!-- - `ooo` for async sequences that preserve context -->
 
 ## Render cycle phases
-- `queuePrelude` to queue a task for before update is rendered to DOM
-- `queueRender` for DOM manipulation tasks
-- `queueLayout` for DOM layout reading tasks
+- `awaitPrelude` to queue a task for before update is rendered to DOM
+- `awaitRender` for DOM manipulation tasks
+- `awaitLayout` for DOM layout reading tasks
 - `awaitTick` to schedule a task for after update is painted to the DOM
 
 #### Lifecycle hook prefixes

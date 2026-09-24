@@ -1,6 +1,6 @@
 import { getActiveFlask } from "@luent/flask";
 import { component, template, If, Else,  ElseIf,Style, NodeRef, atAttach } from "luent";
-import { getActiveUpdate, ion, atRender, queueTask, watch } from "@luent/quarky";
+import { getActiveUpdate, ion, atRender, queueTask, observe } from "@luent/quarky";
 import "./style.css"
 
 
@@ -55,7 +55,7 @@ export function MountIfAnimation() {
       }
    })
 
-   watch($color, () => {
+   observe($color, () => {
       console.log('hi tick instant', getActiveUpdate())
    })
 
@@ -385,19 +385,19 @@ function ArticleBlock(setup: {
 //     //     }
 //     // )
 
-//     watch($count, () => {
+//     observe($count, () => {
 //         console.log("sync phase")
 //     }, { phase: SYNC })
 
-//     watch($count, () => {
+//     observe($count, () => {
 //         console.log("pre-render phase")
 //     }, { phase: BEFORE_RENDER })
 
-//     watch($count, () => {
+//     observe($count, () => {
 //         console.log("render phase")
 //     }, { phase: ON_RENDER })
 
-//     watch($count, () => {
+//     observe($count, () => {
 //         console.log("post-render phase")
 //     }, { phase: AFTER_RENDER })
 

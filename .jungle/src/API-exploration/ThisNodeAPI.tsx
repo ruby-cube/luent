@@ -1,12 +1,12 @@
 //@ts-nocheck
 import { component, template, v } from "luent"
-import { Ion, watch } from "@luent/quarky"
+import { Ion, observe } from "@luent/quarky"
 import { DynamicNode } from "../../../../packagesluent/src/flask/ViewFlask";
 
 /**
  * [] Should asynchronous functions be bound to their contexts? ... It's a lot of work... leaning towards no..
  * [] Should watchers be auto stopped when its containing flask is disposed? How about nested watchers? Should this be the case for all flasked listeners?
- * [] If auto-disposal is implemented, what is the best way to detach a watcher from its containing flask? Should watchers inherently be flasks? 
+ * [] If auto-disposal is implemented, what is the best way to detach a observer from its containing flask? Should watchers inherently be flasks? 
  */
 
 function $thisNode() { return {} as ThisNode }
@@ -47,7 +47,7 @@ function CounterKit(context: ThisNode) {
    const $count = ion(0)
 
    //@ts-ignore
-   watch($count, e => {
+   observe($count, e => {
 
    }, {})
 
@@ -75,17 +75,17 @@ function component() {
             dynamicNode = new DynamicNode(null),
 
             // render 
-            watch(style, () => {
-               watch(ion, () => {
+            observe(style, () => {
+               observe(ion, () => {
 
                }) // should be replaced when effect is rerun
             }),
 
 
-            watch($condition, () => {
+            observe($condition, () => {
                // render 
-               watch(style, () => {
-                  watch(ion, () => {
+               observe(style, () => {
+                  observe(ion, () => {
 
                   }) // should be replaced when effect is rerun
                }) //should stop when kit's dynamic node is dismantled, which is also when the effect is dismantled; should pause if kit is deactivated, effect cannot be deactivated..
@@ -94,22 +94,22 @@ function component() {
 
          {() => (
             // render 
-            watch(style, () => {
-               watch(ion, () => {
+            observe(style, () => {
+               observe(ion, () => {
 
                }) // should be replaced when effect is rerun
             }),
 
-            watch(list, () => {
+            observe(list, () => {
 
                // render 
-               watch(style, () => {
-                  watch(ion, () => {
+               observe(style, () => {
+                  observe(ion, () => {
 
                   }) // until: outer effect
                }) // until: dynamic node
 
-               watch(ion, () => {
+               observe(ion, () => {
 
                }) // until: dynamic node
 

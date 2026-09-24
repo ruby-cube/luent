@@ -1,5 +1,5 @@
 import { component, template, For, If, Else, FromTag } from "luent"
-import { watch,  ionicTickTask, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "@luent/quarky"
+import { observe,  ionicTickTask, ionize, Ionized, Ion, $, makeIon, createIon, $$ } from "@luent/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/x_RenderCycle"
 import { create } from "domain"
 import { inTrackedScope } from "../../../../packages/quarky/src/reactivity/Compound"

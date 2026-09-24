@@ -43,7 +43,7 @@ export const atEnd = beforeUnmount
 //    })
 // })
 
-// watch($count, () => {
+// observe($count, () => {
 
 
 //    atEnd(() => {

@@ -1,4 +1,4 @@
-import { As, asJSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, NodeRef, Style, Thru, track } from "luent";
+import { As, asJSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, NodeRef, Style, Thru, observe } from "luent";
 import { Ion, queueTask } from "@luent/quarky";
 import { moveUniqueItems } from "@luent/utils";
 
@@ -634,7 +634,7 @@ function goalHue(baseHue: number) {
 
 function CelebrationKit($sorted: Ion<boolean>, onComplete: () => void) {
 
-  track($sorted, () => {
+  observe($sorted, () => {
     if ($sorted()) {
       setTimeout(celebrate, 250) // 250 to ensure item transitions are complete
     }

@@ -2,7 +2,7 @@ import { hasQuark, QUARK, quarkOf } from "../abstract/Quark";
 import { Traceable, TraceableEntity, TraceableMutable } from "./Traceable";
 import { __DEV__getTrace, getAsyncPath, traceAsyncPath } from "../../../flask/src/debug";
 import { Compound, Particle } from "../reactivity/Compound";
-import { watch } from "../reactivity/Watcher";
+import { observe } from "../reactivity/Observer";
 import { isFunction, isObject } from "@luent/utils";
 import { createMemoizedDerivation, DerivationIonQuark } from "../ion/DerivationIon";
 import { Stateful } from "../abstract/Stateful";
@@ -35,7 +35,7 @@ export const dev = {
       }
       const quark = hasQuark(target) ? quarkOf(target) : quarkOf(toTraceableDerivation(target))
       if (!isTraceableCompound(quark)) return;
-      watch(target, () => logAtoms(quark), {
+      observe(target, () => logAtoms(quark), {
          phase: PRELUDE,
          eager: true
       })
@@ -116,7 +116,7 @@ function traceTriggers(target: Function) {
    if (quark.particles.length === 0) target() // induces tracking
    markTriggers(quark.particles)
 
-   watch(target, () => {
+   observe(target, () => {
       logTriggers(quark)
    }, {
       phase: PRELUDE
@@ -220,23 +220,23 @@ function _logAtoms(particles: Particle[]) {
 
 type TraceableCompound = TraceableEntity & Compound & (Stateful | {})
 
-// TODO: what about watch( {phase: SYNC, once: true }) ?? atoms will not be logged
-export function logAtoms(subject: TraceableCompound) {
-   const traceable = subject.asTraceable as Traceable
+// TODO: what about observe( {phase: SYNC, once: true }) ?? atoms will not be logged
+export function logAtoms(substance: TraceableCompound) {
+   const traceable = substance.asTraceable as Traceable
    console.log('')
    console.groupCollapsed(`%cAtoms of \`${traceable?.name}\``, "background-color: lightblue; padding-inline: .5em; color: black")
-   if ('getState' in subject) console.log('value:', subject.getState())
-   _logAtoms(subject.particles)
+   if ('getState' in substance) console.log('value:', substance.getState())
+   _logAtoms(substance.particles)
    console.groupEnd()
    console.log('')
 }
 
-export function logTriggers(subject: TraceableCompound) {
-   const traceable = subject.asTraceable as Traceable
+export function logTriggers(substance: TraceableCompound) {
+   const traceable = substance.asTraceable as Traceable
    console.log('')
    console.groupCollapsed(`%cTriggers of \`${traceable.name}\``, "background-color: lightblue; padding-inline: .5em; color: black")
-   if ('getState' in subject) console.log('value:', subject.getState())
-   logTraces(subject.particles)
+   if ('getState' in substance) console.log('value:', substance.getState())
+   logTraces(substance.particles)
    console.groupEnd()
    console.log('')
 }

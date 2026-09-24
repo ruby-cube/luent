@@ -246,11 +246,11 @@ describe('transform', () => {
    it('transforms derivation expression', () => {
       const { code, edits } = preprocessNSX(
          `get count = ref(0);\n` +
-         `watch((count * 2)@)`
+         `observe((count * 2)@)`
       )
       expect(code).toBe(
          `let count = ref(0);\n` +
-         `watch((count * 2)!)`
+         `observe((count * 2)!)`
       )
       const ast = parseNSX('test.nsx', code)
       const { ast: tsxTree, transformed } = transformNSX(ast.program, edits)
@@ -259,18 +259,18 @@ describe('transform', () => {
       expect(generated.code).toBe(
          `import { assertª } from "@luent/nextscript";\n` +
          `const count = assertª(ref(0));\n` +
-         `watch(() => (count() * 2));\n`
+         `observe(() => (count() * 2));\n`
       )
    })
 
    it('transforms derivation sequence expression', () => {
       const { code, edits } = preprocessNSX(
          `get count = ref(0);\n` +
-         `watch((console.log('hi'), count * 2)@)`
+         `observe((console.log('hi'), count * 2)@)`
       )
       expect(code).toBe(
          `let count = ref(0);\n` +
-         `watch((console.log('hi'), count * 2)!)`
+         `observe((console.log('hi'), count * 2)!)`
       )
       const ast = parseNSX('test.nsx', code)
       const { ast: tsxTree, transformed } = transformNSX(ast.program, edits)
@@ -279,18 +279,18 @@ describe('transform', () => {
       expect(generated.code).toBe(
          `import { assertª } from "@luent/nextscript";\n` +
          `const count = assertª(ref(0));\n` +
-         `watch(() => ((console.log('hi'), count() * 2)));\n`
+         `observe(() => ((console.log('hi'), count() * 2)));\n`
       )
    })
 
    it('transforms derivation type casting expression', () => {
       const { code, edits } = preprocessNSX(
          `get count = ref(0);\n` +
-         `watch((count * 2 as number)@)`
+         `observe((count * 2 as number)@)`
       )
       expect(code).toBe(
          `let count = ref(0);\n` +
-         `watch((count * 2 as number)!)`
+         `observe((count * 2 as number)!)`
       )
       const ast = parseNSX('test.nsx', code)
       const { ast: tsxTree, transformed } = transformNSX(ast.program, edits)
@@ -299,7 +299,7 @@ describe('transform', () => {
       expect(generated.code).toBe(
          `import { assertª } from "@luent/nextscript";\n` +
          `const count = assertª(ref(0));\n` +
-         `watch(() => (count() * 2 as number));\n`
+         `observe(() => (count() * 2 as number));\n`
       )
    })
 
@@ -307,11 +307,11 @@ describe('transform', () => {
    it('transforms async derivation expression', () => {
       const { code, edits } = preprocessNSX(
          `get count = ref(0);\n` +
-         `watch((await count)@)`
+         `observe((await count)@)`
       )
       expect(code).toBe(
          `let count = ref(0);\n` +
-         `watch((await count)!)`
+         `observe((await count)!)`
       )
       const ast = parseNSX('test.nsx', code)
       const { ast: tsxTree, transformed } = transformNSX(ast.program, edits)
@@ -320,18 +320,18 @@ describe('transform', () => {
       expect(generated.code).toBe(
          `import { assertª } from "@luent/nextscript";\n` +
          `const count = assertª(ref(0));\n` +
-         `watch(async () => (await count()));\n`
+         `observe(async () => (await count()));\n`
       )
    })
 
    it('transforms immediately invoked derivation expression', () => {
       const { code, edits } = preprocessNSX(
          `get count = ref(0);\n` +
-         `watch((count * 2)@())`
+         `observe((count * 2)@())`
       )
       expect(code).toBe(
          `let count = ref(0);\n` +
-         `watch((count * 2)!())`
+         `observe((count * 2)!())`
       )
       const ast = parseNSX('test.nsx', code)
       const { ast: tsxTree, transformed } = transformNSX(ast.program, edits)
@@ -340,7 +340,7 @@ describe('transform', () => {
       expect(generated.code).toBe(
          `import { assertª } from "@luent/nextscript";\n` +
          `const count = assertª(ref(0));\n` +
-         `watch((() => (count() * 2))());\n`
+         `observe((() => (count() * 2))());\n`
       )
    })
 
@@ -353,17 +353,17 @@ describe('transform', () => {
    // (() => { const c = 0 ; return a + b })()
    it('transforms immediately invoked derivation expression-block bodied', () => {
       const { code, edits } = preprocessNSX(
-         `watch({ const c = 0 ; return a + b }@())`
+         `observe({ const c = 0 ; return a + b }@())`
       )
       expect(code).toBe(
-         `watch((ª=>{ const c = 0 ; return a + b })())`
+         `observe((ª=>{ const c = 0 ; return a + b })())`
       )
       const ast = parseNSX('test.nsx', code)
       const { ast: tsxTree, transformed } = transformNSX(ast.program, edits)
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `watch((() => {\n` +
+         `observe((() => {\n` +
          `\tconst c = 0;\n` +
          `\treturn a + b;\n` +
          `}\n)());\n`

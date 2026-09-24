@@ -28,7 +28,7 @@
 
 
 import { component, Context, ContextKey, template, For, fromContext, If, Ion, Ionized, v } from "luent";
-import { ion, ionize, watch } from "@luent/quarky";
+import { ion, ionize, observe } from "@luent/quarky";
 
 class Message {
    constructor(

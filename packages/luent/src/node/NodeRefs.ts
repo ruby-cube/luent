@@ -1,5 +1,5 @@
 import { getActiveFlask, getFlask } from "@luent/flask";
-import { INTERNAL, Ion, PRELUDE, toValue, watch } from "@luent/quarky";
+import { INTERNAL, Ion, PRELUDE, toValue, observe } from "@luent/quarky";
 import { isFunction } from "@luent/utils";
 
 
@@ -12,7 +12,7 @@ type Nodes = any[] | Nodes[]
 //    console.log('setting up nodes array')
 //    for (let i = 0; i < indices.length; i++) {
 //       const $index = indices[i]
-//       watch($index, () => {
+//       observe($index, () => {
 //          if ($index() === -1) {
 //             const array = traverseNodes(nodes, i, indices)
 //             delete array[$index()]
@@ -127,7 +127,7 @@ export function setUpNodeRefs(node: any, root: any[], indices: Index[]) {
 
 function setUpLevel(referent: any, array: any[], index: Ion<number> | number) {
    if (isFunction(index)) {
-      watch(index, ({ current: i }) => {
+      observe(index, ({ current: i }) => {
          if (i === -1) {
             array.pop()
          }

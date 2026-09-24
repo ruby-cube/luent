@@ -1,4 +1,4 @@
-import { KeyboardEvent, For, If, listen, $of, track, ionicTick, Ion, Ionic, ionic, ion, FromTag, FormEvent } from "luent"
+import { KeyboardEvent, For, If, listen, $of, Ion, Ionic, ionic, ion, FromTag, FormEvent, awaitTick } from "luent"
 
 interface Todo {
   id: number
@@ -45,9 +45,9 @@ export function TodoMVC() {
   function getTodos(): Todo[] {
     const STORAGE_KEY = 'vue-todomvc'
 
-    ionicTick(() => {
+    awaitTick(oo => oo(() => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify($todos()))
-    })
+    }))
 
     return JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []
   }

@@ -177,7 +177,7 @@ function MessageDisplay(setup: FromTag<{
 }>) {
   const { message@ } = setup;
 
-  track(message@, () => {
+  observe(message@, () => {
     console.log('The message changed!')
   })
 
@@ -192,7 +192,7 @@ function MessageDisplay(setup: FromTag<{
 }>) {
   const { $message } = setup;
 
-  track($message, () => {
+  observe($message, () => {
     console.log('The message changed!')
   })
 

@@ -4,7 +4,7 @@ import { hasQuark, quarkOf } from "../abstract/Quark"
 import { asTrackedAtom, isTrackableAtom, Atom, TrackedAtom } from "./Atom"
 import { isFunction, isObject, noop } from "@luent/utils";
 import { isIon, toValue } from "../ion/utils";
-import { WatchSubjects } from "./Watcher";
+import { ObservedSubstances } from "./Observer";
 import { Compound, Particle, popTracker, pushTracker } from "./Compound";
 import type { QuarkyIonicProxy } from "../ionic/ModelQuark";
 import { Traceable, TraceableEntity } from "../debug/Traceable";
@@ -12,54 +12,54 @@ import { Stateful } from "../abstract/Stateful";
 import { isIonicProxy } from "../ionic/IonicModel";
 
 
-export function isSubject(value: AnyObject): value is Subject {
+export function isSubstance(value: AnyObject): value is Substance {
   if ('reactive' in value) return value.reactive;
   return false;
 }
 
-const MULTISUBJECT = '--multisubject' as const
+const MULTISUBJECT = '--multisubstance' as const
 
-export function multisubject<S extends unknown[]>(...subject: S) {
-  const subj = subject as S & { [MULTISUBJECT]: true }
+export function multisubstance<S extends unknown[]>(...substance: S) {
+  const subj = substance as S & { [MULTISUBJECT]: true }
   subj[MULTISUBJECT] = true;
   return subj;
 }
 
 
-// watch collection
-// watch properties -- must specify which properties to watch in multi subject: absorbed ions and derivation ions
+// observe collection
+// observe properties -- must specify which properties to observe in multi substance: absorbed ions and derivation ions
 
-type StatefulSubject = Subject & Stateful
+type StatefulSubstance = Substance & Stateful
 
-export function asSubject(target: unknown, retrack: boolean): StatefulSubject & TraceableEntity {
-  return isMultisubject(target) ? new Multisubject(target, retrack)
-    : asMonosubject(target, retrack)
+export function asSubstance(target: unknown, retrack: boolean): StatefulSubstance & TraceableEntity {
+  return isMultisubstance(target) ? new Multisubstance(target, retrack)
+    : asMonosubstance(target, retrack)
 }
 
-function asMonosubject(subject: unknown, retrack: boolean) {
+function asMonosubstance(substance: unknown, retrack: boolean) {
   // TODO: do not retrack if reaction runs once
-  return isIonicProxy(subject) ? new ProxySubject(subject)
-    : isFunction(subject) ? new IonSubject(subject, retrack)
-      : { reactive: false, getState() { return subject }, linkReaction(reaction: Reaction) { } }  //non-ionized object
+  return isIonicProxy(substance) ? new ProxySubstance(substance)
+    : isFunction(substance) ? new IonSubstance(substance, retrack)
+      : { reactive: false, getState() { return substance }, linkReaction(reaction: Reaction) { } }  //non-ionized object
 }
 
-function isMultisubject(subject: unknown): subject is WatchSubjects {
-  return isObject(subject) && MULTISUBJECT in subject;
+function isMultisubstance(substance: unknown): substance is ObservedSubstances {
+  return isObject(substance) && MULTISUBJECT in substance;
 }
 
 
 
 
-class Multisubject implements StatefulSubject, TraceableEntity {
+class Multisubstance implements StatefulSubstance, TraceableEntity {
   asTraceable?: Traceable | undefined;
-  private subjects: StatefulSubject[] = []
+  private substances: StatefulSubstance[] = []
   reactive: boolean = true;
 
-  constructor(multisubject: WatchSubjects, retrack: boolean) {
-    const subjects = this.subjects;
-    for (const subject of multisubject) {
-      const monosubject = asMonosubject(subject, retrack)
-      subjects.push(monosubject)
+  constructor(multisubstance: ObservedSubstances, retrack: boolean) {
+    const substances = this.substances;
+    for (const substance of multisubstance) {
+      const monosubstance = asMonosubstance(substance, retrack)
+      substances.push(monosubstance)
     }
   }
 
@@ -68,20 +68,20 @@ class Multisubject implements StatefulSubject, TraceableEntity {
   private get = () => {
     this.get = () => {
       const values = []
-      for (const subject of this.subjects) {
-        values.push(subject.getState())
+      for (const substance of this.substances) {
+        values.push(substance.getState())
       }
       return values;
     }
 
     // initial get
     const values = []
-    for (const subject of this.subjects) {
-      values.push(subject.getState())
-      if (!subject.reactive) this.inertCount++
+    for (const substance of this.substances) {
+      values.push(substance.getState())
+      if (!substance.reactive) this.inertCount++
     }
 
-    if (this.inertCount === this.subjects.length) {
+    if (this.inertCount === this.substances.length) {
       this.reactive = false;
     }
     return values;
@@ -92,10 +92,10 @@ class Multisubject implements StatefulSubject, TraceableEntity {
   }
 
   linkReaction(reaction: Reaction): void {
-    const subjects = this.subjects;
-    for (const subject of subjects) {
-      if (!subject.reactive) continue;
-      subject.linkReaction(reaction)
+    const substances = this.substances;
+    for (const substance of substances) {
+      if (!substance.reactive) continue;
+      substance.linkReaction(reaction)
     }
   }
 }
@@ -103,7 +103,7 @@ class Multisubject implements StatefulSubject, TraceableEntity {
 
 
 
-export interface Subject {
+export interface Substance {
   reactive: boolean,
   linkReaction(reaction: Reaction): void
 }
@@ -111,9 +111,9 @@ export interface Subject {
 
 /**
  * Watching ionized models will NOT track absorbed ions and derivations. 
- * To watch absorbed ions and derivations, use multisubject
+ * To observe absorbed ions and derivations, use multisubstance
  */
-class ProxySubject extends Compound implements StatefulSubject, TraceableEntity {
+class ProxySubstance extends Compound implements StatefulSubstance, TraceableEntity {
   reactive: boolean = true
 
   asTraceable?: Traceable | undefined;
@@ -131,7 +131,7 @@ class ProxySubject extends Compound implements StatefulSubject, TraceableEntity 
   }
 
   // getValue() {
-  //    console.log('ionic proxy subject')
+  //    console.log('ionic proxy substance')
   //    // TODO: retrack pions??
   //    return this.proxy
   // }
@@ -166,13 +166,13 @@ class ProxySubject extends Compound implements StatefulSubject, TraceableEntity 
 
 // const STALE = Symbol('stale')
 
-// TODO: currently we are retracking every single subject even if they are identical to another functional subject that has been retrack.
-// To make things more efficient, we need to share/reuse functional subjects if they track the same ion and only retrack if they are stale.
+// TODO: currently we are retracking every single substance even if they are identical to another functional substance that has been retrack.
+// To make things more efficient, we need to share/reuse functional substances if they track the same ion and only retrack if they are stale.
 
 /**
- * Primitive subject for derivation ions and ionic tasks.
+ * Primitive substance for derivation ions and ionic tasks.
  */
-export class FunctionSubject extends Compound implements Subject, TraceableEntity {
+export class FunctionSubstance extends Compound implements Substance, TraceableEntity {
   reactive: boolean = true;
 
   // get stale() {
@@ -190,7 +190,7 @@ export class FunctionSubject extends Compound implements Subject, TraceableEntit
     private warnNoAtoms = true
   ) {
     super()
-    // watch(fn, () => {
+    // observe(fn, () => {
     // }, {phase: SYNC})
     // queueMicrotask(() => {
     //    this.linkReaction(new Reaction(() => {
@@ -261,23 +261,23 @@ export class FunctionSubject extends Compound implements Subject, TraceableEntit
 
 
 /**
- * A subject composed of FunctionSubject and (maybe) ProxySubject. Wraps watched ions.
+ * A substance composed of FunctionSubstance and (maybe) ProxySubstance. Wraps watched ions.
  */
-export class IonSubject implements StatefulSubject, TraceableEntity {
+export class IonSubstance implements StatefulSubstance, TraceableEntity {
   get reactive(): boolean {
-    if (this.nestedSubject) {
-      return this.subject.reactive || this.nestedSubject.reactive
+    if (this.nestedSubstance) {
+      return this.substance.reactive || this.nestedSubstance.reactive
     }
-    return this.subject.reactive
+    return this.substance.reactive
   }
 
-  private subject: FunctionSubject
-  private nestedSubject: ProxySubject | IonSubject | undefined
+  private substance: FunctionSubstance
+  private nestedSubstance: ProxySubstance | IonSubstance | undefined
 
   asTraceable?: Traceable | undefined
 
   get particles(): Particle[] {
-    return [...this.subject.particles, ...(this.nestedSubject?.particles ?? [])]
+    return [...this.substance.particles, ...(this.nestedSubstance?.particles ?? [])]
   }
 
   constructor(
@@ -285,13 +285,13 @@ export class IonSubject implements StatefulSubject, TraceableEntity {
     private retrack: boolean = true
   ) {
     const quark = hasQuark(getter) ? quarkOf(getter) : {}
-    this.subject = quark instanceof FunctionSubject ? quark : new FunctionSubject(getter, retrack, false);
+    this.substance = quark instanceof FunctionSubstance ? quark : new FunctionSubstance(getter, retrack, false);
   }
 
   linkReaction(reaction: Reaction): void {
     if (this.reactive)
-      this.subject.linkReaction(reaction)
-    this.nestedSubject?.linkReaction(reaction)
+      this.substance.linkReaction(reaction)
+    this.nestedSubstance?.linkReaction(reaction)
   }
 
   private relinkProxy = () => {
@@ -300,23 +300,23 @@ export class IonSubject implements StatefulSubject, TraceableEntity {
       return;
     }
     this.relinkProxy = () => {
-      const reaction = this.subject.reaction
+      const reaction = this.substance.reaction
       if (!reaction) {
         return;
         throw new Error('Must call linkReaction before retracking')
       }
-      this.nestedSubject?.linkReaction(reaction)
+      this.nestedSubstance?.linkReaction(reaction)
     }
   }
 
   getState() {
-    const value = this.subject.trackedCall()
-    if (value !== this.nestedSubject?.getState()) {
+    const value = this.substance.trackedCall()
+    if (value !== this.nestedSubstance?.getState()) {
       if (isFunction(value)) {
-        this.nestedSubject = new IonSubject(value)
+        this.nestedSubstance = new IonSubstance(value)
       }
       else if (isIonicProxy(value)) {
-        this.nestedSubject = new ProxySubject(value)
+        this.nestedSubstance = new ProxySubstance(value)
       }
     }
     this.relinkProxy()
@@ -325,88 +325,12 @@ export class IonSubject implements StatefulSubject, TraceableEntity {
 }
 
 
-/**
- * Primitive subject for derivation ions and ionic tasks.
- */
-export class AsyncSubject extends Compound implements Subject, TraceableEntity {
-  reactive: boolean = true;
-
-  // get stale() {
-  //    return this.state.get() === STALE
-  // }
-
-  // previous = new SimpleState(undefined)
-  // state = new SimpleState(STALE)
-
-  asTraceable?: Traceable | undefined;
-
-  constructor(
-    private fn: () => Promise<unknown>,
-    private retrack: boolean,
-    private warnNoAtoms = true
-  ) {
-    super()
-  }
-
-  private call = () => {
-    this.call = () => toValue(this.retrackedCall());
-    return this.trackAtoms(this.fn)
-  }
-
-  trackedCall() {
-    const value = this.call()
-    if (this.particles.length === 0) this.reactive = false;
-    return value;
-  }
-
-  reaction: Reaction | undefined
-
-  private retrackedCall() { // TODO: retrack call only if stale
-    if (!this.retrack || !this.reactive)
-      return this.fn()
-    // if (!this.stale) {
-    //    console.log('### not stale')
-    //    return this.state.get()
-    // }
-    const reaction = this.reaction
-    if (!reaction) throw new Error('Must call linkReaction before retracking')
-    reaction.unlink()
-    this.untrackAtoms()
-    const output = this.trackAtoms(this.fn)
-    this.forEachAtom(atom => {
-      linkReactionToAtom(atom, reaction)
-    })
-    // this.state.set(output)
-    return output;
-  }
-
-  linkReaction(reaction: Reaction): void {
-    this.reaction = reaction;
-    this.forEachAtom(atom => {
-      linkReactionToAtom(atom, reaction)
-    })
-  }
-
-
-  private trackAtoms(fn: () => any) {
-    pushTracker(this);
-    try {
-      return fn();
-    }
-    finally {
-      popTracker();
-      if (__DEV__ && this.warnNoAtoms && this.particles.length === 0) {
-        console.warn(`Ionic compound has no dependencies (and therefore no reactivity)`, this)
-      }
-    }
-  }
-}
 
 // async function loadUserProjects(userId: string) {
-//   const subject = getSubject()
+//   const substance = getSubstance()
 //   try {
 //     const user = await fetchUser(userId)
-//     const projects = await subject.tracked(() => fetchProjects(user.organizationId))
+//     const projects = await substance.tracked(() => fetchProjects(user.organizationId))
 //     return { user, projects }
 
 //   } catch (error) {
@@ -419,7 +343,7 @@ export class AsyncSubject extends Compound implements Subject, TraceableEntity {
 //  * - relinks value to reaction if value is ionized
 //  * - relinks derivation atoms to reaction on every call if derivation ion
 //  */
-// export class IonSubject extends IonicCompound implements WatchedSubstance {
+// export class IonSubstance extends IonicCompound implements WatchedSubstance {
 //    inert: boolean = false;
 
 //    private valueAtom?: Atom
@@ -445,7 +369,7 @@ export class AsyncSubject extends Compound implements Subject, TraceableEntity {
 //       const value = isParticle(quark) ? (this.atoms.push(quark), detachedCall(ion)) : detachedCall(() => this.trackCall(ion))
 
 //       // this.atoms = compound ? compound.atoms.length ? compound.atoms : (quark.inert = true, [])
-//       //    : !quark.inert && isWatchable(quark) ? [quark] : []
+//       //    : !quark.inert && isObservable(quark) ? [quark] : []
 
 //       if (isIonicProxy(value)) {
 //          this.valueAtom = quarkOf(value)
@@ -502,7 +426,7 @@ export class AsyncSubject extends Compound implements Subject, TraceableEntity {
 
 
 
-function linkReactionToAtom(atom: Atom | undefined, reaction: Reaction) {
+export function linkReactionToAtom(atom: Atom | undefined, reaction: Reaction) {
   if (!atom) return;
   reaction.link(asTrackedAtom(atom))
 }

@@ -14,7 +14,7 @@ export type $AtomicNeutronState = MutableIon<unknown> & {
    [QUARK]: {
       inert: true;
       value: any,
-      ionized: boolean, // TODO: remove? an ionized neutron is useless because the watcher will never be triggered... to work, you need to make the neutron reactive.
+      ionized: boolean, // TODO: remove? an ionized neutron is useless because the observer will never be triggered... to work, you need to make the neutron reactive.
    }
 }
 

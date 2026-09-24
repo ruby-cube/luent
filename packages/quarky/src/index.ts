@@ -35,11 +35,11 @@ export { toRaw } from "./ionic/IonicModel"
 // 	ooo,
 // } from "./async/ooo"
 // export {
-// 	watch,
-// } from "./reactivity/Watcher"
+// 	observe,
+// } from "./reactivity/Observer"
 // export {
 // 	queueTask,
-// 	queueRender,
+// 	awaitRender,
 // 	PRELUDE,
 // 	SYNC,
 // } from "./reactivity/RenderCycle"
@@ -63,10 +63,10 @@ export * from "./ion/AtomicIon"
 export * from "./ion/DerivationIon"
 export * from "./ion/Get"
 export * from "./ion/utils"
-export * from "./reactivity/Watcher"
+export * from "./reactivity/Observer"
 export * from "./reactivity/RenderCycle"
 export * from "./reactivity/Compound"
-export * from "./reactivity/Subject"
+export * from "./reactivity/Substance"
 export * from "./reactivity/Reaction"
 export * from "./ionic/ModelQuark"
 export * from "./ionic/IonizedArray"

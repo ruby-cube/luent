@@ -22,7 +22,7 @@ Ultimately, run a reaction when a mutation happens
 ```ts
 const $count = ion(0)
 
-track($count, () => {
+observe($count, () => {
   console.log('count changed!')
 })
 ```
@@ -31,21 +31,21 @@ track($count, () => {
 ```ts
 const list = ionic([])
 
-track(list, () => {
+observe(list, () => {
   console.log('list changed!')
 })
 ```
-Note that `track()` tracks mutations shallowly.
+Note that `observe()` tracks mutations shallowly.
 
 ## Tracking ions of ionic structures
 ```ts
 const $list = ion([])
 
-track($list, () => {
+observe($list, () => {
   console.log('list changed!')
 })
 ```
-When passed an ion containing an ionic structure, `track()` tracks mutations of the ion as well as shallow mutations of the ionic structure.
+When passed an ion containing an ionic structure, `observe()` tracks mutations of the ion as well as shallow mutations of the ionic structure.
 
 ## Tracking ionic tasks
 `ionicTick()` tracks trackable access operations (e.g. getter calls, reactive property access, `Array.filter()`, etc) performed *synchronously* within the task.
@@ -64,7 +64,7 @@ ionicTick(() => {
 
 
 ## Scheduling
-By default, `track()` runs reactions at the end of a render cycle, or the tick—after the mutation has been rendered and painted to the screen. To schedule reactions earlier in the render cycle, see [The Render Cycle](/guide/the-render-cycle)
+By default, `observe()` runs reactions at the end of a render cycle, or the tick—after the mutation has been rendered and painted to the screen. To schedule reactions earlier in the render cycle, see [The Render Cycle](/guide/the-render-cycle)
 
 
 ## Effect Cleanup

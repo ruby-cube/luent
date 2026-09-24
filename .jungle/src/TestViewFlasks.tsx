@@ -1,5 +1,5 @@
 import { component, $thisView, template, Else, If } from "luent";
-import { getCurrentPhase, ion, watch } from "@luent/quarky";
+import { getCurrentPhase, ion, observe } from "@luent/quarky";
 import { $thisScene } from "../../../packages/flask/Scene";
 
 let rootView: any;
@@ -50,10 +50,10 @@ function DynamicParent() {
    const view = dynamicParentView = $thisView()
    console.log('>>> this view dynamic parent', view, rootView !== view)
 
-   watch($active, () => {
+   observe($active, () => {
       const scene = $thisScene()
       console.log('>>> dynamic parent effect', scene, getCurrentPhase())
-      watch($happy, () => {
+      observe($happy, () => {
          const scene = $thisScene()
          console.log('>>> happy effect', scene, getCurrentPhase())
       }, { eager: true })

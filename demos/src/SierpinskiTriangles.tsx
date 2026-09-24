@@ -6,7 +6,7 @@ import './SierpinskiTriangles.css'
 
 // TODO:
 // - time warning for lazy update
-// - pState for consistency, how to keep lazy state consistent with 'watch() derivations'?
+// - pState for consistency, how to keep lazy state consistent with 'observe() derivations'?
 //QUESTION:
 // - async reactions?
 // - when to cancel, when to queue?

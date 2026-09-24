@@ -1,5 +1,5 @@
 import { debug, isFunction, isObject, normalizeToArray } from "@luent/utils";
-import { __DEV__checkIfTracked, Ion, isGetter, PRELUDE, queueRender, untracked, watch, trackForRender, queueInternalRender } from "@luent/quarky";
+import { __DEV__checkIfTracked, Ion, isGetter, PRELUDE, awaitRender, untracked, observe, trackForRender, queueInternalRender } from "@luent/quarky";
 import { isComponentKit } from "@luent/nextscript";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
 import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@luent/flask";

@@ -1,4 +1,4 @@
-import { watch } from "../reactivity/Watcher"
+import { observe } from "../reactivity/Observer"
 import { AnyObject } from "@luent/types"
 import { MutableIon } from "../ion/Ion"
 import { createAtomicIon } from "../ion/AtomicIon"
@@ -34,7 +34,7 @@ export function createAsyncDerivation(config: AsyncDerivationConfig, setup?: Any
 
    const $fetch = createMemoizedDerivation(fetch)
 
-   watch($fetch, setAsyncState, { phase: PRELUDE, eager: true })
+   observe($fetch, setAsyncState, { phase: PRELUDE, eager: true })
 
    function setAsyncState() {
       const pendingPromise = $pending?.()

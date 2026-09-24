@@ -1,12 +1,12 @@
 import { component, listen, template } from "luent";
-import { ion, watch } from "@luent/quarky";
+import { ion, observe } from "@luent/quarky";
 
 export function TestOnceEager() {
    const $count = ion(0, {
       increment() { $count.value++ }
    })
    
-   // watch($count, () => {
+   // observe($count, () => {
    //    console.log('$count is', $count())
    // }, { once: true, eager: true })
 

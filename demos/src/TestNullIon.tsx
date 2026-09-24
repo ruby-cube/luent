@@ -1,10 +1,10 @@
 import { component, If } from "luent";
-import { ion, PRELUDE, watch } from "@luent/quarky";
+import { ion, PRELUDE, observe } from "@luent/quarky";
 
 export function TestNullIon() {
    const $frog = ion(null)
 
-   watch($frog, () => {
+   observe($frog, () => {
       console.log('@@@frog', $frog())
    }, { phase: PRELUDE })
 

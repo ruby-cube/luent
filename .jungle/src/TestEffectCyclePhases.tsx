@@ -1,5 +1,5 @@
 import { component, template } from "luent";
-import { watch, ion } from "@luent/quarky";
+import { observe, ion } from "@luent/quarky";
 
 export function TestEffectCyclePhases() {
 
@@ -26,23 +26,23 @@ export function TestEffectCyclePhases() {
    })
 
 
-   watch($count, async ({ current: count }) => {
-      console.log('### prelude: watch $count', count.frog)
-      watch(()=>count.frog, ({ current: frog }) => {
+   observe($count, async ({ current: count }) => {
+      console.log('### prelude: observe $count', count.frog)
+      observe(()=>count.frog, ({ current: frog }) => {
          console.log('### frog', frog)
       })
    }, { eager: true, phase: PRELUDE })
 
-   // watch($count, () => {
-   //    console.log('### internal render: watch $count')
+   // observe($count, () => {
+   //    console.log('### internal render: observe $count')
    // }, { phase: PRELUDE })
 
-   // watch($count, () => {
-   //    console.log('### render: watch $count')
+   // observe($count, () => {
+   //    console.log('### render: observe $count')
    // }, { phase: RENDER })
 
-   // watch($count, () => {
-   //    console.log('### postlude: watch $count')
+   // observe($count, () => {
+   //    console.log('### postlude: observe $count')
    // }, { phase: POSTLUDE })
 
 

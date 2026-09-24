@@ -1,27 +1,27 @@
 import { getFlask } from "@luent/flask";
 import { component, atAttach, template } from "luent";
-import { ion, LAYOUT, PRELUDE, atPrelude, atRender, queueTask, RENDER, SYNC, TICK, watch } from "@luent/quarky";
+import { ion, LAYOUT, PRELUDE, atPrelude, atRender, queueTask, RENDER, SYNC, TICK, observe } from "@luent/quarky";
 
 export function TestRenderEffects() {
    const $count = ion(0)
 
-   watch($count, () => {
+   observe($count, () => {
       console.log('@@@SYNC $count changed', $count())
    }, { phase: SYNC })
 
-   watch($count, () => {
+   observe($count, () => {
       console.log('@@@PRELUDE $count changed', $count())
    }, { phase: PRELUDE })
 
-   watch($count, () => {
+   observe($count, () => {
       console.log('@@@RENDER $count changed', $count())
    }, { phase: RENDER })
 
-   watch($count, () => {
+   observe($count, () => {
       console.log('@@@LAYOUT $count changed', $count())
    }, { phase: LAYOUT })
 
-   watch($count, () => {
+   observe($count, () => {
       console.log('@@@TICK $count changed', $count())
    }, { phase: TICK })
 

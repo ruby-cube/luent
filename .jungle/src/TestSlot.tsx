@@ -56,7 +56,7 @@ function TestSlotO() {
    }
 
    // if Content.length !== 0 throw error
-   // QUESTION: What happens if you watch a render function that renders its own ions?
+   // QUESTION: What happens if you observe a render function that renders its own ions?
    return (
 
       <Comp>{namedSlots} hi</Comp>
@@ -72,7 +72,7 @@ function TestSlotO() {
    }
 
    // if Content.length !== 0 throw error
-   // QUESTION: What happens if you watch a render function that renders its own ions?
+   // QUESTION: What happens if you observe a render function that renders its own ions?
    return (
 
       <Comp>{Content} hi</Comp>

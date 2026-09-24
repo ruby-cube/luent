@@ -1,10 +1,10 @@
 import { $CodeTab, CodeToggle } from "@luent/websites-shared"
-import { css, Style, track } from "luent"
+import { css, Style, observe } from "luent"
 
 export function LanguageToggle() {
   const $tab = $CodeTab()
   const body = document.querySelector('body')!
-  track($tab, () => {
+  observe($tab, () => {
     if ($tab() === 'main') {
       body.classList.add('lang-mode-tsx')
     }

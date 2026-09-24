@@ -94,7 +94,7 @@ describe('NextScript JSX transforms', () => {
       // expect(generated.code).toBe(
       //    `import { assertª, assertµ } from "@luent/nextscript";\n` +
       //    `const foo = assertª(ref(0));\n` +
-      //    `watch((() => {\n` + `\tconst a = 0;\n\treturn a;\n}\n));\n` + // TODO: remove parentheses if not IIDE
+      //    `observe((() => {\n` + `\tconst a = 0;\n\treturn a;\n}\n));\n` + // TODO: remove parentheses if not IIDE
       //    `const count = assertª(ref(0));\n` +
       //    `assertµ(count).value = 2;\n`
       // )

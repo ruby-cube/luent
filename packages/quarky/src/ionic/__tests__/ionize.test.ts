@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { describe, expect, it } from "vitest"
 // import { ionize, isIonicProxy, MARK, withInertItems } from "../x_ionize"
-import { watch } from "../../reactivity/Watcher"
+import { observe } from "../../reactivity/Observer"
 // import { inert, isInert } from "../../../../x-old/x_inert"
 
 // TODO: update with new API
@@ -42,7 +42,7 @@ describe('ionize', () => {
       expect(frog.$name).toBeDefined()
 
       let currentName = frog.name;
-      watch(frog.$name!, ({ current: name }) => {
+      observe(frog.$name!, ({ current: name }) => {
          currentName = name;
       }, { phase: SYNC })
 
@@ -69,7 +69,7 @@ describe('ionize', () => {
       expect(swamp.frog.$name).toBeDefined()
 
       let currentName = swamp.frog.name;
-      watch(() => (swamp.frog.name), ({ current: name }) => {
+      observe(() => (swamp.frog.name), ({ current: name }) => {
          currentName = name;
       }, { phase: SYNC })
 

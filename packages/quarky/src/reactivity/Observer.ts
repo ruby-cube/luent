@@ -1,6 +1,6 @@
 import { $listen, Flask, getActiveFlask, getFlask, PausableListener, SustainedListenerOptions } from "@luent/flask";
 import { Reaction } from "./Reaction";
-import { asSubject, IonSubject, isSubject, Subject } from "./Subject";
+import { asSubstance, IonSubstance, isSubstance, Substance } from "./Substance";
 import { AnyObject, Glass } from "@luent/types";
 import { __DEV__unwrap } from "@luent/utils";
 import { SimpleState } from "./State";
@@ -13,11 +13,11 @@ import { toValue } from "../ion/utils";
 import { $activeUpdate, getActiveUpdate } from "./Update";
 
 
-// watch(list.$length, list.$couch, sync(() => {
+// observe(list.$length, list.$couch, sync(() => {
 //    doSomething(prevList)
 // }))
 
-// watch(multisubstance(list.$length, list.$couch), sync(() => {
+// observe(multisubstance(list.$length, list.$couch), sync(() => {
 //    doSomething(prevList)
 // }))
 
@@ -35,42 +35,42 @@ export type ReactionOptions = {
   phase?: Phase;
   preserve?: boolean;
   retrack?: boolean;
-} & Glass<SustainedListenerOptions & WatchDebugOptions>
+} & Glass<SustainedListenerOptions & ObserverDebugOptions>
 
-export type WatchDebugOptions = {
+export type ObserverDebugOptions = {
   devName?: string,
   'dev.logAtoms'?: boolean,
   'dev.traceTriggers'?: boolean
 }
 
-export type ReactionTask<T = unknown> = (event: StateChangeEvent<SubjectValues<T>>) => void;
+export type ReactionTask<T = unknown> = (event: StateChangeEvent<SubstanceValues<T>>) => void;
 
-type SubjectValues<T> = [T] extends [() => infer R] ? R : [T] extends [infer O] ? O : MultiSubjectValues<T>;
+type SubstanceValues<T> = [T] extends [() => infer R] ? R : [T] extends [infer O] ? O : MultiSubstanceValues<T>;
 
-type MultiSubjectValues<T> =
-  T extends [infer A, infer B] ? [SubjectValue<A>, SubjectValue<B>]
-  : T extends [infer A, infer B, infer C] ? [SubjectValue<A>, SubjectValue<B>, SubjectValue<C>]
-  : T extends [infer A, infer B, infer C, infer D] ? [SubjectValue<A>, SubjectValue<B>, SubjectValue<C>, SubjectValues<D>]
-  : T extends [infer A, infer B, infer C, infer D, infer E] ? [SubjectValue<A>, SubjectValue<B>, SubjectValue<C>, SubjectValue<D>, SubjectValue<E>]
-  : T extends [infer A, infer B, infer C, infer D, infer E, infer F] ? [SubjectValue<A>, SubjectValue<B>, SubjectValue<C>, SubjectValue<D>, SubjectValue<E>, SubjectValue<F>]
+type MultiSubstanceValues<T> =
+  T extends [infer A, infer B] ? [SubstanceValue<A>, SubstanceValue<B>]
+  : T extends [infer A, infer B, infer C] ? [SubstanceValue<A>, SubstanceValue<B>, SubstanceValue<C>]
+  : T extends [infer A, infer B, infer C, infer D] ? [SubstanceValue<A>, SubstanceValue<B>, SubstanceValue<C>, SubstanceValues<D>]
+  : T extends [infer A, infer B, infer C, infer D, infer E] ? [SubstanceValue<A>, SubstanceValue<B>, SubstanceValue<C>, SubstanceValue<D>, SubstanceValue<E>]
+  : T extends [infer A, infer B, infer C, infer D, infer E, infer F] ? [SubstanceValue<A>, SubstanceValue<B>, SubstanceValue<C>, SubstanceValue<D>, SubstanceValue<E>, SubstanceValue<F>]
   : T
 
-type SubjectValue<T> = T extends () => infer R ? R : T
+type SubstanceValue<T> = T extends () => infer R ? R : T
 
 
 
 
 
 
-// Possible subjects
+// Possible substances
 // ---
 // plain function (potentially inert)
-// ion (potentially inert/neutron) (should have a watch fn on quark)
+// ion (potentially inert/neutron) (should have a observe fn on quark)
 // memoized ion
 // 
 // ionized model possibly with absorbed ions
 // --
-// plain array with all sorts of subjects
+// plain array with all sorts of substances
 // --
 // ionized collection
 
@@ -83,22 +83,22 @@ export class StateChangeEvent<S = unknown> {
   ) { }
 }
 
-export type WatchSubjects = (Object | Ion)[]
+export type ObservedSubstances = (Object | Ion)[]
 
-export function watch<T>(subject: T, reaction: ReactionTask<T>, options: ReactionOptions = {}): PausableListener {
-  if (import.meta.env.SSR) return InertWatcher()
+export function observe<T>(substance: T, reaction: ReactionTask<T>, options: ReactionOptions = {}): PausableListener {
+  if (import.meta.env.SSR) return InertObserver()
   options.retrack = options.retrack ?? true;
 
-  const target = asSubject(subject, options.retrack)
-  target.asTraceable = new Traceable(options?.devName ?? 'watch' + subject)
+  const target = asSubstance(substance, options.retrack)
+  target.asTraceable = new Traceable(options?.devName ?? 'observe' + substance)
 
-  if (!isSubject(target)) { // plain object
+  if (!isSubstance(target)) { // plain object
     if (options?.eager) {
       scheduleEagerReaction(() =>
-        reaction(new StateChangeEvent(undefined, subject, true))
+        reaction(new StateChangeEvent(undefined, substance, true))
         , getPhase(options))
     }
-    return InertWatcher()
+    return InertObserver()
   }
 
   const prevState = new SimpleState(target.getState()) // tracking
@@ -109,7 +109,7 @@ export function watch<T>(subject: T, reaction: ReactionTask<T>, options: Reactio
         reaction(new StateChangeEvent(undefined, prevState.get(), true))
         , getPhase(options))
     }
-    return InertWatcher()
+    return InertObserver()
   }
 
   function wrappedReaction() {
@@ -127,7 +127,7 @@ export function watch<T>(subject: T, reaction: ReactionTask<T>, options: Reactio
   }
   wrappedReaction.__DEV__fn = reaction
 
-  return setUpWatcher(
+  return setUpObserver(
     target,
     wrappedReaction,
     options,
@@ -149,14 +149,14 @@ export function sync<F>(fn: F): F {
 }
 
 
-export function setUpWatcher(
-  subject: Subject,
+export function setUpObserver(
+  substance: Substance,
   task: Task,
   options: ReactionOptions,
 ) {
   const phase = options.phase = getPhase(options)
   const eager = options.eager ?? false;
-  // TODO: options.preserve means non-pausable watcher
+  // TODO: options.preserve means non-pausable observer
   const preserve = options.preserve
 
   // task = maybePostcycleTask(task, phase)
@@ -173,7 +173,7 @@ export function setUpWatcher(
     enroll(_task) {
       const reaction = new Reaction(_task, phase)
       reaction.__DEV__fn = task.__DEV__fn
-      subject.linkReaction(reaction)
+      substance.linkReaction(reaction)
       if (eager) {
         scheduleEagerReaction(_task, phase)
       }
@@ -200,11 +200,11 @@ export function scheduleEagerReaction(task: Task, phase: Phase) {
 
 
 
-export function InertWatcher() {
+export function InertObserver() {
   function noOp() {
     return false;
   }
-  return { // inert watch subjects
+  return { // inert observe substances
     stop: noOp,
     pause: noOp,
     resume: noOp,
@@ -217,20 +217,20 @@ export function InertWatcher() {
 
 
 /**
- * Optimized barebones ion-only watch function. links reaction to atoms and flask. No async context used.
+ * Optimized barebones ion-only observe function. links reaction to atoms and flask. No async context used.
  * @param ion 
  * @param render 
  * @param eager 
  * @returns 
  */
 export function trackForRender<T>(ion: Ion<T>, render: (state: { current: T, previous: T, flask: Flask, eagerRun: boolean }) => void, flask: Flask = getActiveFlask(), eager: boolean = false) {
-  // watch(ion, (e)=>render({current: e.current, previous: e.previous, flask: getActiveFlask()}), {phase: PRELUDE, eager})
+  // observe(ion, (e)=>render({current: e.current, previous: e.previous, flask: getActiveFlask()}), {phase: PRELUDE, eager})
   // return;
-  const subject = new IonSubject(() => toValue(ion())) // toValue in case of mutable ion getter
+  const substance = new IonSubstance(() => toValue(ion())) // toValue in case of mutable ion getter
 
-  let prevState = subject.getState()
+  let prevState = substance.getState()
 
-  if (!subject.reactive && !eager) {
+  if (!substance.reactive && !eager) {
     return;
   }
 
@@ -249,7 +249,7 @@ export function trackForRender<T>(ion: Ion<T>, render: (state: { current: T, pre
   let eagerRun = eager;
 
   function _render() {
-    const newState = subject.getState()
+    const newState = substance.getState()
     render({ current: newState, previous: prevState, flask, eagerRun })
     eagerRun = false;
     prevState = newState;
@@ -259,7 +259,7 @@ export function trackForRender<T>(ion: Ion<T>, render: (state: { current: T, pre
     scheduleEagerReaction(_render, PRELUDE)
   }
 
-  subject.linkReaction(reaction)
+  substance.linkReaction(reaction)
 
   flask?.onDiscard(/* listener.stop */() => {
     reaction.destroy()

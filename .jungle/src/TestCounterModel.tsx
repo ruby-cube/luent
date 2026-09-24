@@ -1,5 +1,5 @@
 import { component, template } from "luent"
-import { ionic, ion, Ionic, watch } from "@luent/quarky"
+import { ionic, ion, Ionic, observe } from "@luent/quarky"
 
 // TODO:
 // [x] private this access in methods and typing
@@ -40,7 +40,7 @@ export function TestMutableCounter() {
       // }
    })
 
-   // watch(count, () => {
+   // observe(count, () => {
    //    // console.log('&&&& count model changed', count.value)
    // })
 

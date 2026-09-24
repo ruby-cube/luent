@@ -3,7 +3,7 @@ import { isFunction, isObject, normalizeToArray } from "@luent/utils";
 import { atAttach, beforeDetach, atRemount, atDetach, atDemount, atUnmount } from "../flask/flask-hooks";
 import { mountDOMNodes, setUpNodeVine, removeDOMNodes, processJSXOutput, JSXNode, VineNode } from "../node/VineNode";
 import { getFlask } from "@luent/flask";
-import { queueInternalRender, queueRender } from "@luent/quarky";
+import { queueInternalRender, awaitRender } from "@luent/quarky";
 import { AnyObject } from "@luent/types";
 import { setUpElement } from "../element/setUpElement";
 

@@ -2,9 +2,9 @@ import { isFunction, isObject, toError } from "@luent/utils";
 import { AsyncState, getActiveFlask } from "@luent/flask";
 import { addToSuspense, SuspenseIon } from "./Suspense";
 import { Ion, MutableIon } from "../ion/Ion";
-import { watch } from "../reactivity/Watcher";
+import { observe } from "../reactivity/Observer";
 import { AsyncNode } from "./ooo";
-import { PRELUDE } from "../reactivity/RenderCycle";
+import { PRELUDE, SYNC } from "../reactivity/RenderCycle";
 import { createAtomicIon } from "../ion/AtomicIon";
 import { createMemoizedDerivation } from "../ion/DerivationIon";
 
@@ -58,7 +58,7 @@ export function isAsyncIon(value: any): value is AsyncIon<any> {
 }
 
 // RemoteIon({
-//    watch: $a,
+//    observe: $a,
 //    fetch: a => new Promise<number>((resolve, reject) => {
 //       setTimeout(() => {
 //          resolve(a * b);
@@ -135,7 +135,6 @@ export function toPromise(awaited: any) {
 
 type AsyncIonOptions<T = any, U = any> = {
   '-as'?: (value: T) => U,
-  '-awaited'?: true,
   '-suspend'?: SuspenseIon,
   '-debounced'?: number
 }
@@ -212,8 +211,7 @@ export function AsyncIon<
   const $promise = createAtomicIon(new Promise((res, rej) => { resolve = res; reject = rej }) as null | Promise<T>)
   pendingStart = performance.now()
   const suspense = options?.['-suspend']
-  // const awaited = options?.['-awaited']
-  if (/* !awaited &&  */!suspense) {
+  if (!suspense) {
     $promise.value!.catch(err => {
       if (err === 'cancelled') return;
       else throw err
@@ -319,8 +317,8 @@ export function AsyncIon<
   // let timeout: NodeJS.Timeout | undefined;
   // let timeoutResolve: NodeJS.Timeout | undefined;
 
-  // TODO: optimization: handle fetch as promise outside of watch
-  watch(fetch instanceof Promise ? () => fetch : fetch, ({ current: output }) => {
+  // TODO: optimization: handle fetch as promise outside of observe
+  observe(fetch instanceof Promise ? () => fetch : fetch, ({ current: output }) => {
     const maybePromise = toPromise(output)
     if (maybePromise === pendingPromise) {
       return;
@@ -393,11 +391,13 @@ export function AsyncIon<
           if (suspense?.() && pendingState === undefined) {
             suspense()?.then(() => {
               // instantUpdate(() => {
+                console.log('$$$ update ion: suspense.then')
               $ion.value = value
               // })
             })
           }
           else {
+            console.log('$$$ update ion', value)
             $ion.value = value
           }
 
@@ -449,6 +449,7 @@ export function AsyncIon<
       }
       $error.value = null
       $promise.value = null
+      console.log('$$$ update ion: output')
       $ion.value = output
     }
   }, { phase: PRELUDE, eager: true })

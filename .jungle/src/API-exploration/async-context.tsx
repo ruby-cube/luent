@@ -17,7 +17,7 @@ function App(input : FromTag()) {
       // thisScene atEnd  (flask)
    })
 
-   watch($count, () => {
+   observe($count, () => {
       // thisScene atEnd end
    })
 

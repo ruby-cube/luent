@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, template, For, If, Else } from "luent"
-import { watch, ion, ionicTickTask, ionize, Ionized, ionic } from "@luent/quarky"
+import { observe, ion, ionicTickTask, ionize, Ionized, ionic } from "@luent/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/x_RenderCycle"
 
 interface Todo {

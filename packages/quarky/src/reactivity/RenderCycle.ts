@@ -339,62 +339,62 @@ export function getCurrentPhase() {
 }
 
 
-// class PhasePromise implements Promise<void> {
-//   get [Symbol.toStringTag]() {
-//     return "PhasePromise";
-//   }
+class PhasePromise implements Promise<void> {
+  get [Symbol.toStringTag]() {
+    return "PhasePromise";
+  }
 
-//   constructor(private schedule: (task: Task) => void) { }
+  constructor(private schedule: (task: Task) => void) { }
 
-//   then<TResult1 = void, TResult2 = never>(
-//     onfulfilled?: ((value: void) => TResult1 | PromiseLike<TResult1>) | null,
-//     onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null,
-//   ): Promise<TResult1 | TResult2> {
-//     return new Promise<TResult1 | TResult2>((resolve, reject) => {
-//       const handleRejected = (reason: any) => {
-//         if (!onrejected) {
-//           reject(reason)
-//           return;
-//         }
-//         Promise.resolve(onrejected(reason)).then(resolve, reject)
-//       }
+  then<TResult1 = void, TResult2 = never>(
+    onfulfilled?: ((value: void) => TResult1 | PromiseLike<TResult1>) | null,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null,
+  ): Promise<TResult1 | TResult2> {
+    return new Promise<TResult1 | TResult2>((resolve, reject) => {
+      const handleRejected = (reason: any) => {
+        if (!onrejected) {
+          reject(reason)
+          return;
+        }
+        Promise.resolve(onrejected(reason)).then(resolve, reject)
+      }
 
-//       try {
-//         this.schedule(() => {
-//           try {
-//             Promise.resolve(onfulfilled ? onfulfilled(undefined) : (undefined as TResult1)).then(resolve, handleRejected)
-//           }
-//           catch (err) {
-//             handleRejected(err)
-//           }
-//         })
-//       }
-//       catch (err) {
-//         handleRejected(err)
-//       }
-//     })
-//   }
+      try {
+        this.schedule(() => {
+          try {
+            Promise.resolve(onfulfilled ? onfulfilled(undefined) : (undefined as TResult1)).then(resolve, handleRejected)
+          }
+          catch (err) {
+            handleRejected(err)
+          }
+        })
+      }
+      catch (err) {
+        handleRejected(err)
+      }
+    })
+  }
 
-//   catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null): Promise<void | TResult> {
-//     return this.then<void, TResult>(undefined, onrejected)
-//   }
+  catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null): Promise<void | TResult> {
+    return this.then<void, TResult>(undefined, onrejected)
+  }
 
-//   finally(onfinally?: (() => void) | null): Promise<void> {
-//     const runFinally = () => Promise.resolve(onfinally?.()).then(() => undefined)
+  finally(onfinally?: (() => void) | null): Promise<void> {
+    const runFinally = () => Promise.resolve(onfinally?.()).then(() => undefined)
 
-//     return this.then<void, never>(
-//       () => runFinally(),
-//       (reason) => runFinally().then(() => {
-//         throw reason
-//       }),
-//     )
-//   }
-// }
+    return this.then<void, never>(
+      () => runFinally(),
+      (reason) => runFinally().then(() => {
+        throw reason
+      }),
+    )
+  }
+}
 
 
 // export function $prelude() {
 //   return _prelude ?? (_prelude = new Promise<void>(resolve => {
-//     queuePrelude(() => {
+//     awaitPrelude(() => {
 //       const prelude = _prelude
 //       _prelude = undefined
 //       resolve()
@@ -405,7 +405,7 @@ export function getCurrentPhase() {
 
 // export function $render() {
 //   return _render ?? (_render = new Promise<void>(resolve => {
-//     queueRender(() => {
+//     awaitRender(() => {
 //       const render = _render
 //       _render = undefined
 //       resolve()
@@ -416,7 +416,7 @@ export function getCurrentPhase() {
 
 // export function $layout() {
 //   return _layout ?? (_layout = new Promise<void>(resolve => {
-//     queueLayout(() => {
+//     awaitLayout(() => {
 //       const layout = _layout
 //       _layout = undefined
 //       resolve()
@@ -425,10 +425,10 @@ export function getCurrentPhase() {
 //   }))
 // }
 
-// export const prelude = new PhasePromise(queuePrelude)
-// export const render = new PhasePromise(queueRender)
-// export const layout = new PhasePromise(queueLayout)
-// export const tick = new PhasePromise(awaitTick)
+export const prelude = new PhasePromise(awaitPrelude)
+export const render = new PhasePromise(awaitRender)
+export const layout = new PhasePromise(awaitLayout)
+export const tick = new PhasePromise(awaitTick)
 
 
 
@@ -449,7 +449,7 @@ export function getCurrentPhase() {
 
 
 
-export function queuePrelude(task: Task) {
+ function awaitPrelude(task: Task) {
   $activeUpdate()?.cycle.scheduleTask(task, PRELUDE)
 }
 
@@ -457,15 +457,15 @@ export function queueInternalRender(task: Task) {
   $activeUpdate()?.cycle.scheduleTask(task, INTERNAL_RENDER)
 }
 
-export function queueRender(task: Task) {
+ function awaitRender(task: Task) {
   $activeUpdate()?.cycle.scheduleTask(task, RENDER)
 }
 
-export function queueLayout(task: Task) {
+ function awaitLayout(task: Task) {
   $activeUpdate()?.cycle.scheduleTask(task, LAYOUT)
 }
 
-export function awaitTick(task: Task) {
+ function awaitTick(task: Task) {
   const _task = $_wrap_with_context(task)
   requestAnimationFrame(() => {
     queueTask(_task)

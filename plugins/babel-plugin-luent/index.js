@@ -67,6 +67,7 @@ function isAsSeriesElement(node, seriesType) {
 function isAwaitSeriesElement(node, seriesType) {
    return t.isCallExpression(node) && (
       node.callee.name === 'Await'
+      || node.callee.name === 'Awaiting'
       || node.callee.name === 'Meanwhile'
       || node.callee.name === 'Twiddle'
       || node.callee.name === 'Catch' && seriesType === 'Await'
@@ -178,6 +179,10 @@ function transformJSXChildrenToArrayExpression(paths) {
                array.push(createAsSeries(series)) // TODO:
                break;
 
+            case 'Awaiting':
+               array.push(createAwaitSeries(series))
+               break;
+
             case 'Await':
                array.push(createAwaitSeries(series))
                break;
@@ -229,9 +234,9 @@ function transformJSXChildrenToArrayExpression(paths) {
          }
       }
       else if (t.isJSXExpressionContainer(node) && isAwaitSeriesElement(node.expression, seriesType)) {
-         if (node.expression.callee.name === 'Await') {
+         if (node.expression.callee.name === 'Await' || node.expression.callee.name === 'Awaiting') {
             closeSeries()
-            seriesType = 'Await'
+            seriesType = node.expression.callee.name
             series = [node.expression]
          }
          else if (node.expression.callee.name === 'Catch') {
@@ -384,6 +389,7 @@ const TemplateFunctions = {
    Else: transformTemplateArgToRenderFunction,
    Try: transformTemplateArgToRenderFunction,
    Await: transformTemplateArgToRenderFunction,
+   Awaiting: transformTemplateArgToRenderFunction,
    Meanwhile: transformTemplateArgToRenderFunction,
    For: transformTemplateArgToRenderFunction,
    Portal: transformTemplateArgToRenderFunction,

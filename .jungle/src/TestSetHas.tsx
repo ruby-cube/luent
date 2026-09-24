@@ -1,5 +1,5 @@
 import { component, template } from "luent";
-import { ionize, watch } from "@luent/quarky";
+import { ionize, observe } from "@luent/quarky";
 
 export function TestSetHas() {
    const mySet = ionize(new Set([0, 1, 2]))
@@ -12,7 +12,7 @@ export function TestSetHas() {
       mySet.add(0)
    }
 
-   watch((mySet.has(0)), ({ current, previous }) => {
+   observe((mySet.has(0)), ({ current, previous }) => {
       console.log('mySet changed', current, previous)
    })
 

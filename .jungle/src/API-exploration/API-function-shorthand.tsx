@@ -1,5 +1,5 @@
 import { component, template, FromTag } from "luent"
-import { ionic, Ion, Ionic, watch } from "@luent/quarky"
+import { ionic, Ion, Ionic, observe } from "@luent/quarky"
 
 // absorbed ions
 // get something 
@@ -75,14 +75,14 @@ fetchUser($ => $userID() + 0)
 
 // fetchUser($(o => $userID() + 0))
 
-// watch($(o => $userID() + 0))
+// observe($(o => $userID() + 0))
 
 //@ts-expect-error
-watch(() => $userID() + 0)
+observe(() => $userID() + 0)
 
 // WINNER
 //@ts-expect-error
-watch($ => $userID() + 0)
+observe($ => $userID() + 0)
 
 
 function fetchUser(id: Ion<string>) {

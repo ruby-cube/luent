@@ -117,24 +117,24 @@ function asIon(
 
    if (isFunction(initialState)) {
       if (setup && '-mutable' in setup) {
-         const watch = setup['-track']
+         const observe = setup['-track']
          delete setup['-mutable']
          delete setup['-track']
-         return createHybridIon({ derive: initialState, watch }, setup)
+         return createHybridIon({ derive: initialState, observe }, setup)
       }
       return createMemoizedDerivation(<Derivation>initialState, setup)
    }
 
    if (setup && '-derive' in setup) {
       const derive = setup['-derive']
-      const watch = setup['-track']
+      const observe = setup['-track']
       delete setup['-derive']
       delete setup['-track']
-      return createHybridIon({ derive, initial: initialState, watch }, setup)
+      return createHybridIon({ derive, initial: initialState, observe }, setup)
    }
    if (setup && '-fetch' in setup) {
       const fetch = setup['-fetch']
-      const watch = setup['-track'] // TODO:
+      const observe = setup['-track'] // TODO:
       delete setup['-fetch']
       delete setup['-track']
       return AsyncIon(initialState, fetch, setup)

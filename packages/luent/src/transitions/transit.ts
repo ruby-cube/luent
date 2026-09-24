@@ -1,4 +1,4 @@
-import { getActiveUpdate, queueLayout, queueRender, queueTask, toValue } from "@luent/quarky";
+import { getActiveUpdate, awaitLayout, awaitRender, queueTask, toValue } from "@luent/quarky";
 import { toClassNames } from "./transitions";
 import { atListChanged } from "../iteratives/For";
 import { MaybeIon } from "../component/bindings-types";
@@ -8,7 +8,7 @@ import { atAttach, beforeDetach } from "../flask/flask-hooks";
 export function setUpPositionTransition(node: HTMLElement, transitionClasses: MaybeIon<string>) {
   atListChanged(() => {
     const first = node.getBoundingClientRect()
-    queueRender(() => {
+    awaitRender(() => {
       const last = node.getBoundingClientRect()
       startTransitionItem(node, first, last, toClassNames(toValue(transitionClasses)))
     })
@@ -28,9 +28,9 @@ export function startTransitionItem(node: HTMLElement, first: DOMRect, last: DOM
   node.style.setProperty('transform', `translate3d(${deltaX}px, ${deltaY}px, 0px)`)
 
   // Force style flush before enabling transitions back. (required by Safari)
-  queueLayout(() => {
+  awaitLayout(() => {
     node.getBoundingClientRect()
-    queueRender(() => {
+    awaitRender(() => {
       node.style.removeProperty('transition')
     })
   })

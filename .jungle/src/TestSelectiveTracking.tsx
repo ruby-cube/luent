@@ -1,5 +1,5 @@
 import { component, template } from "luent";
-import { DerivedIon, ion, ionic, ionize, watch, watchEffect } from "@luent/quarky";
+import { DerivedIon, ion, ionic, ionize, observe, watchEffect } from "@luent/quarky";
 
 export function TestSelectiveTracking() {
 
@@ -57,7 +57,7 @@ export function TestSelectiveTracking() {
 
     const $frogName = asPion($frog, 'name')
 
-    watch($frogName, (name) => {
+    observe($frogName, (name) => {
         console.log('frog name changed', name)
     })
 

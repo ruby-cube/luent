@@ -1,9 +1,9 @@
 import { component, template } from "luent";
-import { ion, SYNC, watch } from "@luent/quarky";
+import { ion, SYNC, observe } from "@luent/quarky";
 
 export function TestSyncEffects() {
    const $count = ion(0)
-   watch($count, () => {
+   observe($count, () => {
       console.log('count', $count())
    }, { phase: SYNC })
 

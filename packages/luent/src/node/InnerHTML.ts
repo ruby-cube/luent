@@ -1,4 +1,4 @@
-import { __DEV__checkIfTracked, Ion, toValue, isGetter, trackForRender, queueRender, RUN_EAGERLY, queueInternalRender } from "@luent/quarky";
+import { __DEV__checkIfTracked, Ion, toValue, isGetter, trackForRender, awaitRender, RUN_EAGERLY, queueInternalRender } from "@luent/quarky";
 import { MaybeIon } from "../component/bindings-types";
 import { DOMParent } from "./VineNode";
 import { getFlask } from "@luent/flask";

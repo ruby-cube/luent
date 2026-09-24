@@ -59,7 +59,7 @@ export function asTrackedAtom(watchable: Atom) {
 
 
 //    /**
-//      * To be called by watch() when initializing watcher
+//      * To be called by observe() when initializing observer
 //      * @param reaction 
 //      */
 //    link(reaction: Reaction) {
@@ -165,7 +165,7 @@ export class TrackedAtom {
       return new Reactions(phase)
    }
    /**
-     * To be called by watch() when initializing watcher
+     * To be called by observe() when initializing observer
      * @param reaction 
      */
    link(reaction: Reaction) {

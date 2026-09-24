@@ -1,5 +1,5 @@
 import { Flask, getFlask } from "@luent/flask";
-import { isGetter, queueRender, RUN_EAGERLY, toValue, trackForRender, queueInternalRender } from "@luent/quarky";
+import { isGetter, awaitRender, RUN_EAGERLY, toValue, trackForRender, queueInternalRender } from "@luent/quarky";
 import { MaybeIon } from "../component/bindings-types";
 import { AnyObject } from "@luent/types";
 

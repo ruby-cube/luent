@@ -1,4 +1,4 @@
-import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, queueLayout, listen, awaitTick, queueTask, awaiting, queueRender } from "luent";
+import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, awaitLayout, listen, awaitTick, queueTask, awaiting, awaitRender } from "luent";
 import { codeHtml, trusted } from "./code-utils";
 import { TOOLTIP_CONFIG, TooltipKit } from "@luent/luent-ui";
 import { HoverInfo } from "./HoverInfo";
@@ -87,10 +87,10 @@ export function Code(setup: FromTag<{
 
           function updateStickyPlacement() {
             if (!stickyButton || !stickyContainer) return
-            queueLayout(() => {
+            awaitLayout(() => {
               const containerRect = stickyContainer.getBoundingClientRect()
               const rightOffset = Math.max(0, window.innerWidth - containerRect.right + 8)
-              queueRender(() => {
+              awaitRender(() => {
                 stickyButton.style.right = `${rightOffset}px`
               })
             })
@@ -123,14 +123,14 @@ export function Code(setup: FromTag<{
           }
 
           function syncStickyVisibility() {
-            queueLayout(() => {
+            awaitLayout(() => {
               const navRect = nav.getBoundingClientRect()
               const containerRect = stickyContainer.getBoundingClientRect()
               const topOffset = stickyTopOffset()
               const shouldShow = navRect.bottom <= topOffset
                 && containerRect.bottom > topOffset + CONTAINER_BOTTOM_OFFSET_PX
 
-              queueRender(() => {
+              awaitRender(() => {
                 updateStickyVisibility(shouldShow)
               })
             })
@@ -272,8 +272,7 @@ function CodeBlock(setup: FromTag<{ tab: CodeTab, highlight: (code: string, lang
     '-fetch': async () => {
       const highlighted = await highlight(tab.code, tab.lang ?? tab.name)
       return markHover(highlighted, tab.hover)
-    },
-    '-awaited': true
+    }
   })
   const $container = NodeRef('div') as unknown as NodeRef<HTMLDivElement>
 
@@ -344,7 +343,7 @@ export function CodeToggle(setup: FromTag<{
       return;
     }
     if (mainWidth === 0) {
-      queueLayout(() => {
+      awaitLayout(() => {
         mainWidth = $mainNode()!.offsetWidth;
       })
     }

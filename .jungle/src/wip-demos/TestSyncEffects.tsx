@@ -1,4 +1,4 @@
-import { ion, SYNC, watch } from "@luent/quarky";
+import { ion, SYNC, observe } from "@luent/quarky";
 import { component, template } from "luent";
 
 export function TestSyncEffects() {
@@ -14,21 +14,21 @@ export function TestSyncEffects() {
 
    const $count2 = ion(0)
 
-   watch($count, () => {
+   observe($count, () => {
       console.log('$$$ ---effect')
-      watch($count, () => {
+      observe($count, () => {
          console.log('$$$ NESTED')
       }, { phase: SYNC })
 
    }, { phase: SYNC })
 
-   watch($count, () => {
+   observe($count, () => {
       console.log('$$$ --start effect increment')
       $count2.value = $count() + 1;
       console.log('--end effect increment')
    }, { phase: SYNC })
 
-   // watch($count2, () => {
+   // observe($count2, () => {
    //    console.log('$$$ --start effect2 increment')
    //    $count.value = $count2() + 1;
    //    console.log('--end effect2 increment')

@@ -43,7 +43,7 @@ describe('searchOpeningBrace', () => {
    })
 
    it('returns undefined when closing index is not a closing brace', () => {
-      const code = 'watch((count + 1)@())'
+      const code = 'observe((count + 1)@())'
       const closing = code.lastIndexOf(')')
       expect(searchOpeningBrace(code, closing)).toBeUndefined()
    })

@@ -6,7 +6,7 @@ import { component, template, POSTLUDE, PRELUDE } from "luent"
 import { ion, ionize } from "@luent/quarky"
 import { isFunction } from "@luent/utils";
 import { time } from "console";
-import { watch } from "fs";
+import { observe } from "fs";
 import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6"
 
 // [ ] ions with methods
@@ -79,19 +79,19 @@ const $doubleCount = ion(() => $count() * 2, {
 // TODO:
 // writable derivations
 
-// const $shippingMethod = Ion.watch($shippingOptions, (options, prev) => options.find(opt => opt.id === prev.id) ?? options[0])
+// const $shippingMethod = Ion.observe($shippingOptions, (options, prev) => options.find(opt => opt.id === prev.id) ?? options[0])
 
-// const $shippingMethod = Ion.watch($shippingOptions, options => options[0])
+// const $shippingMethod = Ion.observe($shippingOptions, options => options[0])
 
 // const $shippingMethod = Ion.writable(() => $shippingOptions()[0])
 
 
-// const $quantity = Ion.watch($selectedProduct, () => 1)
+// const $quantity = Ion.observe($selectedProduct, () => 1)
 
 
 // const $quantity = HybridIon({
 //    initial: null,
-//    watch: $selectedProduct,
+//    observe: $selectedProduct,
 //    derive: () => 1
 // })
 
@@ -103,7 +103,7 @@ const $shippingMethod = HybridIon(() => $shippingOptions()[0])
 // (1)
 const $quantity = ion(1, {
    '@init'() {
-      watch($selectedproduct, () => { this.value = 1 })
+      observe($selectedproduct, () => { this.value = 1 })
    },
    increment() {
       this.value++
@@ -165,15 +165,15 @@ const markLiked = AsyncOp((liked) => {
 
 // cases where you want to start with an initial value
 // const $quantity = ion(null, {
-//    '@init'({ watch }) { watch($selectedProduct, () => 1) }
+//    '@init'({ observe }) { observe($selectedProduct, () => 1) }
 // })
 
 // const $quantity = ion(null, {
-//    watch: [$selectedProduct, () => 1]
+//    observe: [$selectedProduct, () => 1]
 // })
 
 // const $quantity = ion(null, {
-//    watch: $selectedProduct,
+//    observe: $selectedProduct,
 //    derive: () => 1
 // })
 
@@ -182,11 +182,11 @@ const markLiked = AsyncOp((liked) => {
 // })
 
 // const $quantity = ion(null, {
-//    '@init'() { watch($selectedProduct, sync(() => this.value = 1)) }
+//    '@init'() { observe($selectedProduct, sync(() => this.value = 1)) }
 // })
 
 // const $shippingMethod = ion(null, {
-//    '@init'({ watch }) { watch($shippingOptions, ({ current }) => current[0]) }
+//    '@init'({ observe }) { observe($shippingOptions, ({ current }) => current[0]) }
 // })
 
 // const $shippingMethod = ion(null, {
@@ -198,7 +198,7 @@ const markLiked = AsyncOp((liked) => {
 // })
 
 // const $shippingMethod = ion(null, {
-//    '@init'({ watch }) { watch($shippingOptions, ({ current, previous }) => options.find(opt => opt.id === prev.id) ?? options[0]) }
+//    '@init'({ observe }) { observe($shippingOptions, ({ current, previous }) => options.find(opt => opt.id === prev.id) ?? options[0]) }
 // })
 
 
@@ -572,12 +572,12 @@ function FruitBasket({ $selectedFruit, fruitStore }) {
 
 // EFFECTS
 
-// watch ions
+// observe ions
 
 export function Counter() {
    let $count = ion(0)
 
-   watch(($count), () => {
+   observe(($count), () => {
       console.log('count is now', $count())
    })
 
@@ -592,13 +592,13 @@ export function Counter() {
 }
 
 // state change event object
-watch(($count), ({ current, previous }) => {
+observe(($count), ({ current, previous }) => {
    console.log('count is now', current)
    console.log('count was', previous)
 })
 
 // clean up hook
-watch(($count), () => {
+observe(($count), () => {
    const timeout = setTimeout(() => {
       console.log('timed out!')
    }, 1000)
@@ -613,24 +613,24 @@ ionicTickTask(() => {
 }) // default poster render
 
 // Effect Cycle Phases
-watch(($count), ({ current, previous }) => {
+observe(($count), ({ current, previous }) => {
    console.log('count:', current)
 }, { phase: SYNC })
 
-watch($count, ({ current, previous }) => {
+observe($count, ({ current, previous }) => {
    doStateChanges(current)
 }, { phase: PRELUDE })
 
-watch($count, ({ current, previous }) => {
+observe($count, ({ current, previous }) => {
    manipulateDOM(current)
 }, { phase: RENDER })
 
-watch($count, ({ current, previous }) => {
+observe($count, ({ current, previous }) => {
    updateDatabase(current)
 }, { phase: POSTLUDE })
 
 
-watch($count, () => {
+observe($count, () => {
    console.log('pre-render phase')
 
    await __render___()
@@ -676,7 +676,7 @@ $$: $username = 'Bubby';
 
 player.name === 'Bubby' // true
 
-watch((player.name), () => {
+observe((player.name), () => {
    console.log('player name changed!')
 })
 

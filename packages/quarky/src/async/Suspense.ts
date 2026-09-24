@@ -1,5 +1,5 @@
 import { getActiveFlask } from "@luent/flask"
-import { watch } from "../reactivity/Watcher"
+import { observe } from "../reactivity/Observer"
 import { Ion } from "../ion/Ion"
 import { AsyncQuark } from "./AsyncIon"
 import { RawJSXNode } from "luent"
@@ -103,7 +103,7 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
                quarks.delete(quark)
             })
 
-            watch($promise, ({ current: promise, previous, eager }) => {
+            observe($promise, ({ current: promise, previous, eager }) => {
                if (!eager && promise === previous) {
                   return;
                }

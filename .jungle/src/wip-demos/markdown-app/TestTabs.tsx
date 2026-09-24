@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { component, ContextKey, template, For, fromContext, FromTag, If, NodeRef } from "luent";
 import { MarkdownApp } from "./markdown-app";
-import { Ion, ionize, Ionized, watch, ion } from "@luent/quarky";
+import { Ion, ionize, Ionized, observe, ion } from "@luent/quarky";
 
 export function TabApp() {
 
@@ -99,7 +99,7 @@ function asFiles(data: FileData[]) {
 //       }
 //    })
 
-//    watch(files, ({ collectionChanges }) => {
+//    observe(files, ({ collectionChanges }) => {
 //       // TODO: update database
 //    })
 
@@ -230,12 +230,12 @@ function App(input : {
       default: 'home' // key | render function | undefined (default)
    })
 
-   watch($activeFile, ({ current: file }) => {
+   observe($activeFile, ({ current: file }) => {
       if (file) MainView.mount('file', file.id)
       else MainView.mount('home')
    })
 
-   // watch(openedFiles, ({ collectionChange }) => {
+   // observe(openedFiles, ({ collectionChange }) => {
    //    const { removedItems, newItems, movedItems } = collectionChange // TODO: implement with getters for lazy computation
    //    if (removedItems)
    //       for (const file of removedItems) {

@@ -120,7 +120,7 @@ export class Reaction {
 //    }
 
 //    /**
-//    * To be called by watch() when initializing watcher
+//    * To be called by observe() when initializing observer
 //    * @param reaction 
 //    */
 //    queue(reaction: Reaction) {

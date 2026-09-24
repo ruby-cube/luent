@@ -1,5 +1,5 @@
 import { component, beforeDetach, template } from "luent";
-import { ionicTickTask, Ion, Ionized, SYNC, watch } from "@luent/quarky";
+import { ionicTickTask, Ion, Ionized, SYNC, observe } from "@luent/quarky";
 
 export function DateApp() {
 

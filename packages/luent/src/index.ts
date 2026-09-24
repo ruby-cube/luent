@@ -3,14 +3,14 @@ import type { JSX } from './jsx-runtime'
 export {
   ion,
   ionic,
-  watch as track,
+  observe,
   ionize,
 
-  ionicTick,
-  ionicLayout,
-  ionicPrelude,
-  ionicRender,
-  runIonicTask as ionicCall,
+  awaitTick,
+  awaitLayout,
+  awaitPrelude,
+  awaitRender,
+  runIonicTask as observedCall,
 
   Finitron,
 
@@ -41,12 +41,8 @@ export {
   toIon,
   toValue,
 
-  queueTask,
+  queueTask
 
-  queueLayout,
-  queuePrelude,
-  queueRender,
-  awaitTick
 } from '@luent/quarky'
 export { isMutableIon } from './element/mutables'
 export type { Nested, Ion, Ionic, MutableIon } from '@luent/quarky'
@@ -107,6 +103,7 @@ export {
 } from './context/ContextKey'
 export { listen } from './events/listen'
 export { Await, Meanwhile, Twiddle } from './boundaries/Await'
+export { Awaiting } from './boundaries/Awaiting'
 export { Portal } from './boundaries/Portal'
 export { For } from './iteratives/For'
 export { Thru } from './iteratives/Thru'
@@ -144,7 +141,6 @@ export type {
   RawJSXNode,
   TagType,
 } from './node/makeJSXNode'
-export type { RenderTag } from './component/Component'
 export type { ContextEntryKey } from './context/ContextKey'
 export type { FromTag, RenderTag, WithRef } from './component/bindings-types'
 export type { TagClass } from './element/styles'

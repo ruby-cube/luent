@@ -97,7 +97,7 @@ export function TestListTransit() {
 //   const first = sent.get(id)
 //   if (first) {
 //     const last = node.getBoundingClientRect()
-//     queueRender(() => {
+//     awaitRender(() => {
 //       const deltaY = first.top - last.top
 //       const deltaX = first.left - last.left
 //       if (deltaY || deltaX) {

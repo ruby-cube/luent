@@ -65,7 +65,7 @@ const { onCreated, fromContext } = _this;
 
 const dog = _this.fromGround(_dog_)
 
-watch($list, async () => {
+observe($list, async () => {
 
     await fetch()
 
@@ -75,13 +75,13 @@ watch($list, async () => {
 // what about preserve??, activate and unmount?
 // derived ions
 // cases: 
-// - you want a watcher or listener to outlive its context (not needed if initialized in handler or an effect)
+// - you want a observer or listener to outlive its context (not needed if initialized in handler or an effect)
 // - listeners or watchers initialized in a handler or an effect
 
 
 function reClick(_this: ThisComponent) {
 
-    watch($frog, () => {
+    observe($frog, () => {
 
     }, { until: _this.onDiscard }) // manual cleanup //include info about preservation on _this.onDiscard
 }
@@ -96,13 +96,13 @@ listen(document, 'click', () => {
 }) //auto clean up
 
 // opt out of auto-cleanup
-const watcher = watch($list, () => {
+const observer = observe($list, () => {
 
 }, { outlive: true })
 
 // batch opt out
 function useMouse(flask) {
-    watch($list, () => {
+    observe($list, () => {
 
     })
 

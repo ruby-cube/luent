@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, template, NodeRef } from "luent"
-import { AnyIon, DerivedIon, AtomicIon, ion, ionize, watchEffect, watch} from "@luent/quarky"
+import { AnyIon, DerivedIon, AtomicIon, ion, ionize, watchEffect, observe} from "@luent/quarky"
 import { or, $setup, is, isDefined, isAny, not } from "../../../packagesluent/src/component/X_$setup"
 import { AnyObject } from "@luent/types"
 import { toIonicProps } from "../../../packagesluent/src/component/X_normalizeProps"
@@ -307,8 +307,8 @@ export function TestCleanupScheduler({
    //     $frog.setName((event.target as HTMLInputElement).value)
    // }
 
-   function initWatcher() {
-      watch($frog, () => {
+   function initObserver() {
+      observe($frog, () => {
          console.log('frog changed name', $frog.name)
       }, { until: [$stopButton()!, 'click'] })
    }
@@ -441,7 +441,7 @@ export function TestCleanupScheduler({
          <input value={$frogName} />
 
          <button ref={$stopButton}>stop</button>
-         <button on:click={initWatcher}>start</button>
+         <button on:click={initObserver}>start</button>
          <div
             width={2}
             style={['width: 2px', {

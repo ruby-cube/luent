@@ -415,7 +415,7 @@ export function TestCounterModel() {
 
    const $doubleCount = ion(() => counter.count * 2)
 
-   // watch(counter, ({ state }) => {
+   // observe(counter, ({ state }) => {
    //    console.log('changed', state)
    // }, { eager: true, phase: RENDER })
 

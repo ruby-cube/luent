@@ -1,5 +1,5 @@
 import { component, template, For, If, listen, NodeRef, Portal, Style } from "luent"
-import { Finitron, ion, watch } from "@luent/quarky"
+import { Finitron, ion, observe } from "@luent/quarky"
 
 //FIX: 
 // [] conditional rendering with <o--portal>
@@ -109,7 +109,7 @@ function IfContextMenuB() {
       $open.value = false
    }
 
-   watch($open, ({ current: open }) => {
+   observe($open, ({ current: open }) => {
       if (!open) return
       let menuClicked = false;
       listen(document, 'click', e => menuClicked || close(), { once: true })

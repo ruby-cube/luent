@@ -1,5 +1,5 @@
 import { component, template } from "luent";
-import { ion, watch } from "@luent/quarky";
+import { ion, observe } from "@luent/quarky";
 
 export function TestEffectCycle() {
    const $count = ion(0, {
@@ -13,29 +13,29 @@ export function TestEffectCycle() {
 
    const $doubleCount = ion(() =>$count() * 2)
 
-   watch($doubleCount, () => {
-      console.log("&% watch $doubleCount 0")
+   observe($doubleCount, () => {
+      console.log("&% observe $doubleCount 0")
    })
 
-   watch($doubleCount, ()=>{
+   observe($doubleCount, ()=>{
       console.log("&% self-removing 1")
    }, {once: true})
 
-   watch($doubleCount, ()=>{
+   observe($doubleCount, ()=>{
       console.log("&% self-removing 2")
    }, { once: true})
 
-   watch($doubleCount, () => {
-      console.log("&% watch $doubleCount 1")
+   observe($doubleCount, () => {
+      console.log("&% observe $doubleCount 1")
    }, {})
 
-   watch($doubleCount, () => {
-      console.log("&% watch $doubleCount 2")
+   observe($doubleCount, () => {
+      console.log("&% observe $doubleCount 2")
 
    },{})
 
-   watch($doubleCount, () => {
-      console.log("&% watch $doubleCount 3")
+   observe($doubleCount, () => {
+      console.log("&% observe $doubleCount 3")
 
    },{})
 

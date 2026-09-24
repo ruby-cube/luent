@@ -87,6 +87,9 @@ interface Ion<T> {
 Keep in mind, derivations are:
 
 - **side-effect free:** Derivation functions must not mutate state. Doing so will lead to unpredictable behavior.
+  ```nsx
+  get foo = ion(() => bar++) // ❌
+  ```
   ```tsx
   const $foo = ion(() => $bar.value++) // ❌
   ```
@@ -94,7 +97,7 @@ Keep in mind, derivations are:
 - **synchronously tracked:** Only reactive state that is accessed *synchronously* within a derivation can be tracked. If you need to track reactive state that is accessed asynchronously, use the `-fetch` option (see [Async Rendering](/guide/async-rendering)).
   <!-- ```tsx
   // example?
-  track()
+  observe()
   ``` -->
 - **potentially inert**: A compound ion is inert when its derivation does not access any reactive state. This allows component inputs to be normalized into compound ions regardless of whether the consumer passes static or reactive values.
   <!-- ```tsx
@@ -104,6 +107,10 @@ Keep in mind, derivations are:
 
 #### Deriving from previous state
 The `ion()` function passes the previous state to derivations, which can be used to derive the next state. 
+```ns
+get delta = ion(0)
+get total = ion((prev = 0) => prev + delta)
+```
 ```ts
 const $delta = ion(0)
 const $total = ion((prev = 0) => prev + $delta())
@@ -116,11 +123,22 @@ When the derivation is called for the first time, the previous state will be und
 By default, the `ion()` function memoizes derived state, recomputing it only when one of its dependencies changes. This avoids unnecessary recomputation across multiple reads and is typically the most efficient behavior. 
 
 To create an unmemoized compound ion, declare it as a simple arrow function expression.
+```ns
+get username = () => user.name
+```
 ```ts
 const $username = () => user.name
 ```
 
 If other `ion()` features are needed (to create, for example, a [settable compound ion]()), memoization may be disabled through the option flag `{ '-memoize': false }`.
+```ns
+get username = ion(() => user.name, { 
+  '-memoize': false,
+  '@set'(name: string) {
+    user.name = name
+  }
+})
+```
 ```ts
 const $username = ion(() => user.name, { 
   '-memoize': false,
@@ -136,6 +154,14 @@ const $username = ion(() => user.name, {
 ### Inline derivations
 Inline derivations are compound ions created directly within another expression. They are typically unmemoized, created in the form of a function expression. 
 
+```nsx
+<button 
+  on:click={increment} 
+  disabled={() => count > limit} // inline derivation
+>
+  +
+</button>
+```
 ```tsx
 <button 
   on:click={increment} 
@@ -145,7 +171,12 @@ Inline derivations are compound ions created directly within another expression.
 </button>
 ```
 ```tsx
-track(() => $count() > limit, () => {
+observe(() => count > limit, () => {
+  console.log('over the limit!')
+})
+```
+```tsx
+observe(() => $count() > limit, () => {
   console.log('over the limit!')
 })
 ```
@@ -224,7 +255,7 @@ Ions are typically [tracked](#tracking-ions) by the view. When the ion’s state
 ```
 ::: info Transpiled
 (simplified for demonstration purposes)
-```ts
+```js
 jsx('div', {
   Slot: () => [$count] // pass in the ion
 })
@@ -232,11 +263,11 @@ jsx('div', {
 :::
 ::: info Under the hood of `jsx()`
 (simplified for demonstration purposes)
-```ts
+```js
 const textNode = document.createTextNode(ion())
 
 /* updates text node whenever ion's state changes */
-track(ion, () => {
+observe(ion, () => {
   textNode.data = ion()
 })
 ```
@@ -260,7 +291,7 @@ An ion may be rendered statically by passing in its value rather than the ion it
 ```
 ::: info Transpiled
 (simplified for demonstration purposes)
-```ts
+```js
 jsx('div', {
   Slot: () => [$count()] // pass in the value
 })
@@ -268,7 +299,7 @@ jsx('div', {
 :::
 ::: info Under the hood of `jsx()`
 (simplified for demonstration purposes)
-```ts
+```js
 const textNode = document.createTextNode(value)
 ```
 :::
@@ -277,6 +308,16 @@ const textNode = document.createTextNode(value)
 ## Ion variants
 
 ### Ions with methods
+```nsx
+get count = ion(0, {
+  increment() {
+    count++
+  },
+  decrement() {
+    count--
+  }
+})
+```
 ```tsx
 const $count = ion(0, {
   increment() {
@@ -287,12 +328,28 @@ const $count = ion(0, {
   }
 })
 ```
+```nsx
+<button on:click={count@.increment}>+</button>
+```
 ```tsx
 <button on:click={$count.increment}>+</button>
 ```
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 
 ### Encapsulated ions
+```nsx
+get count = ion(0, {
+  '-capsule': true, // capsule flag
+  increment() {
+    count++
+  },
+  decrement() {
+    count--
+  }
+})
+
+count = 5 // TypeError: Property 'value' does not exist on type '() => number'.
+```
 ```tsx
 const $count = ion(0, {
   '-capsule': true, // capsule flag
@@ -306,6 +363,9 @@ const $count = ion(0, {
 
 $count.value = 5 // TypeError: Property 'value' does not exist on type '() => number'.
 ```
+```nsx
+<button on:click={() => count@.increment()}>+</button>
+```
 ```tsx
 <button on:click={() => $count.increment()}>+</button>
 ```
@@ -314,11 +374,17 @@ $count.value = 5 // TypeError: Property 'value' does not exist on type '() => nu
 ### Hybrid ions
 
 #### Mutable compound ions
+```nsx
+get state = ion(() => states[0], { '-mutable': true })
+```
 ```tsx
 const $state = ion(() => $states()[0], { '-mutable': true })
 ```
 
 #### Derivable atomic ions
+```tsx
+get state = ion('Oregon', { '-derive': () => states[0] })
+```
 ```tsx
 const $state = ion('Oregon', { '-derive': () => $states()[0] })
 ```
@@ -329,6 +395,16 @@ const $state = ion('Oregon', { '-derive': () => $states()[0] })
 See [Async Rendering](/guide/async-rendering)
 
 ## Ion hooks
+```nsx
+get count = ion(0, {
+  '@get'() {
+    console.log('count accessed!', count)
+  },
+  '@set'(value) {
+    console.log('count set!', value)
+  }
+})
+```
 ```tsx
 const $count = ion(0, {
   '@get'() {
@@ -341,6 +417,18 @@ const $count = ion(0, {
 ```
 
 ### Settable compound ions
+```nsx
+get first = ion('John')
+get last = ion('Doe')
+
+get fullname = ion(() => first + ' ' + last, {
+  '@set'(value) {
+    [first, last] = value.split(' ')
+  }
+})
+
+fullname = 'Jane Doe'
+```
 ```tsx
 const $first = ion('John')
 const $last = ion('Doe')
@@ -357,6 +445,14 @@ $fullname.value = 'Jane Doe'
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 
 ## Debugging Ions
+```nsx
+get count = ion(0, {
+  '@set'(value) {
+    debug.traceAsync('count', value)
+  }
+})
+```
+## Debugging Ions
 ```tsx
 const $count = ion(0, {
   '@set'(value) {
@@ -370,15 +466,25 @@ const $count = ion(0, {
 ## Tracking ions
 Ions are typically [tracked by the view](#rendering-reactively). They may also be manually tracked for state changes and linked to custom reactions—functions that will run whenever the tracked state changes.
 
-**Using `track()`**
+**Using `observe()`**
+```nsx
+observe(count@, () => {
+  console.log('Count:', count)
+})
+```
 ```tsx
-track($count, () => {
+observe($count, () => {
   console.log('Count:', $count())
 })
 ```
 By default, reactions passed to `track` run asynchronously to the state mutation after the view has been updated. For the in-depth guide on render cycle phases, see: [The Render Cycle](/guide/the-render-cycle)
 
 **Using an ionic task scheduler**
+```nsx
+ionicTick(() => {
+  console.log('over the limit!', count > limit)
+})
+```
 ```tsx
 ionicTick(() => {
   console.log('over the limit!', $count() > limit)
@@ -387,7 +493,7 @@ ionicTick(() => {
 :::details CODE SWITCH
 **React:** `useEffect()`
 
-**Vue:** `watch()`, `watchEffect()`
+**Vue:** `observe()`, `watchEffect()`
 
 **Svelte:** `$effect`
 
@@ -398,8 +504,13 @@ ionicTick(() => {
 
 ### Implicit dependency tracking
 Compound ions and ionic tasks are tracked through implicit dependency tracking of ionic reads (e.g. `$count()`):
+```nsx
+observe(() => count > limit, () => {
+  console.log('over the limit!')
+})
+```
 ```tsx
-track(() => $count() > limit, () => {
+observe(() => $count() > limit, () => {
   console.log('over the limit!')
 })
 ```

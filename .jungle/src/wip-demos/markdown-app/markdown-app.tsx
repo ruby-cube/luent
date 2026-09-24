@@ -53,7 +53,7 @@ export function MarkdownApp(
 
   const $doubleCount = ion(() => $count() * 2)
 
-  // NOTE: There's actually no reason to pause and resume this watcher since it is watching local state. 
+  // NOTE: There's actually no reason to pause and resume this observer since it is watching local state. 
   // Pausing and resuming is only helpful if state is shared across views
   // and state can be mutated outside of the hidden view
 

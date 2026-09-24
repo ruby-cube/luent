@@ -1,5 +1,5 @@
 import { Reaction } from "../reactivity/Reaction";
-import { FunctionSubject } from "../reactivity/Subject";
+import { FunctionSubstance } from "../reactivity/Substance";
 import { QUARK } from "../abstract/Quark";
 import { AnyObject } from "@luent/types";
 import { Traceable } from "../debug/Traceable";
@@ -11,7 +11,7 @@ import { Stateful } from "../abstract/Stateful";
 import { SYNC } from "../reactivity/RenderCycle";
 
 
-export class DerivationIonQuark extends FunctionSubject implements Stateful {
+export class DerivationIonQuark extends FunctionSubstance implements Stateful {
 
    constructor(
       fn: () => unknown,

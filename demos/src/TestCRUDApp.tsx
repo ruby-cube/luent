@@ -1,5 +1,5 @@
 import { component, template, For, Style, css } from "luent"
-import { ionic, ion, PRELUDE, watch } from "@luent/quarky"
+import { ionic, ion, PRELUDE, observe } from "@luent/quarky"
 
 // Adapted from Vue's CRUDApp demo
 
@@ -12,7 +12,7 @@ export function CRUDApp() {
    const $last = ion('')
    const $fullName = ion(() => `${$last()}, ${$first()}`)
 
-   watch($selected, ({ current }) => {
+   observe($selected, ({ current }) => {
       [$last.value, $first.value] = current.split(', ')
    }, { phase: PRELUDE })
 

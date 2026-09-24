@@ -47,7 +47,7 @@ function MessageForm(this: ThisView, {
 
    let timeoutID: number;
 
-   this.watch($text, () => {
+   this.observe($text, () => {
       if (timeoutID) clearTimeout(timeoutID);
 
       setTimeout(() => {
@@ -55,7 +55,7 @@ function MessageForm(this: ThisView, {
       }, 100)
    })
 
-   this.watch($text, async () => {
+   this.observe($text, async () => {
       const timeoutID = setTimeout(() => {
 
       })

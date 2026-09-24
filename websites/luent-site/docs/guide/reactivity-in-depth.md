@@ -96,7 +96,7 @@ function ionic(target) {
 Reactions are functions that run in reaction to the state changes of the ions being tracked.
 
 ```ts
-track($count, () => { // runs whenever count changes
+observe($count, () => { // runs whenever count changes
   console.log("count is", $count());
 });
 ```
@@ -108,7 +108,7 @@ Reactions are able to track nested ions through implicit dependency tracking of 
 ```ts
 const $doubled = ion(() => $count() * 2)
 
-track($doubled, () => {
+observe($doubled, () => {
   console.log("count x 2 is", $doubled());
 });
 ```
@@ -120,7 +120,7 @@ The signal is ultimately received by the tracker, which then links a reaction to
 
 
 ```tsx
-function track(target, reaction) {
+function observe(target, reaction) {
   typeof target === "function"
     ? trackSignals(target, reaction)
     : trackStructure(target, reaction);

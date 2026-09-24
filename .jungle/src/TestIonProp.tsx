@@ -1,5 +1,5 @@
 import { component, template } from "luent";
-import { ion, ionic, ionize, watch } from "@luent/quarky";
+import { ion, ionic, ionize, observe } from "@luent/quarky";
 
 
 export function TestIonProp() {
@@ -38,7 +38,7 @@ export function TestIonProp() {
         }
     })
 
-    watch($counter, ({mutations}) => {
+    observe($counter, ({mutations}) => {
         console.log('$counter mutated', mutations)
     })
 

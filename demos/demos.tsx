@@ -46,13 +46,14 @@ import { TestInnerHTML } from "./src/TestInnerHTML"
 import { Counter } from "./src/CounterApp"
 import { TestStylesBindings } from "./src/TestStylesBindings"
 import { twMerge } from "tailwind-merge"
-import './src/index.css'
+// import './src/index.css'
 import { TestRenderCycle } from "./src/TestRenderCycle"
 import { TestIfElseDisplayView } from "./src/TestIfElseDisplayView"
 import { TestNameEditor } from "./src/TestNameEditor"
 import { TestColorSort } from "./src/TestColorSort"
 import { TestStyleComments } from "./src/TestStyleComments"
 import { TestDynamicTag } from "./src/TestDynamicTag"
+import { TestTaskObserver } from "./src/TestTaskObserver"
 // import { DayView } from "./src/TimelineApp/Timeline"
 
 export function runDemo() {
@@ -66,7 +67,7 @@ export function runDemo() {
       {/* <DayView/> */}
       {/* <TestStyleComments/> */}
       {/* <TestColorSort></TestColorSort> */}
-      <TooltipDemo/>
+      <TestAsyncSelect/>
     </>
     // return <TestInnerHTML/>
   }, '#root')
