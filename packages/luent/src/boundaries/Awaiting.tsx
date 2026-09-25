@@ -12,7 +12,7 @@ export function Awaiting<T>(promise: Promise<T> | Ion<Promise<T> | null>, render
 
   const $loaded = ion(false as Promise<any> | false | undefined | null)
 
-  observe($suspense, ({previous}) => {
+  observe($suspense, ({ previous }) => {
     if ($suspense() === null) {
       $loaded.value = previous;
     }

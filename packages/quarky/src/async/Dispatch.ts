@@ -59,8 +59,8 @@ export function Dispatch<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V> |
 
    const quark = { $promise, $error, cancelIfFetching }
 
-   const suspense = options?.['-suspend']
-   if (suspense) addToSuspense(suspense, quark)
+  //  const suspense = options?.['-suspend']
+  //  if (suspense) addToSuspense(suspense, quark)
 
    function dispatchAction(...args: any[]) {
       cancelIfFetching()

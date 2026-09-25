@@ -104,10 +104,10 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 <!-- - `DOMNode()` <span class='doc-tag'>Experimental</span> to create a DOM node  -->
 
 ## Async rendering
-- `$Pending()` to create a promise ion that batches the promises of other fetched-state ions.
+- `$PendingBatch()` to create a promise ion that batches the promises of other fetched-state ions.
 - `$Fetched()` to create an ion with asynchronously updated state
 - `Dispatch()` to create async actions
-- `Lazy()` to create a lazy loaded component or render function
+- `LazyView()` to create a lazy loaded component or render function
 <!-- - `Lax()` to create async updates -->
 <!-- - `lax()` for async updates -->
 
@@ -120,6 +120,10 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 - `awaitRender` for DOM manipulation tasks
 - `awaitLayout` for DOM layout reading tasks
 - `awaitTick` to schedule a task for after update is painted to the DOM
+- `prelude` promise for prelude phase
+- `render` promise for render phase
+- `layout` promise for layout phase
+- `tick` promise for tick phase
 
 #### Lifecycle hook prefixes
 - `before` lifecycle hook prefix for before render phase

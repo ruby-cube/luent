@@ -20,6 +20,11 @@ export {
   TICK,
   LAYOUT,
 
+  prelude,
+  render,
+  layout,
+  tick,
+
   // Clean this up
   // Stream,
   // $suspense,
@@ -161,7 +166,7 @@ export type ModifierKey = JSX.ModifierKey
 export { JSXComponent as expose, toª as to$, ªªof as $of } from '@luent/nextscript'
 export type { ComponentKit } from '@luent/nextscript'
 
-
+export { $_preserve_context} from './async/context'
 
 
 

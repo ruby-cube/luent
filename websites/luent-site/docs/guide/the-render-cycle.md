@@ -5,7 +5,7 @@ The render cycle coordinates when reactions and scheduled tasks run during an up
 Render cycle phases provide predictable timing for:
 
 - data synchronization
-- DOM writes
+- DOM manipulations
 - layout reads
 - post-render follow-up work
 
@@ -81,7 +81,7 @@ Unless an update is marked as instant, the prelude phase is interruptible so tha
 
 ## The Render Phase
 
-The render phase performs DOM mutation work. It is used to schedule tasks that directly modify DOM nodes.
+The render phase runs DOM manipulation tasks. It is used to schedule tasks that directly modify DOM nodes.
 
 Once the render phase begins, the update is considered committed and can no longer be interrupted by newer updates.
 
@@ -138,12 +138,12 @@ awaitTick(() => {
 <span class='doc-tag'>Experimental</span>
 </div>
 
-<!-- Tasks are scheduled for phases of the current render cycle with the following promises:
+Tasks are scheduled for phases of the current render cycle with the following promises:
 
 - `prelude`
 - `render`
 - `layout`
-- `tick` -->
+- `tick`
 
 ```tsx
 function ChatApp() {

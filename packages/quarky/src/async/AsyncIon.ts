@@ -1,5 +1,5 @@
 import { isFunction, isObject, toError } from "@luent/utils";
-import { AsyncState, getActiveFlask } from "@luent/flask";
+import { AsyncState } from "@luent/flask";
 import { addToSuspense, SuspenseIon } from "./Suspense";
 import { Ion, MutableIon } from "../ion/Ion";
 import { observe } from "../reactivity/Observer";
@@ -7,6 +7,7 @@ import { AsyncNode } from "./ooo";
 import { PRELUDE, SYNC } from "../reactivity/RenderCycle";
 import { createAtomicIon } from "../ion/AtomicIon";
 import { createMemoizedDerivation } from "../ion/DerivationIon";
+import { awaitPrelude } from "../reactivity/IonicTask";
 
 export let $suspense: SuspenseIon
 export const [getAwaiting, suspenseStack] = AsyncState<SuspenseIon>('Suspense')
@@ -127,19 +128,18 @@ export type Awaited<T> = MutableIon<T | undefined> & $Async<T>
 // export function isPending(ion: AsyncIon<unknown>) {
 //    return ion.value instanceof Promise;
 // }
-export function toPromise(awaited: any) {
-  if (awaited instanceof Promise) return awaited
-  if (awaited instanceof Object && 'asPromise' in awaited) return awaited.asPromise
-  return awaited
-}
+// export function toPromise(awaited: any) {
+//   if (awaited instanceof Promise) return awaited
+//   if (awaited instanceof Object && 'asPromise' in awaited) return awaited.asPromise
+//   return awaited
+// }
 
 type AsyncIonOptions<T = any, U = any> = {
   '-as'?: (value: T) => U,
-  '-suspend'?: SuspenseIon,
-  '-debounced'?: number
+  // '-debounced'?: number
 }
 
-function unpackAsyncIonArgs<T, OPT>(
+export function unpackAsyncIonArgs<T, OPT>(
   arg1: T | (() => Promise<T>),
   arg2?: (() => Promise<T>) | OPT & AsyncIonOptions,
   arg3?: OPT & AsyncIonOptions
@@ -153,28 +153,6 @@ function unpackAsyncIonArgs<T, OPT>(
   }
 }
 
-//@ts-expect-error
-globalThis.$$_createAsyncIon = AsyncIon
-
-// export function _AsyncIon(initialState: unknown, setup?: AnyObject) {
-//    if (initialState instanceof Promise) {
-//       if (setup && '-standin' in setup) {
-//          const standin = setup.standin
-//          delete setup['-standin']
-//          return createAsyncAtomicIon(initialState, standin, setup)
-//       }
-//       return createAsyncAtomicIon(initialState, undefined, setup)
-//    }
-//    if (isFunction(initialState)) {
-//       if (setup && '-standin' in setup) {
-//          const standin = setup.standin
-//          delete setup['-standin']
-//          return createAsyncDerivation({ fetch: initialState, standin }, setup)
-//       }
-//       return createAsyncDerivation({ fetch: initialState, standin: undefined }, setup)
-//    }
-//    return createAtomicIon(initialState, setup)
-// }
 
 export function AsyncIon<
   T,
@@ -254,17 +232,15 @@ export function AsyncIon<
 
   // const pendingPromises = new Set()
   let pendingPromise: Promise<unknown> | null = null
+  const cancelledPromises = new Set()
 
   function isFetching() {
     return Boolean(pendingPromise)
   }
 
   function cancelFetch() {
-    // for (const promise of pendingPromises){
     cancelledPromises.add(pendingPromise)
     pendingPromise = null
-    // pendingPromises.delete(promise)
-    // }
   }
 
   function cancelIfFetching() {
@@ -306,7 +282,7 @@ export function AsyncIon<
   //    })
   // }
   // else {
-  const cancelledPromises = new Set()
+
 
   if (suspense) addToSuspense(suspense, quark)
 
@@ -391,7 +367,7 @@ export function AsyncIon<
           if (suspense?.() && pendingState === undefined) {
             suspense()?.then(() => {
               // instantUpdate(() => {
-                console.log('$$$ update ion: suspense.then')
+              console.log('$$$ update ion: suspense.then')
               $ion.value = value
               // })
             })
@@ -457,14 +433,6 @@ export function AsyncIon<
   return $async as any as AsyncIon<T>;
 }
 
-// export function asAsyncIon<T>(value: AsyncIon<T> | Promise<T>, options: { awaited: true }): AsyncIon<T> {
-//    if (isAsyncIon(value)) return value;
-//    return AsyncIon(undefined, value)
-// }
-
-// function isAsyncIon(value: unknown): value is AsyncIon<unknown> {
-//    return isFunction(value) && SUSPENSE_ION in value;
-// }
 
 function Debouncer() {
   let id: NodeJS.Timeout;
@@ -478,5 +446,149 @@ function Debouncer() {
     })
   }
 }
+
+
+
+type AsyncIonSetup<T = any, U = any> = {
+  initialState: U | undefined,
+  fetch: (observe: (fn: () => any) => any) => Promise<T> | T,
+  wrap: ((value: T) => U) | undefined
+}
+
+
+export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
+  const { initialState, fetch, wrap } = setup;
+
+  // Pending state
+  let resolve: ((value: T | PromiseLike<T>) => void) | null;
+  let reject: ((reason?: any) => void) | null
+
+  function Pending<T>() {
+    const promise = new Promise<T>((res, rej) => {
+      resolve = res;
+      reject = rej;
+    })
+    promise.catch(error => {
+      if (error === 'cancelled') return;
+      else throw error
+    })
+    return promise
+  }
+
+  const $state = createAtomicIon(initialState);
+  const $loaded = createAtomicIon(false);
+  const $error = createAtomicIon(null) as MutableIon<null | Error>
+  const $pending = createAtomicIon(Pending()) as MutableIon<Promise<T> | null>
+
+  const quark = {
+    $promise: $pending,
+    cancelIfFetching,
+    $loaded,
+    $error,
+  }
+
+  const $fetched = createMemoizedDerivation(() => {
+    // const awaiting = getAwaiting()
+    // if (awaiting) addToSuspense(awaiting, quark)
+    return $state()
+  }, {
+    [ASYNC_QUARK]: quark,
+    get pending() {
+      return $pending()
+    },
+    get loaded() {
+      return $loaded()
+    },
+  })
+
+  if (import.meta.env.SSR) return $fetched;
+
+  // Cancellation
+  let pendingPromise: PromiseLike<unknown> | null = null
+  const cancelledPromises = new Set()
+
+  function isFetching() {
+    return Boolean(pendingPromise)
+  }
+
+  function cancelFetch() {
+    cancelledPromises.add(pendingPromise)
+    pendingPromise = null
+  }
+
+  function cancelIfFetching() {
+    if (isFetching()) {
+      cancelFetch()
+      return true;
+    }
+    return false
+  }
+
+  // Observe
+  awaitPrelude(oo => {
+    const promise = toPromise(fetch(oo)) as PromiseLike<any>
+    if (promise === pendingPromise) return;
+
+    cancelIfFetching()
+    pendingPromise = promise
+    if (!resolve) {
+      $pending.value = Pending()
+    }
+
+    const p = promise.then(value => {
+      if (cancelledPromises.has(promise)) {
+        cancelledPromises.delete(promise)
+        if (reject) {
+          reject('cancelled')
+          resolve = null;
+          reject = null;
+        }
+        return;
+      }
+      pendingPromise = null
+      if (resolve) {
+        resolve(value)
+        resolve = null;
+        reject = null;
+      }
+      $pending.value = null
+      $state.value = value
+      $loaded.value = true
+    })
+
+    if ('catch' in p && typeof p.catch === 'function') {
+      (p as Promise<unknown>).catch(error => {
+        pendingPromise = null
+        if (reject) {
+          reject(error)
+          resolve = null
+          reject = null
+        }
+        $error.value = toError(error)
+        $pending.value = null
+        $loaded.value = true
+      })
+    }
+  })
+
+  return $fetched
+}
+
+export function toPromise<T>(value: T): T extends PromiseLike<infer V> ? PromiseLike<V> : T {
+  if (!isObject(value)) {
+    return new Promise(resolve => resolve(value)) as T extends PromiseLike<infer V> ? PromiseLike<V> : T
+  }
+  if (isPromiseLike(value)) return value as T extends PromiseLike<infer V> ? PromiseLike<V> : T
+  return new Promise(resolve => resolve(value)) as T extends PromiseLike<infer V> ? PromiseLike<V> : T
+}
+
+function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
+  return (
+    value != null &&
+    (typeof value === "object" || typeof value === "function") &&
+    typeof (value as any).then === "function"
+  )
+}
+
 
 

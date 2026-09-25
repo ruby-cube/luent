@@ -3,20 +3,20 @@ import { createAtomicIon } from "./AtomicIon";
 import { createMemoizedDerivation } from "./DerivationIon";
 import { createHybridIon } from "./HybridIon";
 import { AnyObject } from "@luent/types";
-import { AsyncIon } from "../async/AsyncIon";
+import { AsyncIon, createAsyncIon } from "../async/AsyncIon";
 import { isIon } from "./utils";
 import { Ionic, ionic } from "../ionic/Ionic";
 
 /* API */
 export interface Ion<T = unknown> {
-   (): T
-   '~ion'?: true
+  (): T
+  '~ion'?: true
 }
 
 // type MaybeInert<T = unknown> = IsIonic<ExcludePrimitives<T>> extends true ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
 
 export interface MutableIon<T> extends Ion<T> {
-   value: T
+  value: T
 }
 
 
@@ -25,7 +25,9 @@ export interface MutableIon<T> extends Ion<T> {
 
 type Derivation<R = unknown> = (previous?: R) => R
 
-type IonOptions<T, M> = M extends { '-fetch': any } ? { '-fetch': () => Promise<T> | T } : {}
+type IonOptions<T, M> = M extends { '-fetch': any } 
+? { '-fetch': (oo: (fn: () => any) => any) => Promise<T> | T } 
+: {}
 
 
 /**
@@ -66,18 +68,18 @@ type IonOptions<T, M> = M extends { '-fetch': any } ? { '-fetch': () => Promise<
  */
 
 export function ion<
-   T,
-   M
+  T,
+  M
 >(initialState: T & (() => unknown), setup?: M & ThisType<IonMethods<M>>): AsIon<T, M>
 export function ion<
-   T,
-   M
+  T,
+  M
 >(initialState: T, setup?: M & ThisType<IonMethods<M> & { value: T }> & IonOptions<T, M>): AsIon<T, M>
 export function ion<
-   T,
-   M
+  T,
+  M
 >(initialState: T & (() => unknown) | T, setup?: M & ThisType<IonMethods<M> & { value: T }> & IonOptions<T, M>): AsIon<T, M> {
-   return asIon(initialState, setup) as AsIon<T, M>
+  return asIon(initialState, setup) as AsIon<T, M>
 }
 
 export function ionize<T extends AnyObject, M>(target: T, setup?: M & ThisType<IonMethods<M> & { value: T }> & IonOptions<T, M>) {
@@ -90,56 +92,54 @@ type OptionFlags = '-mutable' | '-fetch' | '-refetch' | '-track' | '-derive'
 type IonMethods<M> = { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
 
 type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>]
-   ? T // [T] extends [AtomicIon] to prevent type-narrowing
-   : [T] extends [Derivation<infer R>]
-   ? M extends { '-mutable': boolean } // TODO: distinguish true vs false without requiring devs to write { '-mutable': true as const}
-   ? MutableIon<R> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
-   : M extends { '@set': Function }
-   ? MutableIon<R> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
-   : Ion<R> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
-   : M extends { '-fetch': any } | { '-refetch': any }
-   ? Ion<T> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] } & {
-      pending: Promise<T> | null;
-      loaded: boolean;
-   }
-   : MutableIon<T> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
+  ? T // [T] extends [AtomicIon] to prevent type-narrowing
+  : [T] extends [Derivation<infer R>]
+  ? M extends { '-mutable': boolean } // TODO: distinguish true vs false without requiring devs to write { '-mutable': true as const}
+  ? MutableIon<R> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
+  : M extends { '@set': Function }
+  ? MutableIon<R> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
+  : Ion<R> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
+  : M extends { '-fetch': any } | { '-refetch': any }
+  ? Ion<T> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] } & {
+    pending: Promise<T> | null;
+    loaded: boolean;
+  }
+  : MutableIon<T> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
 
 
 
 // TODO: Optimization: Use compiler to presort different types of ions
 function asIon(
-   initialState: unknown | (() => unknown),
-   setup?: AnyObject,
+  initialState: unknown | (() => unknown),
+  setup?: AnyObject,
 ) {
-   if (isIon(initialState) && !setup) {
-      return initialState
-   }
+  if (isIon(initialState) && !setup) {
+    return initialState
+  }
 
-   if (isFunction(initialState)) {
-      if (setup && '-mutable' in setup) {
-         const observe = setup['-track']
-         delete setup['-mutable']
-         delete setup['-track']
-         return createHybridIon({ derive: initialState, observe }, setup)
-      }
-      return createMemoizedDerivation(<Derivation>initialState, setup)
-   }
-
-   if (setup && '-derive' in setup) {
-      const derive = setup['-derive']
+  if (isFunction(initialState)) {
+    if (setup && '-mutable' in setup) {
       const observe = setup['-track']
-      delete setup['-derive']
+      delete setup['-mutable']
       delete setup['-track']
-      return createHybridIon({ derive, initial: initialState, observe }, setup)
-   }
-   if (setup && '-fetch' in setup) {
-      const fetch = setup['-fetch']
-      const observe = setup['-track'] // TODO:
-      delete setup['-fetch']
-      delete setup['-track']
-      return AsyncIon(initialState, fetch, setup)
-   }
-   return createAtomicIon(initialState, setup)
+      return createHybridIon({ derive: initialState, observe }, setup)
+    }
+    return createMemoizedDerivation(<Derivation>initialState, setup)
+  }
+
+  if (setup && '-derive' in setup) {
+    const derive = setup['-derive']
+    const observe = setup['-track']
+    delete setup['-derive']
+    delete setup['-track']
+    return createHybridIon({ derive, initial: initialState, observe }, setup)
+  }
+  if (setup && '-fetch' in setup) {
+    const fetch = setup['-fetch']
+    delete setup['-fetch']
+    return createAsyncIon({ initialState, fetch, wrap: setup['-as'] })
+  }
+  return createAtomicIon(initialState, setup)
 }
 
 

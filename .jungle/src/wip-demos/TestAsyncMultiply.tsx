@@ -69,7 +69,7 @@ export function TestAsyncMultipliers() {
       const multiply = Dispatch(() => db.multiply($n(), i), {
          // '-presume': () => $product.value = $n() * i,
          '-then': [[$product, (res) => $product.value = res]], // TODO: .value and setting pions should cancel pending dispatches
-         '-suspend': $pending
+        //  '-suspend': $pending
       })
 
       multipliers.push(multiply)
@@ -233,7 +233,7 @@ function MultiplyKit() {
       $Multiply($n: Ion<number>, o: number) {
          return ion(0, {
             '-fetch': () => db.multiply($n(), o),
-            '-suspend': $pending
+            // '-suspend': $pending
          })
       },
       $pending
