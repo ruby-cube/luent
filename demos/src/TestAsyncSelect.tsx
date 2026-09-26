@@ -14,7 +14,7 @@ import { Await, Awaiting, For, Meanwhile, mountIsland, PRELUDE, SYNC, observe, i
 const TEST_LATENCY_0 = 1000
 const TEST_LATENCY_1 = 500
 
-export function TestAsyncSelect() {
+export function TestAsyncSelectB() {
 
   // const $states = ion([], {
   //   '-fetch': db.fetchStates
@@ -164,7 +164,7 @@ export function TestAsyncSelect() {
 }
 
 
-export function TestAsyncSelectA() {
+export function TestAsyncSelect() {
 
   const $states = ion([], {
     '-fetch': db.fetchStates

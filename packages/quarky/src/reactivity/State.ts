@@ -110,7 +110,6 @@ export class SimpleState implements PendableState {
    }
 
    commitUpdate() {
-    if (this.pending === 'Florida') console.log('commit Florida', this.pending)
       // console.log('commit update', this.current, this.pending)
       return this.current = this.pending
    }

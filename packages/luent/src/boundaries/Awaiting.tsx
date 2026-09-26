@@ -5,7 +5,7 @@ import { ASYNC_QUARK, AsyncQuark, Ion, ion, SUSPENSE_QUARK, SuspenseIon, observe
 export function Awaiting<T>(promise: Promise<T> | Ion<Promise<T> | null>, render: (result: T) => any) {
 
   const $result = ion(undefined as T, {
-    '-fetch': typeof promise === 'function' ? promise : () => promise
+    '-fetch': typeof promise === 'function' ? oo=>oo(promise) : () => promise
   })
   const $suspense = SuspenseIon()
   $suspense[SUSPENSE_QUARK].include(($result as any)[ASYNC_QUARK] as AsyncQuark)

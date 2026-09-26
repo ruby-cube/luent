@@ -2,9 +2,7 @@ import { isFunction, isObject, toError } from "@luent/utils";
 import { AsyncState } from "@luent/flask";
 import { addToSuspense, SuspenseIon } from "./Suspense";
 import { Ion, MutableIon } from "../ion/Ion";
-import { observe } from "../reactivity/Observer";
 import { AsyncNode } from "./ooo";
-import { PRELUDE, SYNC } from "../reactivity/RenderCycle";
 import { createAtomicIon } from "../ion/AtomicIon";
 import { createMemoizedDerivation } from "../ion/DerivationIon";
 import { awaitPrelude } from "../reactivity/IonicTask";
@@ -181,35 +179,35 @@ export function AsyncIon<
   arg3?: OPT & AsyncIonOptions
 ): OPT extends undefined ? AsyncIon<T> : B extends true | 'load' | 'reload' ? Awaited<T> : AsyncIon<T> {
   const { initialState, fetch, options } = unpackAsyncIonArgs(arg1, arg2, arg3)
+
   let pendingStart: DOMHighResTimeStamp | undefined;
   let resolve: ((value: T | PromiseLike<T>) => void) | null;
   let reject: ((reason?: any) => void) | null
   const $loaded = createAtomicIon(false)
   const $error = createAtomicIon(null as Error | null) // TODO:
-  const $promise = createAtomicIon(new Promise((res, rej) => { resolve = res; reject = rej }) as null | Promise<T>)
+  const $promise = createAtomicIon(new Promise((res, rej) => { 
+    resolve = res; 
+    reject = rej 
+  }) as null | Promise<T>)
   pendingStart = performance.now()
-  const suspense = options?.['-suspend']
-  if (!suspense) {
+  // const suspense = options?.['-suspend']
+  // if (!suspense) {
     $promise.value!.catch(err => {
       if (err === 'cancelled') return;
       else throw err
     })
-  }
+  // }
 
   const $ion = createAtomicIon(initialState as unknown)
 
-  const pendingState = suspense?.pendingState
+  // const pendingState = suspense?.pendingState
   const quark = {
     $promise,
     cancelIfFetching,
     $loaded,
     $error
   }
-  const $async = createMemoizedDerivation(suspense && pendingState !== undefined
-    ? () => suspense()
-      ? pendingState
-      : $ion() // FIX:
-    : () => {
+  const $async = createMemoizedDerivation(() => {
       const awaiting = getAwaiting()
       if (awaiting) addToSuspense(awaiting, quark)
       return $ion()
@@ -284,7 +282,7 @@ export function AsyncIon<
   // else {
 
 
-  if (suspense) addToSuspense(suspense, quark)
+  // if (suspense) addToSuspense(suspense, quark)
 
 
 
@@ -294,8 +292,11 @@ export function AsyncIon<
   // let timeoutResolve: NodeJS.Timeout | undefined;
 
   // TODO: optimization: handle fetch as promise outside of observe
-  observe(fetch instanceof Promise ? () => fetch : fetch, ({ current: output }) => {
-    const maybePromise = toPromise(output)
+  // observe(fetch instanceof Promise ? () => fetch : fetch, ({ current: output }) => {
+    awaitPrelude(oo=> {
+      // const output = fetch(oo)
+
+    const maybePromise = toPromise(fetch(oo))
     if (maybePromise === pendingPromise) {
       return;
     }
@@ -327,12 +328,12 @@ export function AsyncIon<
         // else {
         $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
         // pendingStart = performance.now()
-        if (/* !awaited &&  */!suspense) {
+        // if (/* !awaited &&  */!suspense) {
           $promise.value.catch(err => {
             if (err === 'cancelled') return;
             else throw err
           })
-        }
+        // }
         // }
       }
 
@@ -364,18 +365,18 @@ export function AsyncIon<
           }
 
           // instantUpdate(() => {
-          if (suspense?.() && pendingState === undefined) {
-            suspense()?.then(() => {
-              // instantUpdate(() => {
-              console.log('$$$ update ion: suspense.then')
-              $ion.value = value
-              // })
-            })
-          }
-          else {
+          // if (suspense?.() && pendingState === undefined) {
+          //   suspense()?.then(() => {
+          //     // instantUpdate(() => {
+          //     console.log('$$$ update ion: suspense.then')
+          //     $ion.value = value
+          //     // })
+          //   })
+          // }
+          // else {
             console.log('$$$ update ion', value)
             $ion.value = value
-          }
+          // }
 
           if ($promise.value) {
             $promise.value = null;
@@ -428,7 +429,8 @@ export function AsyncIon<
       console.log('$$$ update ion: output')
       $ion.value = output
     }
-  }, { phase: PRELUDE, eager: true })
+        })
+  // }, { phase: PRELUDE, eager: true })
 
   return $async as any as AsyncIon<T>;
 }
@@ -463,7 +465,7 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
   let resolve: ((value: T | PromiseLike<T>) => void) | null;
   let reject: ((reason?: any) => void) | null
 
-  function Pending<T>() {
+  function Pending() {
     const promise = new Promise<T>((res, rej) => {
       resolve = res;
       reject = rej;
@@ -488,8 +490,8 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
   }
 
   const $fetched = createMemoizedDerivation(() => {
-    // const awaiting = getAwaiting()
-    // if (awaiting) addToSuspense(awaiting, quark)
+    const awaiting = getAwaiting()
+    if (awaiting) addToSuspense(awaiting, quark)
     return $state()
   }, {
     [ASYNC_QUARK]: quark,
@@ -546,13 +548,16 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
         return;
       }
       pendingPromise = null
+      
       if (resolve) {
         resolve(value)
         resolve = null;
         reject = null;
       }
-      $pending.value = null
       $state.value = value
+      if ($pending()) {
+        $pending.value = null
+      }
       $loaded.value = true
     })
 
