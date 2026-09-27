@@ -67,7 +67,7 @@ function isAsSeriesElement(node, seriesType) {
 function isAwaitSeriesElement(node, seriesType) {
    return t.isCallExpression(node) && (
       node.callee.name === 'Await'
-      || node.callee.name === 'Awaiting'
+      || node.callee.name === 'Awaits'
       || node.callee.name === 'Meanwhile'
       || node.callee.name === 'Twiddle'
       || node.callee.name === 'Catch' && seriesType === 'Await'
@@ -179,7 +179,7 @@ function transformJSXChildrenToArrayExpression(paths) {
                array.push(createAsSeries(series)) // TODO:
                break;
 
-            case 'Awaiting':
+            case 'Awaits':
                array.push(createAwaitSeries(series))
                break;
 
@@ -234,7 +234,7 @@ function transformJSXChildrenToArrayExpression(paths) {
          }
       }
       else if (t.isJSXExpressionContainer(node) && isAwaitSeriesElement(node.expression, seriesType)) {
-         if (node.expression.callee.name === 'Await' || node.expression.callee.name === 'Awaiting') {
+         if (node.expression.callee.name === 'Await' || node.expression.callee.name === 'Awaits') {
             closeSeries()
             seriesType = node.expression.callee.name
             series = [node.expression]
@@ -389,7 +389,7 @@ const TemplateFunctions = {
    Else: transformTemplateArgToRenderFunction,
    Try: transformTemplateArgToRenderFunction,
    Await: transformTemplateArgToRenderFunction,
-   Awaiting: transformTemplateArgToRenderFunction,
+   Awaits: transformTemplateArgToRenderFunction,
    Meanwhile: transformTemplateArgToRenderFunction,
    For: transformTemplateArgToRenderFunction,
    Portal: transformTemplateArgToRenderFunction,
@@ -429,13 +429,10 @@ function transformTemplateArgToRenderFunction(path) {
    const args = path.node.arguments
    const lastIndex = args.length - 1;
    const templateArg = args[lastIndex]
-   if (!t.isArrowFunctionExpression(templateArg)
-      // t.isCallExpression(templateArg) && isTemplateFunction(templateArg.callee.name)
-      // || templateArg && isJSXRoot(templateArg)
-      // || t.isSequenceExpression(templateArg)
-   ) {
+   if (t.isJSXFragment(templateArg) || t.isJSXElement(templateArg)) {
       args[lastIndex] = toRenderFunction(templateArg)
    }
+   
 }
 
 // let derivationCount = 0;

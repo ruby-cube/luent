@@ -111,7 +111,7 @@ function Layout() {
 :::info Note
 Component must not be `async` functions or return promises. 
 
-To learn about async rendering and scheduling async tasks, see [Async Rendering](), [The Render Cycle](), [Lifecycle Hooks](), and [Awaiting Promises]().
+To learn about async rendering and scheduling async tasks, see [Async Rendering](), [The Render Cycle](), [Lifecycle Hooks](), and [Awaits Promises]().
 :::
 
 ### Stateful views

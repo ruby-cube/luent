@@ -166,11 +166,11 @@ Property ions may be accessed using the `$of()` helper.
 
 ``` -->
 
-### Tracking ions
+### Observing ions
 
-Track the ions of an ionic object by accessing the ion's state—either through property access or function call—within a tracked compound ion.
+Observe the ions of an ionic object by accessing the ion's state—either through property access or function call—within a tracked compound ion.
 
-**Tracked by a view:**
+**Observed by a view:**
 ```nsx
 <label on:dblclick={() => editTodo(todo)}>{(todo.title)@}</label>
 ```
@@ -178,7 +178,7 @@ Track the ions of an ionic object by accessing the ion's state—either through 
 <label on:dblclick={() => editTodo(todo)}>{() => todo.title}</label>
 ```
 
-**Tracked by `observe()`:**
+**with `observe()`:**
 ```nsx
 observe((todo.title)@, () => {
   console.log('title:': todo.title)
@@ -190,16 +190,16 @@ observe(() => todo.title, () => {
 })
 ```
 
-**Tracked by an ionic task**
+**with the observer parameter of schedulers**
 ```nsx
-ionicTick(() => {
-  console.log(todo.title)
+awaitsTick(oo => {
+  console.log(oo(todo.title@))
 })
 ```
 ```tsx
-ionicTick(() => {
+awaitsTick(oo => oo(() => {
   console.log(todo.title)
-})
+}))
 ```
 
 Alternatively, a persistent copy of the ion may be accessed using the `$of()` helper (rather than creating a new inline derivation each time). In NextScript, simply use the accessor operator `@`.

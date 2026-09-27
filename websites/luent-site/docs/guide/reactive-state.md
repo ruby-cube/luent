@@ -3,7 +3,7 @@
 Reactivity refers to the ability of state changes to trigger reactions, such as re-rendering parts of the view. In Luent, ions are the fundamental units of reactivity. They are the building blocks of ionic compounds, which may take the form of compound ions, ionic objects, ionic collections, and ionic tasks.
 
 ## Ions
-Ions are state accessor functions whose state may be tracked for changes. When an ion's state changes, it triggers all reactions linked to the ion. 
+Ions are state accessor functions whose state may be observed for changes. When an ion's state changes, it triggers all reactions linked to the ion. 
 
 There are two main types of ions: **atomic ions** and **compound ions**.
 
@@ -48,7 +48,7 @@ interface MutableIon<T> {
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 
 ### Compound ions
-Compound ions derive their state and reactivity from ions accessed within their derivation.
+Compound ions derive their state and reactivity from reactive state accessed within their derivation.
 
 To create a compound ion, pass a derivation function to `ion()`.
 ```nsx
@@ -122,7 +122,7 @@ When the derivation is called for the first time, the previous state will be und
 #### Memoization of derived state
 By default, the `ion()` function memoizes derived state, recomputing it only when one of its dependencies changes. This avoids unnecessary recomputation across multiple reads and is typically the most efficient behavior. 
 
-To create an unmemoized compound ion, declare it as a simple arrow function expression.
+Memoization involves some overhead of [observing the ion](#observing-ions) for staleness. To create an unmemoized compound ion, declare it as a simple arrow function expression.
 ```ns
 get username = () => user.name
 ```
@@ -241,7 +241,7 @@ $count.value++
 
 ### Rendering reactively
 
-Ions are typically [tracked](#tracking-ions) by the view. When the ion’s state changes, Luent updates the affected portion of the view.
+Ions are [observed](#observing-ions) by the view in order to render reactively. When the ion’s state changes, Luent updates the affected portion of the view.
 
 ```nsx
 <div>{count@}</div>
@@ -463,10 +463,10 @@ const $count = ion(0, {
 
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 
-## Tracking ions
-Ions are typically [tracked by the view](#rendering-reactively). They may also be manually tracked for state changes and linked to custom reactions—functions that will run whenever the tracked state changes.
+## Observing ions
+Ions are typically observed by the view to render reactively and memoized compound ions to prevent staleness. They may also be manually observed for state changes and linked to custom reactions.
 
-**Using `observe()`**
+### Using `observe()`
 ```nsx
 observe(count@, () => {
   console.log('Count:', count)
@@ -477,23 +477,41 @@ observe($count, () => {
   console.log('Count:', $count())
 })
 ```
-By default, reactions passed to `track` run asynchronously to the state mutation after the view has been updated. For the in-depth guide on render cycle phases, see: [The Render Cycle](/guide/the-render-cycle)
+By default, reactions passed to `observe()` run after the view has been updated. Reactions may be run at other stages in a render cycle. For an in-depth guide on render cycle phases, see: [The Render Cycle](/guide/the-render-cycle)
 
-**Using an ionic task scheduler**
+### The observer parameter
+Alternatively, reactive state accessed within scheduled tasks may be observed through the **observer parameter** (named `oo` by convention to represent a pair of eyes). The task will then re-run whenever the observed ions undergo state changes. The observer may observe as broadly or fine-grained as desired.
+
+**Fine-grained observing**
 ```nsx
-ionicTick(() => {
-  console.log('over the limit!', count > limit)
+awaitsTick(oo => {
+  console.log('over the limit!', oo(count@) > limit)
 })
 ```
 ```tsx
-ionicTick(() => {
-  console.log('over the limit!', $count() > limit)
+awaitsTick(oo => {
+  console.log('over the limit!', oo($count) > limit)
 })
 ```
+
+**Broad observing**
+```nsx
+awaitsTick(oo => oo(() => {
+  console.log('over the limit!', count > limit)
+}))
+```
+```tsx
+awaitsTick(oo => oo(() => {
+  console.log('over the limit!', $count() > limit)
+}))
+```
+
+
+
 :::details CODE SWITCH
 **React:** `useEffect()`
 
-**Vue:** `observe()`, `watchEffect()`
+**Vue:** `watch()`, `watchEffect()`
 
 **Svelte:** `$effect`
 
@@ -503,7 +521,7 @@ ionicTick(() => {
 :::
 
 ### Implicit dependency tracking
-Compound ions and ionic tasks are tracked through implicit dependency tracking of ionic reads (e.g. `$count()`):
+Both `observe()` and the observer parameter are able to track ions implicitly through a "track me" signal that ions emit when state is accessed.
 ```nsx
 observe(() => count > limit, () => {
   console.log('over the limit!')
@@ -515,6 +533,39 @@ observe(() => $count() > limit, () => {
 })
 ```
 
+#### Async observing
+
+Due to the way implicit dependency tracking works, only synchronous reactive state access are tracked by observers.
+```nsx
+awaitsTick(oo => oo(() => {
+  console.log('over the limit!', count > limit)
+  await sendAlert.pending;
+  console.log('Database notified:', message) // ❌ not tracked
+}))
+```
+```tsx
+awaitsTick(oo => oo(() => {
+  console.log('over the limit!', $count() > limit)
+  await sendAlert.pending;
+  console.log('Database notified:', $message()) // ❌ not tracked
+}))
+```
+
+However, the observer parameter may observe asynchronously by being called asynchronously.
+```nsx
+awaitsTick(oo => {
+  console.log('over the limit!', oo(count@) > limit)
+  await sendAlert.pending;
+  console.log('Database notified:', oo(message@)) // ✅ tracked
+})
+```
+```tsx
+awaitsTick(oo => oo(() => {
+  console.log('over the limit!', oo($count) > limit)
+  await sendAlert.pending;
+  console.log('Database notified:', oo($message)) // ✅ tracked
+}))
+```
 
 <p align="right"><a href="#reactive-state" style="text-decoration: none">[top]</a></p>
 

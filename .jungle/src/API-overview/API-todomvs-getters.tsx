@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, template, For, If, Else } from "luent"
-import { observe, ion, ionicTickTask, ionize, Ionized, ionic } from "@luent/quarky"
+import { observe, ion, awaitsTick, ionize, Ionized, ionic } from "@luent/quarky"
 import { PRELUDE } from "../../../../packages/quarky/src/reactivity/x_RenderCycle"
 
 interface Todo {
@@ -38,29 +38,8 @@ export function TodoMVC() {
   onHashChange()
 
   // persist state
-  ionicTick(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify($todos()))
-  })
-
-  observedCall(oo => {
+  awaitsTick(oo => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(oo($todos)))
-  })
-
-
-  awaitTick(oo => oo(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify($todos()))
-  }))
-
-  awaitTick(track => observe(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify($todos()))
-  }))
-
-  awaitTick(($$, initial) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify($$($todos)))
-  })
-
-  awaitTick(track => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(observe($todos)))
   })
 
 

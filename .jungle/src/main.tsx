@@ -186,15 +186,15 @@ mountIsland(TestBox, '#root')
 // window.addEventListener('click', startCycle)
 
 // instantUpdate(() => {
-//    runIonicTask(() => {
+//    observeCall(() => {
 //       console.log('*** A')
 //    })
 
-//    runIonicTask(() => {
+//    observeCall(() => {
 //       console.log('*** B')
 //    })
 
-//    runIonicTask(() => {
+//    observeCall(() => {
 //       console.log('*** C')
 //    })
 // })

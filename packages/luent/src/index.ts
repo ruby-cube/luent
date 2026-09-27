@@ -6,11 +6,16 @@ export {
   observe,
   ionize,
 
+  awaitsTick,
+  awaitsLayout,
+  awaitsPrelude,
+  awaitsRender,
+  observeCall,
+
   awaitTick,
   awaitLayout,
   awaitPrelude,
   awaitRender,
-  runIonicTask as observedCall,
 
   Finitron,
 
@@ -46,7 +51,9 @@ export {
   toIon,
   toValue,
 
-  queueTask
+  queueTask,
+
+  $PendingBatch
 
 } from '@luent/quarky'
 export { isMutableIon } from './element/mutables'
@@ -108,7 +115,7 @@ export {
 } from './context/ContextKey'
 export { listen } from './events/listen'
 export { Await, Meanwhile, Twiddle } from './boundaries/Await'
-export { Awaiting } from './boundaries/Awaiting'
+export { Awaits } from './boundaries/Awaits'
 export { Portal } from './boundaries/Portal'
 export { For } from './iteratives/For'
 export { Thru } from './iteratives/Thru'

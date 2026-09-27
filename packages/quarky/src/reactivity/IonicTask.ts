@@ -17,9 +17,9 @@ type _IonicTaskOptions = {
 
 
 
-type Tracker = <T>(ion: Ion<T>) => T
+export type Observer = <T>(ion: Ion<T>) => T
 
-type IonicTask = (track: Tracker, initial: boolean) => void
+type IonicTask = (observer: Observer, initial: boolean) => void
 
 function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
 
@@ -61,19 +61,19 @@ function _queueIonicTask(task: IonicTask, options?: _IonicTaskOptions) {
 type IonicTaskOptions = { [K in keyof _IonicTaskOptions as K extends 'phase' ? never : K]: _IonicTaskOptions[K] }
 
 
-export function awaitPrelude(task: IonicTask, options?: IonicTaskOptions) {
+export function awaitsPrelude(task: IonicTask, options?: IonicTaskOptions) {
   return _queueIonicTask(task, { ...options ?? {}, phase: PRELUDE })
 }
 
-export function runIonicTask(task: IonicTask, options?: IonicTaskOptions) {
+export function observeCall(task: IonicTask, options?: IonicTaskOptions) {
   return _queueIonicTask(task, { ...options ?? {}, phase: SYNC })
 }
 
-export function awaitRender(task: IonicTask, options?: IonicTaskOptions) {
+export function awaitsRender(task: IonicTask, options?: IonicTaskOptions) {
   return _queueIonicTask(task, { ...options ?? {}, phase: RENDER })
 }
 
-export function awaitLayout(task: IonicTask, options?: IonicTaskOptions) {
+export function awaitsLayout(task: IonicTask, options?: IonicTaskOptions) {
   return _queueIonicTask(task, { ...options ?? {}, phase: LAYOUT })
 }
 
@@ -81,7 +81,7 @@ export function awaitLayout(task: IonicTask, options?: IonicTaskOptions) {
 //    return _queueIonicTask(task, { ...options ?? {}, phase: POSTLUDE })
 // }
 
-export function awaitTick(task: IonicTask, options?: IonicTaskOptions) {
+export function awaitsTick(task: IonicTask, options?: IonicTaskOptions) {
   return _queueIonicTask(task, { ...options ?? {}, phase: TICK })
 }
 

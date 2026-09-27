@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { getActiveFlask } from "@luent/flask";
 import { component, template, fromContext, RENDER } from "luent";
-import { ionicTickTask, runIonicTask } from "@luent/quarky";
+import { ionicTickTask, observeCall } from "@luent/quarky";
 
 
 
@@ -20,7 +20,7 @@ import { ionicTickTask, runIonicTask } from "@luent/quarky";
 export function ScoreBoard() {
 
    // synchronous
-   runIonicTask(() => {
+   observeCall(() => {
 
    })
 

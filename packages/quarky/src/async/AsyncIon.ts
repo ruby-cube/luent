@@ -5,7 +5,7 @@ import { Ion, MutableIon } from "../ion/Ion";
 import { AsyncNode } from "./ooo";
 import { createAtomicIon } from "../ion/AtomicIon";
 import { createMemoizedDerivation } from "../ion/DerivationIon";
-import { awaitPrelude } from "../reactivity/IonicTask";
+import { awaitsPrelude } from "../reactivity/IonicTask";
 
 export let $suspense: SuspenseIon
 export const [getAwaiting, suspenseStack] = AsyncState<SuspenseIon>('Suspense')
@@ -66,36 +66,34 @@ export function isAsyncIon(value: any): value is AsyncIon<any> {
 // })
 export type AsyncQuark = {
   cancelIfFetching(): boolean
-  $promise: Ion<Promise<unknown> | null>
+  $promise: Ion<Promise<unknown>>
   $error: Ion<Error | null>
-  // status: 'pending' | 'error' | 'settled'
+  $resolved: Ion<boolean> // settled
+  $loaded: Ion<boolean>
+  // status: 'loading' | 'refetching' | 'error' | 'fulfilled'
 }
 
-export type AsyncProps<T> = {
-  asPromise: Promise<T> | null
-  // error: null | Error,
-  pending: Promise<T> | null,
-  loaded: boolean,
-}
+
 // TODO:
 export type $Async<T> = {
   [ASYNC_QUARK]: AsyncQuark & { $loaded: Ion<boolean> },
-  asPromise: Promise<T> | null
-  // error: null | Error,
-  pending: Promise<T> | null,
+
+  error: null | Error,
+  pending: Promise<T>,
   loaded: boolean,
-  // fetching: boolean
-  // cancelFetch: () => void
+  resolved: boolean
 
   // then: Promise<T>['then']
-  // catch: Promise<T>['then']
-  // finally: Promise<T>['then']
+  // catch: Promise<T>['catch']
+  // finally: Promise<T>['finally']
+
+  status: 'loading' | 'refetching' | 'fulfilled' | 'erred'
 
   // refetch(): void
-  // TODO: need a way to distinguish re'fetches' from initial 'fetch'
-  // pending: boolean
   // cancel(): void
   // onCancel(task: () => void): void
+
+  // redispatch(): void
 }
 export type AsyncIon<T> = MutableIon<T> & $Async<T>
 export type Awaited<T> = MutableIon<T | undefined> & $Async<T>
@@ -185,17 +183,17 @@ export function AsyncIon<
   let reject: ((reason?: any) => void) | null
   const $loaded = createAtomicIon(false)
   const $error = createAtomicIon(null as Error | null) // TODO:
-  const $promise = createAtomicIon(new Promise((res, rej) => { 
-    resolve = res; 
-    reject = rej 
-  }) as null | Promise<T>)
+  const $promise = createAtomicIon(new Promise((res, rej) => {
+    resolve = res;
+    reject = rej
+  }))
   pendingStart = performance.now()
   // const suspense = options?.['-suspend']
   // if (!suspense) {
-    $promise.value!.catch(err => {
-      if (err === 'cancelled') return;
-      else throw err
-    })
+  $promise.value!.catch(err => {
+    if (err === 'cancelled') return;
+    else throw err
+  })
   // }
 
   const $ion = createAtomicIon(initialState as unknown)
@@ -208,10 +206,10 @@ export function AsyncIon<
     $error
   }
   const $async = createMemoizedDerivation(() => {
-      const awaiting = getAwaiting()
-      if (awaiting) addToSuspense(awaiting, quark)
-      return $ion()
-    }, {
+    const awaiting = getAwaiting()
+    if (awaiting) addToSuspense(awaiting, quark)
+    return $ion()
+  }, {
     [ASYNC_QUARK]: quark,
     get pending() {
       return $promise()
@@ -221,7 +219,7 @@ export function AsyncIon<
     },
     get asPromise() {
       return $promise()
-    }
+    },
     // $promise,
     // error: null as null | Error,
   })
@@ -293,8 +291,8 @@ export function AsyncIon<
 
   // TODO: optimization: handle fetch as promise outside of observe
   // observe(fetch instanceof Promise ? () => fetch : fetch, ({ current: output }) => {
-    awaitPrelude(oo=> {
-      // const output = fetch(oo)
+  awaitsPrelude(oo => {
+    // const output = fetch(oo)
 
     const maybePromise = toPromise(fetch(oo))
     if (maybePromise === pendingPromise) {
@@ -329,10 +327,10 @@ export function AsyncIon<
         $promise.value = new Promise((res, rej) => { resolve = res; reject = rej })
         // pendingStart = performance.now()
         // if (/* !awaited &&  */!suspense) {
-          $promise.value.catch(err => {
-            if (err === 'cancelled') return;
-            else throw err
-          })
+        $promise.value.catch(err => {
+          if (err === 'cancelled') return;
+          else throw err
+        })
         // }
         // }
       }
@@ -374,8 +372,8 @@ export function AsyncIon<
           //   })
           // }
           // else {
-            console.log('$$$ update ion', value)
-            $ion.value = value
+          console.log('$$$ update ion', value)
+          $ion.value = value
           // }
 
           if ($promise.value) {
@@ -429,7 +427,7 @@ export function AsyncIon<
       console.log('$$$ update ion: output')
       $ion.value = output
     }
-        })
+  })
   // }, { phase: PRELUDE, eager: true })
 
   return $async as any as AsyncIon<T>;
@@ -459,7 +457,7 @@ type AsyncIonSetup<T = any, U = any> = {
 
 
 export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
-  const { initialState, fetch, wrap } = setup;
+  const { initialState, fetch, wrap = o => o, '-awaited': awaited = true } = setup;
 
   // Pending state
   let resolve: ((value: T | PromiseLike<T>) => void) | null;
@@ -471,37 +469,69 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
       reject = rej;
     })
     promise.catch(error => {
-      if (error === 'cancelled') return;
+      if (error === 'cancelled') {
+        console.log('caught error', error)
+        return;
+      }
       else throw error
     })
     return promise
   }
 
   const $state = createAtomicIon(initialState);
-  const $loaded = createAtomicIon(false);
+  const $loaded = createAtomicIon(false) as MutableIon<boolean>
+  const $resolved = createAtomicIon(false) as MutableIon<boolean>
   const $error = createAtomicIon(null) as MutableIon<null | Error>
-  const $pending = createAtomicIon(Pending()) as MutableIon<Promise<T> | null>
+  const $pending = createAtomicIon(Pending()) as MutableIon<Promise<T>>
 
   const quark = {
     $promise: $pending,
     cancelIfFetching,
     $loaded,
     $error,
+    $resolved
   }
 
   const $fetched = createMemoizedDerivation(() => {
-    const awaiting = getAwaiting()
-    if (awaiting) addToSuspense(awaiting, quark)
+    if (awaited !== false) emitAwait(quark)
     return $state()
-  }, {
+  }, ({
     [ASYNC_QUARK]: quark,
-    get pending() {
-      return $pending()
-    },
+
     get loaded() {
       return $loaded()
     },
-  })
+    get resolved() {
+      return $resolved()
+    },
+    get error() {
+      return $error()
+    },
+
+    get pending() {
+      return $pending()
+    },
+
+    // then(onfulfilled, onrejected) {
+    //   console.log('THEN', onfulfilled)
+    //   return $pending().then(onfulfilled, onrejected)
+    // },
+
+    // catch(onrejected) {
+    //   return $pending().catch(onrejected)
+    // },
+
+    // finally(onfinally) {
+    //   return $pending().finally(onfinally)
+    // },
+
+    get status() {
+      if (!$loaded()) return 'loading';
+      if (!$resolved()) return 'refetching';
+      if ($error()) return 'erred';
+      return 'fulfilled'
+    }
+  } satisfies $Async<T>))
 
   if (import.meta.env.SSR) return $fetched;
 
@@ -516,6 +546,12 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
   function cancelFetch() {
     cancelledPromises.add(pendingPromise)
     pendingPromise = null
+    if (reject) {
+      console.log('rejecting')
+      reject('cancelled')
+      resolve = null;
+      reject = null;
+    }
   }
 
   function cancelIfFetching() {
@@ -527,7 +563,7 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
   }
 
   // Observe
-  awaitPrelude(oo => {
+  awaitsPrelude(oo => {
     const promise = toPromise(fetch(oo)) as PromiseLike<any>
     if (promise === pendingPromise) return;
 
@@ -535,29 +571,25 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
     pendingPromise = promise
     if (!resolve) {
       $pending.value = Pending()
+      $resolved.value = false
     }
 
-    const p = promise.then(value => {
+    const p = promise.then(res => {
+      const value = wrap(res)
       if (cancelledPromises.has(promise)) {
         cancelledPromises.delete(promise)
-        if (reject) {
-          reject('cancelled')
-          resolve = null;
-          reject = null;
-        }
         return;
       }
       pendingPromise = null
-      
+
       if (resolve) {
         resolve(value)
         resolve = null;
         reject = null;
       }
+
       $state.value = value
-      if ($pending()) {
-        $pending.value = null
-      }
+      $resolved.value = true
       $loaded.value = true
     })
 
@@ -570,7 +602,7 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
           reject = null
         }
         $error.value = toError(error)
-        $pending.value = null
+        $resolved.value = true
         $loaded.value = true
       })
     }
@@ -579,15 +611,15 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
   return $fetched
 }
 
-export function toPromise<T>(value: T): T extends PromiseLike<infer V> ? PromiseLike<V> : T {
+export function toPromise<T>(value: T): T extends Promise<infer V> ? Promise<V> : T {
   if (!isObject(value)) {
-    return new Promise(resolve => resolve(value)) as T extends PromiseLike<infer V> ? PromiseLike<V> : T
+    return Promise.resolve(value) as T extends Promise<infer V> ? Promise<V> : T
   }
-  if (isPromiseLike(value)) return value as T extends PromiseLike<infer V> ? PromiseLike<V> : T
-  return new Promise(resolve => resolve(value)) as T extends PromiseLike<infer V> ? PromiseLike<V> : T
+  if (isPromiseLike(value)) return value as T extends Promise<infer V> ? Promise<V> : T
+  return Promise.resolve(value) as T extends Promise<infer V> ? Promise<V> : T
 }
 
-function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
+function isPromiseLike(value: unknown): value is Promise<unknown> {
   return (
     value != null &&
     (typeof value === "object" || typeof value === "function") &&
@@ -596,4 +628,10 @@ function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
 }
 
 
+
+function emitAwait(quark: AsyncQuark) {
+  const awaiting = getAwaiting()
+  if (awaiting) addToSuspense(awaiting, quark)
+  // TODO: track pending state for derivations
+}
 

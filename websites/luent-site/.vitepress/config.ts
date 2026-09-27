@@ -133,6 +133,7 @@ export default defineConfig({
             { text: 'The Render Cycle', link: '/guide/the-render-cycle' },
             { text: 'Preserving Views', link: '/guide/preserving-views' },
             { text: 'Lifecycle Hooks', link: '/guide/lifecycle-hooks' },
+            { text: 'Observers & Reactions', link: '/guide/observers-reactions' },
             { text: 'Effect Cleanup', link: '/guide/effect-cleanup' },
             { text: 'Node Access', link: '/guide/node-access' },
             { text: 'Reusable Logic', link: '/guide/reusable-logic' }

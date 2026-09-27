@@ -65,7 +65,7 @@ function Layout() {
 :::info Note
 Components must not be `async` functions or return promises. 
 
-To learn about async rendering and scheduling async tasks, see [Async Rendering](), [The Render Cycle](), [Lifecycle Hooks](), and [Awaiting Promises]().
+To learn about async rendering and scheduling async tasks, see [Async Rendering](), [The Render Cycle](), [Lifecycle Hooks](), and [Awaits Promises]().
 :::
 
 <p align="right"><a href="#components" style="text-decoration: none">[top]</a></p>

@@ -1,4 +1,4 @@
-import { Await, Awaiting, For, Meanwhile, mountIsland, PRELUDE, SYNC, observe, ion, awaitTick, Ion, awaitPrelude, $_preserve_context } from "luent";
+import { Await, Awaits, For, Meanwhile, mountIsland, PRELUDE, SYNC, observe, ion, awaitTick, Ion, awaitsPrelude, $_preserve_context } from "luent";
 // import { addToSuspense, getActiveUpdate, getAwaiting, popUpdate, pushUpdate } from "@luent/quarky";
 // import { $_run_with_, $_snap_context, getFlask } from "@luent/flask";
 
@@ -8,7 +8,6 @@ import { Await, Awaiting, For, Meanwhile, mountIsland, PRELUDE, SYNC, observe, i
 // const $something = ion(null, {
 //    '-fetch': () => db.getSomething(),
 //    '-dispatch': value => db.setSomething(value),
-//    '-awaited': true
 // })
 
 const TEST_LATENCY_0 = 1000
@@ -104,7 +103,7 @@ export function TestAsyncSelectB() {
 
   let previous: Promise<string[]> | undefined
 
-  awaitPrelude(oo => {
+  awaitsPrelude(oo => {
     const promise = fetchCities(oo);
     if (promise === pendingPromise) return;
     cancelIfFetching()
@@ -141,23 +140,23 @@ export function TestAsyncSelectB() {
 
   return <>
     {/* {Await(() => */}
-      <>
-        <select mu:value={$selectedState} class='test-select-state'>
-          {For($states, $state =>
-            <option>{$state}</option>
-          )}
-        </select>
+    <>
+      <select mu:value={$selectedState} class='test-select-state'>
+        {For($states, $state =>
+          <option>{$state}</option>
+        )}
+      </select>
 
-        <select mu:value={$selectedCity} class='test-select-city' disabled={() => !!$pendingCities()}>
-          {For($cities, $city =>
-            <option>{$city}</option>
-          )}
-        </select>
+      <select mu:value={$selectedCity} class='test-select-city' disabled={() => !!$pendingCities()}>
+        {For($cities, $city =>
+          <option>{$city}</option>
+        )}
+      </select>
 
-        <p style={{ color: () => $pendingCities() ? 'gray' : 'black' }}>
-          Selection: {$selectedCity}, {Awaiting($pendingCities, () => <>{$selectedState()}</>)}
-        </p>
-      </>
+      <p style={{ color: () => $pendingCities() ? 'gray' : 'black' }}>
+        Selection: {$selectedCity}, {Awaits($pendingCities, () => <>{$selectedState()}</>)}
+      </p>
+    </>
     {/* )}
     {Meanwhile(() => <>loading...</>)} */}
   </>
@@ -194,26 +193,26 @@ export function TestAsyncSelect() {
 
   return <>
     <div class='test-view' data-test-latency={JSON.stringify([TEST_LATENCY_0, TEST_LATENCY_1])}>
-      {/* {Await(<> */}
-      <select mu:value={$selectedState} class='test-select-state'>
-        {For($states, $state =>
-          <option>{$state}</option>
-        )}
-      </select>
+      {Await(() =>(console.log('RENDER AWAIT'),<>
+        <select mu:value={$selectedState} class='test-select-state'>
+          {For($states, $state =>
+            <option>{$state}</option>
+          )}
+        </select>
 
-      <select mu:value={$selectedCity} class='test-select-city' disabled={() => !!$cities.pending}>
-        {For($cities, $city =>
-          <option>{$city}</option>
-        )}
-      </select>
+        <select mu:value={$selectedCity} class='test-select-city' disabled={() => !$cities.resolved}>
+          {For($cities, $city =>
+            <option>{$city}</option>
+          )}
+        </select>
 
-      <p style={{ color: () => $cities.pending ? 'gray' : 'black' }}>
-        Selection: {$selectedCity}, {Awaiting(() => $cities.pending, () => <>{$selectedState()}</>)}
-      </p>
-      {/* </>)}
+        <p style={{ color: () => $cities.resolved ? 'black' : 'gray' }}>
+          {/* Selection: {$selectedCity}, {Awaits($cities, $selectedState)} */}
+        </p>
+      </>))}
       {Meanwhile(
         <>loading...</>
-      )} */}
+      )}
     </div>
   </>
 }

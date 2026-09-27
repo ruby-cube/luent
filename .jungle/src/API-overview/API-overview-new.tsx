@@ -194,7 +194,7 @@ const markLiked = AsyncOp((liked) => {
 // })
 
 // const $shippingMethod = ion(null, {
-//    '@init'() { runIonicTask(() => this.value = $shippingOptions()[0]) }
+//    '@init'() { observeCall(() => this.value = $shippingOptions()[0]) }
 // })
 
 // const $shippingMethod = ion(null, {

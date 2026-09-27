@@ -86,7 +86,7 @@ The render phase runs DOM manipulation tasks. It is used to schedule tasks that 
 Once the render phase begins, the update is considered committed and can no longer be interrupted by newer updates.
 
 ```tsx
-awaitRender(oo => {
+awaitsRender(oo => {
   if (oo($open)) {
     $dialog()?.focus();
   }
@@ -94,7 +94,7 @@ awaitRender(oo => {
 ```
 
 ```tsx
-awaitRender(() => {
+awaitsRender(() => {
   const el = $panel();
   if (el) el.style.opacity = "1";
 });
@@ -245,7 +245,7 @@ observe($documents, () => {
 
 Observed tasks run during the specified phase and automatically re-run when their observed ions change state.
 
-- `observedCall()` for synchronous tasks
+- `observeCall()` for synchronous tasks
 - `awaitPrelude()` for prelude phase tasks
 - `awaitRender()` for render phase tasks
 - `awaitLayout()` for layout phase tasks

@@ -2,17 +2,13 @@ import { getActiveFlask } from "@luent/flask"
 import { observe } from "../reactivity/Observer"
 import { Ion } from "../ion/Ion"
 import { AsyncQuark } from "./AsyncIon"
-import { PRELUDE } from "../reactivity/RenderCycle"
 import { createAtomicIon } from "../ion/AtomicIon"
-import { awaitPrelude } from "../reactivity/IonicTask"
+import { awaitsPrelude } from "../reactivity/IonicTask"
 
 export type SuspenseIon = Ion<Promise<void> | null> & {
   initial: boolean
-  oo: Promise<unknown> | null
-  hold: any
   await(): void
   retry(): void
-  pendingState: any
   [SUSPENSE_QUARK]: SuspenseQuark
 }
 
@@ -42,11 +38,11 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
 
   const pendingPromises = new Set()
 
-  const isPending = () => {
-    for (const { $promise } of quarks) {
-      if ($promise()) return true
+  const isResolved = () => {
+    for (const { $promise, $resolved } of quarks) {
+      if (!$resolved()) return false
     }
-    return false
+    return true
   }
 
   let startTime = performance.now();
@@ -91,8 +87,8 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
         if (import.meta.env.SSR) return;
         if (quarks.has(quark)) return;
         // awaitPrelude(() => {
-        const { $promise } = quark
-        if ($promise() && !$suspense()) {
+        const { $promise, $resolved } = quark
+        if (!$resolved() && !$suspense()) {
           $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
           startTime = performance.now()
         }
@@ -106,8 +102,10 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
 
         let previous: Promise<unknown> | null
 
-        awaitPrelude((oo, initial) => {
-          const promise = oo($promise);
+        awaitsPrelude((oo, initial) => {
+          const resolved = oo($resolved)
+          console.log('resovled', resolved)
+          const promise = $promise();
           if (!initial && promise === previous) {
             return;
           }
@@ -116,7 +114,7 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
           if (promise === null) {
             if (!$suspense() && __INTERNAL__) console.warn("Suspense: should be impossible. $suspense is null while promise turned null", previous)
             // console.log('Suspense: promise null, pending promises:', pendingPromises.size, previous)
-            if (pendingPromises.size === 0 && !isPending()) {
+            if (pendingPromises.size === 0 && isResolved()) {
               if (resolve) {
                 timecheck()
                 resolve()
@@ -148,60 +146,9 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
                 resolve = null
                 reject = null
               }
-              // instantUpdate(() => {
-              // $error.value = toError(err);
               $suspense.value = null
-              // })
             })
         })
-
-        // observe($promise, ({ current: promise, previous, eager }) => {
-        //    if (!eager && promise === previous) {
-        //       return;
-        //    }
-        //    pendingPromises.delete(previous)
-        //    if (promise === null) {
-        //       if (!$suspense() && __INTERNAL__) console.warn("Suspense: should be impossible. $suspense is null while promise turned null", previous)
-        //       // console.log('Suspense: promise null, pending promises:', pendingPromises.size, previous)
-        //       if (pendingPromises.size === 0 && !isPending()) {
-        //          if (resolve) {
-        //             timecheck()
-        //             resolve()
-        //             resolve = null
-        //             reject = null
-        //          }
-        //          $suspense.value = null
-        //          if ($suspense.initial) $suspense.initial = false
-        //       }
-        //       return;
-        //    }
-
-        //    pendingPromises.add(promise)
-        //    // console.log('Suspense: +promise; pending promises:', pendingPromises.size)
-        //    if ($suspense.initial) $suspense.initial = false
-        //    if (!$suspense()) {
-        //       startTime = performance.now()
-        //       $suspense.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
-        //    }
-
-        //    promise
-        //       .catch(err => {
-        //          pendingPromises.delete(promise)
-        //          if (err === 'cancelled') {
-        //             return;
-        //          }
-        //          if (reject) {
-        //             reject(err)
-        //             resolve = null
-        //             reject = null
-        //          }
-        //          // instantUpdate(() => {
-        //             // $error.value = toError(err);
-        //             $suspense.value = null
-        //          // })
-        //       })
-        // }, { phase: PRELUDE, eager: true })
-        // })
         return this
       }
     }

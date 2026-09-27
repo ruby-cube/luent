@@ -19,11 +19,11 @@ The API reference is in the works. In the meantime, here is an overview of Luent
 
 #### Secondary reactivity
 - `ionize()` to create an ion of an ionic structure (equivalent to `ion(ionic(x))`)
-- `observedCall()` to observe a synchronous task and rerun it on change.
-- `awaitPrelude()` to observe a prelude-phase task and rerun it on change.
-- `awaitRender()` to observe a render-phase task and rerun it on change.
-- `awaitLayout()` to observe a layout-phase task and rerun it on change.
-- `awaitTick()` to observe a task scheduled for the upcoming render cycle tick and rerun it on change.
+- `observeCall()` to observe a synchronous task and rerun it on change.
+- `awaitsPrelude()` to observe a prelude-phase task and rerun it on change.
+- `awaitsRender()` to observe a render-phase task and rerun it on change.
+- `awaitsLayout()` to observe a layout-phase task and rerun it on change.
+- `awaitsTick()` to observe a task scheduled for the upcoming render cycle tick and rerun it on change.
 - `Finitron()` to create a finite reactive state machine
 - `$of()` to access property ions from an ionic object
 

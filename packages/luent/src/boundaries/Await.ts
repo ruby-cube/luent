@@ -8,7 +8,7 @@
 //    <div>{err}</div>
 // )}
 
-import { ASYNC_QUARK, AsyncIon, isAsyncIon, popAwaiting, pushAwaiting, SuspenseIon, SUSPENSE_QUARK, AsyncQuark, createAtomicIon, ion, Ion, isIon, MutableIon, PRELUDE, observe } from "@luent/quarky";
+import { ASYNC_QUARK, AsyncIon, isAsyncIon, popAwaiting, pushAwaiting, SuspenseIon, SUSPENSE_QUARK, AsyncQuark, createAtomicIon, ion, Ion, isIon, MutableIon, PRELUDE, observe, awaitsPrelude } from "@luent/quarky";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
@@ -279,12 +279,12 @@ export function createAwaitSeries(
   }
 
   // NOTE: DO NOT USE HYBRID ION... the scheduling is not correct
-  observe($suspense, () => {
-    if ($renderPlaceholder() === Boolean($suspense())) {
+  awaitsPrelude(oo => {
+    if ($renderPlaceholder() === Boolean(oo($suspense))) {
       return;
     }
     syncPlaceholderState()
-  }, { phase: PRELUDE, eager: true })
+  })
 
   function shouldHold() {
     placeholder = renderPlaceholder()

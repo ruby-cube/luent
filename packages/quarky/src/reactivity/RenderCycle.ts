@@ -449,7 +449,7 @@ export const tick = new PhasePromise(awaitTick)
 
 
 
-function awaitPrelude(task: Task) {
+export function awaitPrelude(task: Task) {
   $activeUpdate()?.cycle.scheduleTask(task, PRELUDE)
 }
 
@@ -457,15 +457,15 @@ export function queueInternalRender(task: Task) {
   $activeUpdate()?.cycle.scheduleTask(task, INTERNAL_RENDER)
 }
 
-function awaitRender(task: Task) {
+export function awaitRender(task: Task) {
   $activeUpdate()?.cycle.scheduleTask(task, RENDER)
 }
 
-function awaitLayout(task: Task) {
+export function awaitLayout(task: Task) {
   $activeUpdate()?.cycle.scheduleTask(task, LAYOUT)
 }
 
-function awaitTick(task: Task) {
+export function awaitTick(task: Task) {
   const _task = $_wrap_with_context(task)
   requestAnimationFrame(() => {
     queueTask(_task)

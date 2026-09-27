@@ -1,5 +1,5 @@
 import { component, template } from "luent"
-import { ion, runIonicTask, SYNC } from "@luent/quarky"
+import { ion, observeCall, SYNC } from "@luent/quarky"
 
 
 export function TestIonicEffect() {
@@ -10,7 +10,7 @@ export function TestIonicEffect() {
     }
   })
 
-  runIonicTask(() => {
+  observeCall(() => {
     $count.increment()
   })
 

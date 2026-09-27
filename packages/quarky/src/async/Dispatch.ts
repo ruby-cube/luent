@@ -147,6 +147,5 @@ export function Dispatch<F, V>(dispatch: F & ((...args: any[]) => AsyncNode<V> |
       retry: { value: () => retry?.() },
    })
 
-
    return dispatchAction as any
 }
