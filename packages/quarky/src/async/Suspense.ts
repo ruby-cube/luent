@@ -143,14 +143,14 @@ export function SuspenseIon<P>(): SuspenseIon {
       cancelIfFetching,
       include,
       resolve() {
-        // if (resolve) {
-        //   timecheck()
-        //   resolve()
-        //   resolve = null
-        //   reject = null
-        // }
+        if (resolve) {
+          timecheck()
+          resolve()
+          resolve = null
+          reject = null
+        }
         $promised.value = null
-        // if ($suspense.initial) $suspense.initial = false
+        if ($suspense.initial) $suspense.initial = false
       },
       get quarkCount() {
         return quarks.size
@@ -169,6 +169,11 @@ export function SuspenseIon<P>(): SuspenseIon {
       if (quark.cancelIfFetching()) unresolved.delete(quark.$promise())
       quarks.delete(quark)
     })
+
+    if (!$promised()) {
+      $promised.value = Pending()
+      startTime = performance.now()
+    }
 
     let previous: Promise<unknown> | null
     let previousResolved: boolean | undefined
@@ -203,7 +208,7 @@ export function SuspenseIon<P>(): SuspenseIon {
 
       unresolved.add(promise)
 
-      if (!resolve) {
+      if (!$promised()) {
         startTime = performance.now()
         $promised.value = Pending()
       }
