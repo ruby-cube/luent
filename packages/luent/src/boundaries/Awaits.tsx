@@ -1,6 +1,6 @@
 import { As } from "../conditional/As"
 import { createIfSeries, If } from "../conditional/If"
-import { Ion, ion, SuspenseIon, awaitsPrelude, $Async, Observer, $PendingBatch, tick } from "@luent/quarky"
+import { Ion, ion, SuspenseIon, awaitsPrelude, $Async, Observer, $PendingBatch, tick, addToSuspense, ASYNC_QUARK, pushAwaiting, popAwaiting } from "@luent/quarky"
 
 export function Awaits<T>(promise: Promise<T> | Ion<Promise<T>> | Ion<T> & $Async<T>, render: (result: T) => any) {
   console.log('AWAITS')
@@ -13,6 +13,8 @@ export function Awaits<T>(promise: Promise<T> | Ion<Promise<T>> | Ion<T> & $Asyn
     '-fetch': fetch,
     // 'awaited': false
   })
+
+
 
   // observe(fetch, ({ current }) => {
   //   if (!current) return;
@@ -39,19 +41,21 @@ export function Awaits<T>(promise: Promise<T> | Ion<Promise<T>> | Ion<T> & $Asyn
 
   const $suspense = SuspenseIon()
 
-
-
   if (typeof promise === 'function') {
     return {
       $suspense,
       renderResolved: () => {
-        console.log('RENDER RESOLVED')
-        return <>
-          {As($loaded, () => {
-            console.log('RENDER AWAITS', $result())
-            return render($result() as T)
-          })}
-        </>
+        try {
+          // pushAwaiting($suspense)
+          return <>
+            {As($loaded, () => {
+              return render($result() as T)
+            })}
+          </>
+        }
+        finally {
+          // popAwaiting()
+        }
       }
     }
   }
@@ -59,10 +63,14 @@ export function Awaits<T>(promise: Promise<T> | Ion<Promise<T>> | Ion<T> & $Asyn
   return {
     $suspense,
     renderResolved: () => {
-      console.log('RENDER AWAITS')
-      return createIfSeries([
-        If($loaded, () => () => render($result() as T))
-      ])
+      try {
+        // pushAwaiting($suspense)
+        return createIfSeries([
+          If($loaded, () => render($result() as T))
+        ])
+      } finally {
+        // popAwaiting()
+      }
     }
   }
 }

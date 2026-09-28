@@ -148,6 +148,9 @@ export class IfElseKit extends VineNode {
   pendingDeactivatedKit: DynamicNodeKit | null | undefined = null
 
   awaitPendingConditional(suspense: SuspenseIon, kit: DynamicNodeKit, prevKit: DynamicNodeKit | undefined) {
+    const shouldDeactivatePrevious = !!prevKit && (prevKit !== kit || kit.type === 'create')
+    // const shouldDeactivatePrevious = prevKit !== kit
+
     if (!kit.cache) {
       const prevCount = getSuspenseCount(suspense)
       kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === 'create' })
@@ -165,7 +168,7 @@ export class IfElseKit extends VineNode {
               return;
             }
             this.pendingSwitch = null
-            if (prevKit !== kit)
+            if (shouldDeactivatePrevious)
               this.deactivateConditional(prevKit);
             this.reactivateConditional(kit)
           })
@@ -181,7 +184,7 @@ export class IfElseKit extends VineNode {
                   return;
                 }
                 this.pendingSwitch = null
-                if (prevKit !== kit)
+                if (shouldDeactivatePrevious)
                   this.deactivateConditional(prevKit);
                 this.reactivateConditional(kit)
               })
@@ -193,7 +196,7 @@ export class IfElseKit extends VineNode {
         // TODO: end suspense... need a way to do this without exposing .value to devs
         suspense.value = null
         kit.awaitCache = rawOutput
-        if (prevKit !== kit)
+        if (shouldDeactivatePrevious)
           this.deactivateConditional(prevKit);
         this.reactivateConditional(kit)
       }
@@ -210,13 +213,13 @@ export class IfElseKit extends VineNode {
             return;
           }
           this.pendingSwitch = null
-          if (prevKit !== kit)
+          if (shouldDeactivatePrevious)
             this.deactivateConditional(prevKit);
           this.reactivateConditional(kit)
         })
       }
       else {
-        if (prevKit !== kit)
+        if (shouldDeactivatePrevious)
           this.deactivateConditional(prevKit);
         this.reactivateConditional(kit)
       }

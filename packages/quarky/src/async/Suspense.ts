@@ -101,17 +101,18 @@ export function SuspenseIon<P>(pendingState?: P): SuspenseIon {
         })
 
         let previous: Promise<unknown> | null
+        let previousResolved: boolean | undefined
 
         awaitsPrelude((oo, initial) => {
           const resolved = oo($resolved)
-          console.log('resovled', resolved)
           const promise = $promise();
-          if (!initial && promise === previous) {
+          if (!initial && promise === previous && resolved === previousResolved) {
             return;
           }
           pendingPromises.delete(previous)
           previous = promise
-          if (promise === null) {
+          previousResolved = resolved
+          if (resolved) {
             if (!$suspense() && __INTERNAL__) console.warn("Suspense: should be impossible. $suspense is null while promise turned null", previous)
             // console.log('Suspense: promise null, pending promises:', pendingPromises.size, previous)
             if (pendingPromises.size === 0 && isResolved()) {

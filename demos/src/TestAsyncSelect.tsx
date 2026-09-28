@@ -207,7 +207,7 @@ export function TestAsyncSelect() {
         </select>
 
         <p style={{ color: () => $cities.resolved ? 'black' : 'gray' }}>
-          {/* Selection: {$selectedCity}, {Awaits($cities, $selectedState)} */}
+          Selection: {$selectedCity}, {Awaits($cities, $selectedState)}
         </p>
       </>))}
       {Meanwhile(
