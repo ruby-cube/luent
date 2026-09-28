@@ -53,7 +53,8 @@ export {
 
   queueTask,
 
-  $PendingBatch
+  $PendingBatch,
+  Promised
 
 } from '@luent/quarky'
 export { isMutableIon } from './element/mutables'
@@ -64,7 +65,7 @@ export { NodeRef, asJSX } from './node/NodeRef'
 // export * from './component/Component'
 // export * from './boundaries/Portal'
 // export * from './boundaries/Await'
-// export * from './component/bindings-types'
+export { type IonOr } from './component/bindings-types'
 export { awaiting } from './async/awaiting'
 // export * from './component/Style'
 // export * from './component/bindings'
@@ -173,7 +174,7 @@ export type ModifierKey = JSX.ModifierKey
 export { JSXComponent as expose, toª as to$, ªªof as $of } from '@luent/nextscript'
 export type { ComponentKit } from '@luent/nextscript'
 
-export { $_preserve_context} from './async/context'
+export { $_preserve_context } from './async/context'
 
 
 

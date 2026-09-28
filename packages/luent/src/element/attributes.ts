@@ -1,10 +1,10 @@
 import { Flask, getFlask } from "@luent/flask";
 import { isGetter, awaitRender, RUN_EAGERLY, toValue, trackForRender, queueInternalRender } from "@luent/quarky";
-import { MaybeIon } from "../component/bindings-types";
+import { IonOr } from "../component/bindings-types";
 import { AnyObject } from "@luent/types";
 
 
-export function setUpAttributes(node: Element | null, attributes: { [key: string]: MaybeIon<any> }) {
+export function setUpAttributes(node: Element | null, attributes: { [key: string]: IonOr<any> }) {
   const flask = getFlask()
   for (const key in attributes) {
     if (key === 'Slot') continue; // TODO: remove

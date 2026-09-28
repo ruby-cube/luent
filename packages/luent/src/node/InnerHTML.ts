@@ -1,5 +1,5 @@
 import { __DEV__checkIfTracked, Ion, toValue, isGetter, trackForRender, awaitRender, RUN_EAGERLY, queueInternalRender } from "@luent/quarky";
-import { MaybeIon } from "../component/bindings-types";
+import { IonOr } from "../component/bindings-types";
 import { DOMParent } from "./VineNode";
 import { getFlask } from "@luent/flask";
 import { isObject } from "@luent/utils";
@@ -66,7 +66,7 @@ function passthroughHTML(html: string): string {
 
 export type InnerHTMLKit = {
   trusted?: boolean
-  html: MaybeIon<string>,
+  html: IonOr<string>,
 }
 
 // <div innerHTML={{ 

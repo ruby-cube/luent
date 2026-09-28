@@ -6,7 +6,7 @@ import { setUpElement } from '../../element/setUpElement';
 import { JSDOM } from 'jsdom'
 import { Context, createContext } from '../Context';
 import { ContextKey } from '../ContextKey';
-import { Ion, Ionized, MaybeIon, v } from '../../component/bindings-types';
+import { Ion, Ionized, IonOr, v } from '../../component/bindings-types';
 import { ion, ionize, isIon, isIonicProxy } from '@luent/quarky';
 
 
@@ -477,11 +477,11 @@ describe('Integration tests the Context API', () => {
             expect(frog).toBe(defaultValue)
         });
 
-        it('should normalize MaybeIon', () => {
+        it('should normalize IonOr', () => {
 
             const _frog_ = 'frog'
             const value = 'kermit'
-            ContextKey(_frog_, MaybeIon)
+            ContextKey(_frog_, IonOr)
             let frog = 'hi'
 
             function App() {
@@ -660,10 +660,10 @@ describe('Integration tests the Context API', () => {
         });
 
 
-        it('should allow MaybeIon to be undefined if optional', () => {
+        it('should allow IonOr to be undefined if optional', () => {
 
             const _frog_ = 'frog'
-            ContextKey(_frog_, MaybeIon('?'))
+            ContextKey(_frog_, IonOr('?'))
             let frog = 'hi'
 
             function App() {
@@ -690,11 +690,11 @@ describe('Integration tests the Context API', () => {
         });
 
 
-        it('should provide default for MaybeIon', () => {
+        it('should provide default for IonOr', () => {
 
             const _frog_ = 'frog'
             const defaultValue = 'kermit'
-            ContextKey(_frog_, MaybeIon('?')(() => defaultValue))
+            ContextKey(_frog_, IonOr('?')(() => defaultValue))
             let frog = 'hi'
 
             function App() {

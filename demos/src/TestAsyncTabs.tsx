@@ -49,8 +49,8 @@ export function TestAsyncTabs() {
       ))}
     </ul>
 
-    {Await($suspense =>
-      <div class={() => `tab ${$suspense() && 'pending'}`}>
+    {Await(view =>
+      <div class={() => `tab ${view.ifPending('pending')}`}>
         <o:preserve>
           {As($tab, view =>
             <div before:attach={() => tabViews[$tab()] = view}>

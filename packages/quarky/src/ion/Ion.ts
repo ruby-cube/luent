@@ -3,7 +3,7 @@ import { createAtomicIon } from "./AtomicIon";
 import { createMemoizedDerivation } from "./DerivationIon";
 import { createHybridIon } from "./HybridIon";
 import { AnyObject } from "@luent/types";
-import { AsyncIon, createAsyncIon } from "../async/AsyncIon";
+import { $Async, AsyncIon, createAsyncIon } from "../async/AsyncIon";
 import { isIon } from "./utils";
 import { Ionic, ionic } from "../ionic/Ionic";
 
@@ -100,10 +100,7 @@ type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>]
   ? MutableIon<R> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
   : Ion<R> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
   : M extends { '-fetch': any } | { '-refetch': any }
-  ? Ion<T> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] } & {
-    pending: Promise<T> | null;
-    loaded: boolean;
-  }
+  ? Ion<T> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] } & $Async<T>
   : MutableIon<T> & { [K in keyof M as K extends OptionFlags ? never : K]: M[K] }
 
 

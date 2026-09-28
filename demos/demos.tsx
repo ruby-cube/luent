@@ -1,4 +1,4 @@
-import { mountIsland, MICROCLASS_MERGE, provideRoot } from "luent"
+import { mountIsland, MICROCLASS_MERGE, provideRoot, Await, Meanwhile } from "luent"
 import { CellsApp } from "./src/CellsApp"
 import { CircleApp } from "./src/CircleApp"
 import { SVGPolygonApp } from "./src/SVGPolygonApp"
@@ -54,6 +54,8 @@ import { TestColorSort } from "./src/TestColorSort"
 import { TestStyleComments } from "./src/TestStyleComments"
 import { TestDynamicTag } from "./src/TestDynamicTag"
 import { TestTaskObserver } from "./src/TestTaskObserver"
+import { TestNestedAwait } from "./src/TestNestedAwait"
+import { TestAsyncMultiply } from "./src/TestAsyncMultiply"
 // import { DayView } from "./src/TimelineApp/Timeline"
 
 export function runDemo() {
@@ -67,7 +69,7 @@ export function runDemo() {
       {/* <DayView/> */}
       {/* <TestStyleComments/> */}
       {/* <TestColorSort></TestColorSort> */}
-      <TestAsyncSelect/>
+      <TestAsyncTabs/>
     </>
     // return <TestInnerHTML/>
   }, '#root')

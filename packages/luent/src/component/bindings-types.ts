@@ -8,7 +8,7 @@ import { JSX } from "../jsx-runtime"
 
 export type HandleEvent<E = {}> = keyof E extends never ? (() => void) | ((event: E) => void) : (event: E) => void
 
-export type MaybeIon<T> = T | (() => T)
+export type IonOr<T> = T | (() => T)
 
 
 // two types of component input
@@ -44,13 +44,13 @@ export type TagBindings<D> =
 // PlainInput<D>
 // & MaybeIonAttributes<D>
 // & NonmutableIonAttributes<D>
-// & { class?: MaybeIon<string>, style?: MaybeIon<string> }
+// & { class?: IonOr<string>, style?: IonOr<string> }
 // & OpAttribute<D>
 // & SeeAttribute<D>
 // & (D extends { provide: infer P } ? P : {})
 // [] mu ---> {mu:name: MutableIon<string>}
-// [] mu? --> {mu:name: MutableIon<string>}  and {frog: MaybeIon<string>}
-// [] Ion --> MaybeIon<string>
+// [] mu? --> {mu:name: MutableIon<string>}  and {frog: IonOr<string>}
+// [] Ion --> IonOr<string>
 // [] Inert --> 
 
 type Attributes<D> = {

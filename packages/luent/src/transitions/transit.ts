@@ -1,11 +1,11 @@
 import { getActiveUpdate, awaitLayout, awaitRender, queueTask, toValue } from "@luent/quarky";
 import { toClassNames } from "./transitions";
 import { atListChanged } from "../iteratives/For";
-import { MaybeIon } from "../component/bindings-types";
+import { IonOr } from "../component/bindings-types";
 import { getFlask } from "@luent/flask";
 import { atAttach, beforeDetach } from "../flask/flask-hooks";
 
-export function setUpPositionTransition(node: HTMLElement, transitionClasses: MaybeIon<string>) {
+export function setUpPositionTransition(node: HTMLElement, transitionClasses: IonOr<string>) {
   atListChanged(() => {
     const first = node.getBoundingClientRect()
     awaitRender(() => {
@@ -95,7 +95,7 @@ function receive(key: any, node: HTMLElement, port: any, classes: string[]) {
 }
 
 const ANY_PORT = Symbol('any port')
-export function setUpTransit(node: HTMLElement, key: any, port: any = ANY_PORT, transitClasses: MaybeIon<string> = 'transition-position') {
+export function setUpTransit(node: HTMLElement, key: any, port: any = ANY_PORT, transitClasses: IonOr<string> = 'transition-position') {
   usePorts().addPort(port)
   atAttach(() => {
     receive(key, node, port, toClassNames(toValue(transitClasses)))

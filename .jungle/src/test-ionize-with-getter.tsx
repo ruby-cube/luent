@@ -26,7 +26,7 @@ function Board() {
    )
 }
 
-const dog = MaybeIon<number>('?')
+const dog = IonOr<number>('?')
 
 function Comp() {
 

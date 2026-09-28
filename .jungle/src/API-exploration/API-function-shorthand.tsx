@@ -33,7 +33,7 @@ function via<O extends object>(obj: O): O {
 }
 
 
-// NOTE: derivation shorthands only work because parameters/attributes are typed as MaybeIon or ToIon. If parameters are Ion, typescript will also not be happy
+// NOTE: derivation shorthands only work because parameters/attributes are typed as IonOr or ToIon. If parameters are Ion, typescript will also not be happy
 
 
 const $count = ion(0)

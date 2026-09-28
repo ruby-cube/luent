@@ -1,5 +1,5 @@
 import { AnyObject, Booleanny } from "@luent/types";
-import { MaybeIon } from "../component/bindings-types";
+import { IonOr } from "../component/bindings-types";
 import { Flask, getFlask } from "@luent/flask";
 import { Ion, isGetter, awaitRender, RUN_EAGERLY, trackForRender, queueInternalRender } from "@luent/quarky";
 import { camelToKebabCase, isFunction, isObject, isString } from "@luent/utils";
@@ -75,11 +75,11 @@ function composeMicroclasses(classes: TagClass[], merge: MergeMicroclasses) {
 
 
 export type ReactiveClasses = {
-  [key: string]: MaybeIon<Booleanny>;
+  [key: string]: IonOr<Booleanny>;
 }
 
-export type TagStyle = MaybeIon<string | Falsey> | MaybeIon<{ [key: string]: MaybeIon<string | number | Falsey> }>
-export type TagClass = ReactiveClasses | MaybeIon<string | Falsey> | (MaybeIon<string | Falsey> | TagClass)[]
+export type TagStyle = IonOr<string | Falsey> | IonOr<{ [key: string]: IonOr<string | number | Falsey> }>
+export type TagClass = ReactiveClasses | IonOr<string | Falsey> | (IonOr<string | Falsey> | TagClass)[]
 type Falsey = undefined | null | false | ''
 
 export function setUpClasses(node: Element, classes: TagClass[]) {
@@ -226,7 +226,7 @@ export function setUpStyles(node: Element, styles: TagStyle[]) {
 function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey, flask: Flask) {
   if (isObject(entry)) {
     for (const key in entry) {
-      const value = entry[key] as MaybeIon<string | number | Falsey>;
+      const value = entry[key] as IonOr<string | number | Falsey>;
       if (isGetter(value)) {
         trackForRender(value, () => {
           queueInternalRender(() => {

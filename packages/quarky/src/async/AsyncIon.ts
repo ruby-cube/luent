@@ -6,6 +6,7 @@ import { AsyncNode } from "./ooo";
 import { createAtomicIon } from "../ion/AtomicIon";
 import { createMemoizedDerivation } from "../ion/DerivationIon";
 import { awaitsPrelude } from "../reactivity/IonicTask";
+import { untracked } from "../reactivity/Compound";
 
 export let $suspense: SuspenseIon
 export const [getAwaiting, suspenseStack] = AsyncState<SuspenseIon>('Suspense')
@@ -68,7 +69,7 @@ export type AsyncQuark = {
   cancelIfFetching(): boolean
   $promise: Ion<Promise<unknown>>
   $error: Ion<Error | null>
-  $resolved: Ion<boolean> // settled
+  $pending: Ion<boolean>
   $loaded: Ion<boolean>
   // status: 'loading' | 'refetching' | 'error' | 'fulfilled'
 }
@@ -79,15 +80,11 @@ export type $Async<T> = {
   [ASYNC_QUARK]: AsyncQuark & { $loaded: Ion<boolean> },
 
   error: null | Error,
-  pending: Promise<T>,
+  promised: Promise<T>,
   loaded: boolean,
-  resolved: boolean
+  ifPending: <T, U>(suspense: T, value?: U) => T | U | undefined
 
-  // then: Promise<T>['then']
-  // catch: Promise<T>['catch']
-  // finally: Promise<T>['finally']
-
-  status: 'loading' | 'refetching' | 'fulfilled' | 'erred'
+  status: 'fetching' | 'fulfilled' | 'erred:fetch' | 'dispatching' | 'erred:dispatch'
 
   // refetch(): void
   // cancel(): void
@@ -132,6 +129,7 @@ export type Awaited<T> = MutableIon<T | undefined> & $Async<T>
 
 type AsyncIonOptions<T = any, U = any> = {
   '-as'?: (value: T) => U,
+  // '-suspense'?: SuspenseIon
   // '-debounced'?: number
 }
 
@@ -457,7 +455,7 @@ type AsyncIonSetup<T = any, U = any> = {
 
 
 export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
-  const { initialState, fetch, wrap = o => o, '-awaited': awaited = true } = setup;
+  const { initialState, fetch, wrap = o => o } = setup;
 
   // Pending state
   let resolve: ((value: T | PromiseLike<T>) => void) | null;
@@ -478,22 +476,24 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
     return promise
   }
 
+
+
   const $state = createAtomicIon(initialState);
   const $loaded = createAtomicIon(false) as MutableIon<boolean>
-  const $resolved = createAtomicIon(false) as MutableIon<boolean>
+  const $pending = createAtomicIon(true) as MutableIon<boolean>
   const $error = createAtomicIon(null) as MutableIon<null | Error>
-  const $pending = createAtomicIon(Pending()) as MutableIon<Promise<T>>
+  const $promised = createAtomicIon(Pending()) as MutableIon<Promise<T>>
 
   const quark = {
-    $promise: $pending,
+    $promise: $promised,
     cancelIfFetching,
     $loaded,
     $error,
-    $resolved
+    $pending
   }
 
   const $fetched = createMemoizedDerivation(() => {
-    if (awaited !== false) emitAwait(quark)
+    untracked(() => emitAwait(quark))
     return $state()
   }, ({
     [ASYNC_QUARK]: quark,
@@ -501,33 +501,32 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
     get loaded() {
       return $loaded()
     },
-    get resolved() {
-      return $resolved()
-    },
+
     get error() {
       return $error()
     },
 
-    get pending() {
-      return $pending()
+    get promised() {
+      return $promised()
     },
+
+    ifPending,
 
     // then(onfulfilled, onrejected) {
     //   console.log('THEN', onfulfilled)
-    //   return $pending().then(onfulfilled, onrejected)
+    //   return $promised().then(onfulfilled, onrejected)
     // },
 
     // catch(onrejected) {
-    //   return $pending().catch(onrejected)
+    //   return $promised().catch(onrejected)
     // },
 
     // finally(onfinally) {
-    //   return $pending().finally(onfinally)
+    //   return $promised().finally(onfinally)
     // },
 
     get status() {
-      if (!$loaded()) return 'loading';
-      if (!$resolved()) return 'refetching';
+      if ($pending()) return 'fetching';
       if ($error()) return 'erred';
       return 'fulfilled'
     }
@@ -562,6 +561,13 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
     return false
   }
 
+
+  // ifPending
+
+  function ifPending<T, U>(suspense: T, value?: U): T | U | undefined {
+    return $pending() ? suspense : value
+  }
+
   // Observe
   awaitsPrelude(oo => {
     const promise = toPromise(fetch(oo)) as PromiseLike<any>
@@ -570,8 +576,8 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
     cancelIfFetching()
     pendingPromise = promise
     if (!resolve) {
-      $pending.value = Pending()
-      $resolved.value = false
+      $promised.value = Pending()
+      $pending.value = true
     }
 
     const p = promise.then(res => {
@@ -587,9 +593,9 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
         resolve = null;
         reject = null;
       }
-
+      console.log('setting async::', value, fetch)
       $state.value = value
-      $resolved.value = true
+      $pending.value = false
       $loaded.value = true
     })
 
@@ -602,7 +608,7 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
           reject = null
         }
         $error.value = toError(error)
-        $resolved.value = true
+        $pending.value = false
         $loaded.value = true
       })
     }

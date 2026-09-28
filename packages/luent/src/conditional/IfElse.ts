@@ -1,11 +1,11 @@
 import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getActiveFlask, getFlask } from "@luent/flask";
 import { AsyncRender, DOMNode, forEachNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, setUpNodeVine, toAsyncRender, VineNode } from "../node/VineNode"
 import { ViewType, If } from "./If";
-import { createMemoizedDerivation, getSuspenseCount, Ion, PRELUDE, awaitRender, queueTask, SuspenseIon, observe, trackForRender, queueInternalRender } from "@luent/quarky";
+import { createMemoizedDerivation, getSuspenseCount, Ion, PRELUDE, awaitRender, queueTask, SuspenseIon, observe, trackForRender, queueInternalRender, SUSPENSE_QUARK } from "@luent/quarky";
 import { Booleanny } from "@luent/types";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { __DEV__buildAsyncPath, TRACE } from "@luent/flask";
-import { FromTag, MaybeIon, RenderTag } from "../component/bindings-types";
+import { FromTag, IonOr, RenderTag } from "../component/bindings-types";
 import { isPlainObject } from "@luent/utils";
 import { unmarkInitialRender, markInitialRender, TransitionConfigs } from "../transitions/transitions";
 import { setTransition } from "../transitions/Transition";
@@ -15,7 +15,7 @@ export type ConditionalKit = {
   statementType: "if" | "elseIf" | "else";
   render: RenderFunction;
   type: ViewType | undefined;
-  $condition: MaybeIon<Booleanny>
+  $condition: IonOr<Booleanny>
   pending: SuspenseIon | undefined
   // discard: (() => void) | undefined
 }
@@ -194,7 +194,7 @@ export class IfElseKit extends VineNode {
       }
       else {
         // TODO: end suspense... need a way to do this without exposing .value to devs
-        suspense.value = null
+        suspense[SUSPENSE_QUARK].resolve()
         kit.awaitCache = rawOutput
         if (shouldDeactivatePrevious)
           this.deactivateConditional(prevKit);
@@ -279,7 +279,7 @@ export class IfElseKit extends VineNode {
 export type ConditionalStatement = {
   statementType: "if" | "elseIf" | "else";
   type: ViewType | undefined;
-  $condition: MaybeIon<Booleanny>
+  $condition: IonOr<Booleanny>
 }
 
 function getConditions(statements: ConditionalStatement[]) {

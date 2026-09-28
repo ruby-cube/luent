@@ -1,5 +1,5 @@
 import { awaitRender, queueTask, toValue } from "@luent/quarky"
-import { MaybeIon } from "../component/bindings-types"
+import { IonOr } from "../component/bindings-types"
 import { atAttach, atUnmount, beforeDetach } from "../flask/flask-hooks"
 import { setUpPositionTransition, setUpTransit } from "./transit"
 import { createStack } from "@luent/utils"
@@ -15,33 +15,33 @@ export function isTransitioningOut(flask: Flask) {
 }
 
 export interface TransitionBindings extends BaseTransitionBindings {
-  'in'?: true | MaybeIon<string>
-  'out'?: true | MaybeIon<string>
-  'from'?: MaybeIon<string>
-  'to'?: MaybeIon<string>
+  'in'?: true | IonOr<string>
+  'out'?: true | IonOr<string>
+  'from'?: IonOr<string>
+  'to'?: IonOr<string>
 }
 
 interface BaseTransitionBindings {
-  'animate-item'?: boolean | MaybeIon<string>
-  'transition-item'?: boolean | MaybeIon<string>
+  'animate-item'?: boolean | IonOr<string>
+  'transition-item'?: boolean | IonOr<string>
 
-  'transit-class'?: MaybeIon<string>
+  'transit-class'?: IonOr<string>
   'transit-key'?: any
   'transit-port'?: any
 
-  'animate-intro'?: true | MaybeIon<string>
-  'animate-in'?: true | MaybeIon<string>
-  'animate-out'?: true | MaybeIon<string>
+  'animate-intro'?: true | IonOr<string>
+  'animate-in'?: true | IonOr<string>
+  'animate-out'?: true | IonOr<string>
   'animate-in-out'?: true
 
-  'in-out'?: boolean | MaybeIon<string>
-  'from-to'?: MaybeIon<string>
+  'in-out'?: boolean | IonOr<string>
+  'from-to'?: IonOr<string>
 }
 export interface TransitionConfigs extends BaseTransitionBindings {
-  'transition-in'?: true | MaybeIon<string>
-  'transition-out'?: true | MaybeIon<string>
-  'transition-from'?: MaybeIon<string>
-  'transition-to'?: MaybeIon<string> // ?? TODO:
+  'transition-in'?: true | IonOr<string>
+  'transition-out'?: true | IonOr<string>
+  'transition-from'?: IonOr<string>
+  'transition-to'?: IonOr<string> // ?? TODO:
 }
 
 // TODO: add transition in and out classes like animate in out
@@ -148,11 +148,11 @@ export function setUpTransitions(node: HTMLElement, transitions: TransitionConfi
   const initialRender = isInitialRender()
   const animateInOut = transitions['animate-in-out']
   const animateIn = transitions['animate-in'] ?? animateInOut
-  const animateInClasses = animateIn === true ? useAnimateIn() : animateIn as MaybeIon<string>
+  const animateInClasses = animateIn === true ? useAnimateIn() : animateIn as IonOr<string>
   const animateOut = transitions['animate-out'] ?? animateInOut
   const animateOutClasses = animateOut === true ? useAnimateOut() : animateOut
   const animateIntro = transitions['animate-intro']
-  const animateIntroClasses = animateIntro === true ? animateInClasses : animateIntro as MaybeIon<string>
+  const animateIntroClasses = animateIntro === true ? animateInClasses : animateIntro as IonOr<string>
 
   const animateItem = transitions['animate-item']
   const animateItemClasses = animateItem === true ? undefined : animateItem

@@ -19,13 +19,13 @@ const eh = type<{
    hi: 'hi'
 }>
 
-type MaybeIon<T> = T | AtomicIon<T>
+type IonOr<T> = T | AtomicIon<T>
 
 type Huh = number | never
 
 const ALL = Symbol('normalize-all')
 
-const oh = toIon('hi' as MaybeIon<string>)
+const oh = toIon('hi' as IonOr<string>)
 
 
 export function Article({ content } = input({
@@ -46,12 +46,12 @@ export function Article({ content } = input({
 // Val
 
 // Ion
-// MaybeIon
+// IonOr
 // Ionized
 // MaybeIonized
 
 export function Bog(setup: {
-   name?: MaybeIon<string>,
+   name?: IonOr<string>,
    date: v<Date>,
    msg: v<string>,
    address: MaybeIonized<{ // must not have methods, will be auto-protected by Luent
@@ -133,9 +133,9 @@ function Tup<T extends unknown[]>(...args: T): T {
 
 type Ch = LastFnReturnType<[(v: unknown) => string, (v: unknown) => number]>
 
-type MaybeIon<T> = T | AtomicIon<T>;
+type IonOr<T> = T | AtomicIon<T>;
 
-function MaybeIon<T>(...args: T): MaybeIon<T> {
+function IonOr<T>(...args: T): IonOr<T> {
 
 }
 
@@ -172,17 +172,17 @@ export function Ho({ dog = 9, cat } = input({
 
 }
 
-function MaybeIon<T>() { }
+function IonOr<T>() { }
 
 const cleanupPropTypes = {
-   name: MaybeIon<string>('?'),
+   name: IonOr<string>('?'),
    name: $Ionized<string>,
    idea: Val<string | number>,
    $count: $Ion<string | number | undefined, {
       isEven: () => boolean,
       increment: () => void
    }>, // {nameB: AtomicIon<string | number | undefined>} 
-   nameC: MaybeIon<string | number>, // {nameB: AtomicIon<string | number> | undefined}
+   nameC: IonOr<string | number>, // {nameB: AtomicIon<string | number> | undefined}
    date: Date,
    chug: Ionized<{
       name: string
@@ -228,7 +228,7 @@ export function TestCleanupSchedulerJS({ $count, $frog, date, idea, name, nameC 
    )
 }
 
-// MaybeIon
+// IonOr
 // MaybeIonized
 // AtomicIon
 // Ionized
@@ -237,9 +237,9 @@ export function TestCleanupSchedulerJS({ $count, $frog, date, idea, name, nameC 
 
 
 export function TestCleanupSchedulerTS(setup = $setup({
-   name: ['?', MaybeIon<string>, defaultTo('hola'), recast(toString)],
+   name: ['?', IonOr<string>, defaultTo('hola'), recast(toString)],
    nameB: AtomicIon<string | number | undefined>, // {nameB: AtomicIon<string | number | undefined>} 
-   nameC: ['?', MaybeIon<string | number>], // {nameB: AtomicIon<string | number> | undefined}
+   nameC: ['?', IonOr<string | number>], // {nameB: AtomicIon<string | number> | undefined}
    date: Date,
    msg: Val<string>,
    message: Val<string | number>,

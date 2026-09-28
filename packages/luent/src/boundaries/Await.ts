@@ -71,9 +71,16 @@ export function Await(...awaited: [...any[], RawJSXNode | (($suspense: SuspenseI
         // awaitsSlot = true;
         try {
           pushAwaiting($suspense)
-          output = Slot($suspense)
+          output = Slot({
+            ifPending<T, U>(suspense: T, value?: U) {
+              return $suspense() ? suspense : value
+            },
+            $promised: $suspense[SUSPENSE_QUARK].$promise,
+            $suspense
+          })
         }
         finally {
+          console.log('QUARKS!!', awaitables)
           popAwaiting()
         }
       }
@@ -273,14 +280,15 @@ export function createAwaitSeries(
   const $renderPlaceholder = createAtomicIon(true)
 
   function syncPlaceholderState() {
-    const suspensePending = Boolean($suspense())
+    const pending = $suspense[SUSPENSE_QUARK].$pending()
     placeholder = renderPlaceholder()
-    $renderPlaceholder.value = suspensePending && !shouldHold()
+    $renderPlaceholder.value = pending && !shouldHold()
   }
 
   // NOTE: DO NOT USE HYBRID ION... the scheduling is not correct
   awaitsPrelude(oo => {
-    if ($renderPlaceholder() === Boolean(oo($suspense))) {
+    const $pending = $suspense[SUSPENSE_QUARK].$pending
+    if ($renderPlaceholder() === oo($pending)) {
       return;
     }
     syncPlaceholderState()

@@ -6,7 +6,7 @@ import { AnyObject, Booleanny } from "@luent/types";
 import { PortalNodeInput } from "../../boundaries/Portal";
 import { TransitionBindings, TransitionConfigs } from "../../transitions/transitions";
 import { matchEventTarget } from "../../events/target";
-import { MaybeIon } from "../../component/bindings-types";
+import { IonOr } from "../../component/bindings-types";
 import { LuentHooks } from "../../flask/template-hooks";
 import { ComponentRef } from "../../node/NodeRef";
 import { Provided } from "../../context/Context";
@@ -37,8 +37,8 @@ type CrossOrigin = "anonymous" | "use-credentials" | "" | undefined;
 type Booleanish = boolean | "true" | "false";
 type Falsey = undefined | null | false;
 
-type StyleInput = MaybeIon<string | Falsey> | MaybeIon<{ [K in keyof Partial<JSX.CSSProperties>]: MaybeIon<JSX.CSSProperties[K]> }>
-type ClassInput = MaybeIon<string> | MaybeIon<{ [key: string]: MaybeIon<Booleanny> }>
+type StyleInput = IonOr<string | Falsey> | IonOr<{ [K in keyof Partial<JSX.CSSProperties>]: IonOr<JSX.CSSProperties[K]> }>
+type ClassInput = IonOr<string> | IonOr<{ [key: string]: IonOr<Booleanny> }>
 
 
 export namespace JSX {
@@ -736,17 +736,17 @@ export namespace JSX {
   // ===================================================================  
 
   export interface GlobalAttributes {
-    microclass?: ClassInput | MaybeIon<string | Falsey> | (MaybeIon<string | Falsey> | ClassInput)[];
-    class?: ClassInput | MaybeIon<string | Falsey> | (MaybeIon<string | Falsey> | ClassInput)[];
+    microclass?: ClassInput | IonOr<string | Falsey> | (IonOr<string | Falsey> | ClassInput)[];
+    class?: ClassInput | IonOr<string | Falsey> | (IonOr<string | Falsey> | ClassInput)[];
     style?: StyleInput | StyleInput[];
 
-    autofocus?: MaybeIon<Booleanish | undefined>; // Automatically focuses the element
-    lang?: MaybeIon<string | undefined>; // Specifies the language of the element's content
-    id?: MaybeIon<string | undefined>;
-    tabindex?: MaybeIon<number | undefined>; // Defines the tab order of the element
+    autofocus?: IonOr<Booleanish | undefined>; // Automatically focuses the element
+    lang?: IonOr<string | undefined>; // Specifies the language of the element's content
+    id?: IonOr<string | undefined>;
+    tabindex?: IonOr<number | undefined>; // Defines the tab order of the element
 
     // WAI-ARIA
-    role?: MaybeIon<AriaRole | undefined>;
+    role?: IonOr<AriaRole | undefined>;
   }
 
   interface GlobalURLAttributes {
@@ -756,27 +756,27 @@ export namespace JSX {
 
   interface HTMLAttributes<T> extends AriaAttributes, GlobalAttributes, DOMAttributes<T> {
     // Standard HTML Attributes
-    contenteditable?: MaybeIon<Booleanish | "inherit" | "plaintext-only" | undefined>;
-    contextmenu?: MaybeIon<string | undefined>;
-    draggable?: MaybeIon<Booleanish | undefined>;
-    is?: MaybeIon<string | undefined>;
-    slot?: MaybeIon<string | undefined>;
-    spellcheck?: MaybeIon<Booleanish | undefined>;
-    translate?: MaybeIon<"yes" | "no" | undefined>;
-    nonce?: MaybeIon<string | undefined>; // A cryptographic nonce for inline scripts
-    part?: MaybeIon<string | undefined>; // Specifies parts of the element for styling
-    title?: MaybeIon<string | undefined>; // Additional information displayed as a tooltip
-    inert?: MaybeIon<Booleanish | undefined>; // Prevents user interaction with the element
-    itemid?: MaybeIon<string | undefined>; // Defines the item's ID in microdata
-    itemprop?: MaybeIon<string | undefined>; // Specifies the item's property in microdata
-    itemref?: MaybeIon<string | undefined>; // References additional microdata items
-    itemscope?: MaybeIon<Booleanish | undefined>; // Declares the scope of an item
-    itemtype?: MaybeIon<string | undefined>; // Specifies the type of an item in microdata
+    contenteditable?: IonOr<Booleanish | "inherit" | "plaintext-only" | undefined>;
+    contextmenu?: IonOr<string | undefined>;
+    draggable?: IonOr<Booleanish | undefined>;
+    is?: IonOr<string | undefined>;
+    slot?: IonOr<string | undefined>;
+    spellcheck?: IonOr<Booleanish | undefined>;
+    translate?: IonOr<"yes" | "no" | undefined>;
+    nonce?: IonOr<string | undefined>; // A cryptographic nonce for inline scripts
+    part?: IonOr<string | undefined>; // Specifies parts of the element for styling
+    title?: IonOr<string | undefined>; // Additional information displayed as a tooltip
+    inert?: IonOr<Booleanish | undefined>; // Prevents user interaction with the element
+    itemid?: IonOr<string | undefined>; // Defines the item's ID in microdata
+    itemprop?: IonOr<string | undefined>; // Specifies the item's property in microdata
+    itemref?: IonOr<string | undefined>; // References additional microdata items
+    itemscope?: IonOr<Booleanish | undefined>; // Declares the scope of an item
+    itemtype?: IonOr<string | undefined>; // Specifies the type of an item in microdata
 
-    accesskey?: MaybeIon<string | undefined>; // Defines a keyboard shortcut to activate/focus an element
-    autocapitalize?: MaybeIon<"off" | "none" | "on" | "sentences" | "words" | "characters" | undefined>; // Controls capitalization behavior
-    dir?: MaybeIon<"ltr" | "rtl" | "auto" | undefined>; // Specifies the text direction
-    enterkeyhint?: MaybeIon<
+    accesskey?: IonOr<string | undefined>; // Defines a keyboard shortcut to activate/focus an element
+    autocapitalize?: IonOr<"off" | "none" | "on" | "sentences" | "words" | "characters" | undefined>; // Controls capitalization behavior
+    dir?: IonOr<"ltr" | "rtl" | "auto" | undefined>; // Specifies the text direction
+    enterkeyhint?: IonOr<
       "enter"
       | "done"
       | "go"
@@ -785,50 +785,50 @@ export namespace JSX {
       | "search"
       | "send"
       | undefined>; // Hint for virtual keyboards
-    elementtiming?: MaybeIon<string>;
-    hidden?: MaybeIon<Booleanish | "until-found" | undefined>; // Hides the element
+    elementtiming?: IonOr<string>;
+    hidden?: IonOr<Booleanish | "until-found" | undefined>; // Hides the element
 
     // RDFa Attributes
-    about?: MaybeIon<string | undefined>;
-    content?: MaybeIon<string | undefined>;
-    datatype?: MaybeIon<string | undefined>;
-    inlist?: MaybeIon<unknown>;
-    prefix?: MaybeIon<string | undefined>;
-    property?: MaybeIon<string | undefined>;
-    rel?: MaybeIon<string | undefined>;
-    resource?: MaybeIon<string | undefined>;
-    rev?: MaybeIon<string | undefined>;
-    typeof?: MaybeIon<string | undefined>;
-    vocab?: MaybeIon<string | undefined>;
+    about?: IonOr<string | undefined>;
+    content?: IonOr<string | undefined>;
+    datatype?: IonOr<string | undefined>;
+    inlist?: IonOr<unknown>;
+    prefix?: IonOr<string | undefined>;
+    property?: IonOr<string | undefined>;
+    rel?: IonOr<string | undefined>;
+    resource?: IonOr<string | undefined>;
+    rev?: IonOr<string | undefined>;
+    typeof?: IonOr<string | undefined>;
+    vocab?: IonOr<string | undefined>;
 
     /**
      * Non-standard attribute
      */
-    autocorrect?: MaybeIon<string | undefined>;
+    autocorrect?: IonOr<string | undefined>;
     /**
      * Non-standard attribute
      */
-    autosave?: MaybeIon<string | undefined>;
+    autosave?: IonOr<string | undefined>;
     /**
      * Non-standard attribute
      */
-    color?: MaybeIon<string | undefined>;
+    color?: IonOr<string | undefined>;
     /**
      * Non-standard attribute
      */
-    results?: MaybeIon<number | undefined>;
+    results?: IonOr<number | undefined>;
     /**
      * Non-standard attribute
      */
-    security?: MaybeIon<string | undefined>;
+    security?: IonOr<string | undefined>;
     /**
      * Non-standard attribute
      */
-    unselectable?: MaybeIon<"on" | "off" | undefined>;
+    unselectable?: IonOr<"on" | "off" | undefined>;
     /**
      * Non-standard attribute
      */
-    anchor?: MaybeIon<string>;
+    anchor?: IonOr<string>;
 
 
 
@@ -838,30 +838,30 @@ export namespace JSX {
      * Hints at the type of data that might be entered by the user while editing the element or its contents
      * @see {@link https://html.spec.whatwg.org/multipage/interaction.html#input-modalities:-the-inputmode-attribute}
      */
-    inputmode?: MaybeIon<"none" | "text" | "tel" | "url" | "email" | "numeric" | "decimal" | "search" | undefined>;
+    inputmode?: IonOr<"none" | "text" | "tel" | "url" | "email" | "numeric" | "decimal" | "search" | undefined>;
     /**
      * Specify that a standard HTML element should behave like a defined custom built-in element
      * @see {@link https://html.spec.whatwg.org/multipage/custom-elements.html#attr-is}
      */
 
-    exportparts?: MaybeIon<string>;
-    popover?: MaybeIon<'auto' | 'hint' | 'manual' | true>;
-    writingsuggestions?: MaybeIon<Booleanish>;
+    exportparts?: IonOr<string>;
+    popover?: IonOr<'auto' | 'hint' | 'manual' | true>;
+    writingsuggestions?: IonOr<Booleanish>;
 
     /**
      * Experimental
      */
-    virtualkeyboardpolicyExperimental?: MaybeIon<'auto' | 'manual'>;
+    virtualkeyboardpolicyExperimental?: IonOr<'auto' | 'manual'>;
 
     //  /**
     //   * DOM Property
     //   */
-    //  scrollTop?: MaybeIon<number | undefined>;
+    //  scrollTop?: IonOr<number | undefined>;
 
     //  /**
     //   * DOM Property
     //   */
-    //  scrollLeft?: MaybeIon<number | undefined>;
+    //  scrollLeft?: IonOr<number | undefined>;
   }
 
 
@@ -873,108 +873,108 @@ export namespace JSX {
 
   // interface AllHTMLAttributes<T> extends HTMLAttributes<T> {
   //    // Standard HTML Attributes
-  //    accept?: MaybeIon<string | undefined>;
-  //    acceptCharset?: MaybeIon<string | undefined>;
-  //    action?: MaybeIon<string | undefined>;
-  //    allowFullScreen?: MaybeIon<Booleanish | undefined>;
-  //    allowTransparency?: MaybeIon<Booleanish | undefined>;
-  //    alt?: MaybeIon<string | undefined>;
-  //    as?: MaybeIon<string | undefined>;
-  //    async?: MaybeIon<Booleanish | undefined>;
-  //    autoComplete?: MaybeIon<string | undefined>;
-  //    autoPlay?: MaybeIon<Booleanish | undefined>;
-  //    capture?: MaybeIon<Booleanish | "user" | "environment" | undefined>;
-  //    cellPadding?: MaybeIon<number | string | undefined>;
-  //    cellSpacing?: MaybeIon<number | string | undefined>;
-  //    charSet?: MaybeIon<string | undefined>;
-  //    challenge?: MaybeIon<string | undefined>;
-  //    checked?: MaybeIon<Booleanish | undefined>;
-  //    cite?: MaybeIon<string | undefined>;
-  //    classID?: MaybeIon<string | undefined>;
-  //    cols?: MaybeIon<number | undefined>;
-  //    colSpan?: MaybeIon<number | undefined>;
-  //    controls?: MaybeIon<Booleanish | undefined>;
-  //    coords?: MaybeIon<string | undefined>;
-  //    crossorigin?: MaybeIon<CrossOrigin>;
-  //    data?: MaybeIon<string | undefined>;
-  //    dateTime?: MaybeIon<string | undefined>;
-  //    default?: MaybeIon<Booleanish | undefined>;
-  //    defer?: MaybeIon<Booleanish | undefined>;
-  //    disabled?: MaybeIon<Booleanish | undefined>;
-  //    download?: MaybeIon<unknown>;
-  //    encType?: MaybeIon<string | undefined>;
-  //    form?: MaybeIon<string | undefined>;
-  //    formAction?: MaybeIon<string | undefined>;
-  //    formEncType?: MaybeIon<string | undefined>;
-  //    formMethod?: MaybeIon<string | undefined>;
-  //    formNoValidate?: MaybeIon<Booleanish | undefined>;
-  //    formTarget?: MaybeIon<string | undefined>;
-  //    frameBorder?: MaybeIon<number | string | undefined>;
-  //    headers?: MaybeIon<string | undefined>;
-  //    height?: MaybeIon<number | string | undefined>;
-  //    high?: MaybeIon<number | undefined>;
-  //    href?: MaybeIon<string | undefined>;
-  //    hrefLang?: MaybeIon<string | undefined>;
-  //    htmlFor?: MaybeIon<string | undefined>;
-  //    httpEquiv?: MaybeIon<string | undefined>;
-  //    integrity?: MaybeIon<string | undefined>;
-  //    keyParams?: MaybeIon<string | undefined>;
-  //    keyType?: MaybeIon<string | undefined>;
-  //    kind?: MaybeIon<string | undefined>;
-  //    label?: MaybeIon<string | undefined>;
-  //    list?: MaybeIon<string | undefined>;
-  //    loop?: MaybeIon<Booleanish | undefined>;
-  //    low?: MaybeIon<number | undefined>;
-  //    manifest?: MaybeIon<string | undefined>;
-  //    marginHeight?: MaybeIon<number | undefined>;
-  //    marginWidth?: MaybeIon<number | undefined>;
-  //    max?: MaybeIon<number | string | undefined>;
-  //    maxLength?: MaybeIon<number | undefined>;
-  //    media?: MaybeIon<string | undefined>;
-  //    mediaGroup?: MaybeIon<string | undefined>;
-  //    method?: MaybeIon<string | undefined>;
-  //    min?: MaybeIon<number | string | undefined>;
-  //    minLength?: MaybeIon<number | undefined>;
-  //    multiple?: MaybeIon<Booleanish | undefined>;
-  //    muted?: MaybeIon<Booleanish | undefined>;
-  //    name?: MaybeIon<string | undefined>;
-  //    noValidate?: MaybeIon<Booleanish | undefined>;
-  //    open?: MaybeIon<Booleanish | undefined>;
-  //    optimum?: MaybeIon<number | undefined>;
-  //    pattern?: MaybeIon<string | undefined>;
-  //    placeholder?: MaybeIon<string | undefined>;
-  //    playsInline?: MaybeIon<Booleanish | undefined>;
-  //    poster?: MaybeIon<string | undefined>;
-  //    preload?: MaybeIon<string | undefined>;
-  //    readOnly?: MaybeIon<Booleanish | undefined>;
-  //    required?: MaybeIon<Booleanish | undefined>;
-  //    reversed?: MaybeIon<Booleanish | undefined>;
-  //    rows?: MaybeIon<number | undefined>;
-  //    rowSpan?: MaybeIon<number | undefined>;
-  //    sandbox?: MaybeIon<string | undefined>;
-  //    scope?: MaybeIon<string | undefined>;
-  //    scoped?: MaybeIon<Booleanish | undefined>;
-  //    scrolling?: MaybeIon<string | undefined>;
-  //    seamless?: MaybeIon<Booleanish | undefined>;
-  //    selected?: MaybeIon<Booleanish | undefined>;
-  //    shape?: MaybeIon<string | undefined>;
-  //    size?: MaybeIon<number | undefined>;
-  //    sizes?: MaybeIon<string | undefined>;
-  //    span?: MaybeIon<number | undefined>;
-  //    src?: MaybeIon<string | undefined>;
-  //    srcDoc?: MaybeIon<string | undefined>;
-  //    srcLang?: MaybeIon<string | undefined>;
-  //    srcSet?: MaybeIon<string | undefined>;
-  //    start?: MaybeIon<number | undefined>;
-  //    step?: MaybeIon<number | string | undefined>;
-  //    summary?: MaybeIon<string | undefined>;
-  //    target?: MaybeIon<string | undefined>;
-  //    type?: MaybeIon<string | undefined>;
-  //    useMap?: MaybeIon<string | undefined>;
-  //    value?: MaybeIon<string | readonly string[] | number | undefined>;
-  //    width?: MaybeIon<number | string | undefined>;
-  //    wmode?: MaybeIon<string | undefined>;
-  //    wrap?: MaybeIon<string | undefined>;
+  //    accept?: IonOr<string | undefined>;
+  //    acceptCharset?: IonOr<string | undefined>;
+  //    action?: IonOr<string | undefined>;
+  //    allowFullScreen?: IonOr<Booleanish | undefined>;
+  //    allowTransparency?: IonOr<Booleanish | undefined>;
+  //    alt?: IonOr<string | undefined>;
+  //    as?: IonOr<string | undefined>;
+  //    async?: IonOr<Booleanish | undefined>;
+  //    autoComplete?: IonOr<string | undefined>;
+  //    autoPlay?: IonOr<Booleanish | undefined>;
+  //    capture?: IonOr<Booleanish | "user" | "environment" | undefined>;
+  //    cellPadding?: IonOr<number | string | undefined>;
+  //    cellSpacing?: IonOr<number | string | undefined>;
+  //    charSet?: IonOr<string | undefined>;
+  //    challenge?: IonOr<string | undefined>;
+  //    checked?: IonOr<Booleanish | undefined>;
+  //    cite?: IonOr<string | undefined>;
+  //    classID?: IonOr<string | undefined>;
+  //    cols?: IonOr<number | undefined>;
+  //    colSpan?: IonOr<number | undefined>;
+  //    controls?: IonOr<Booleanish | undefined>;
+  //    coords?: IonOr<string | undefined>;
+  //    crossorigin?: IonOr<CrossOrigin>;
+  //    data?: IonOr<string | undefined>;
+  //    dateTime?: IonOr<string | undefined>;
+  //    default?: IonOr<Booleanish | undefined>;
+  //    defer?: IonOr<Booleanish | undefined>;
+  //    disabled?: IonOr<Booleanish | undefined>;
+  //    download?: IonOr<unknown>;
+  //    encType?: IonOr<string | undefined>;
+  //    form?: IonOr<string | undefined>;
+  //    formAction?: IonOr<string | undefined>;
+  //    formEncType?: IonOr<string | undefined>;
+  //    formMethod?: IonOr<string | undefined>;
+  //    formNoValidate?: IonOr<Booleanish | undefined>;
+  //    formTarget?: IonOr<string | undefined>;
+  //    frameBorder?: IonOr<number | string | undefined>;
+  //    headers?: IonOr<string | undefined>;
+  //    height?: IonOr<number | string | undefined>;
+  //    high?: IonOr<number | undefined>;
+  //    href?: IonOr<string | undefined>;
+  //    hrefLang?: IonOr<string | undefined>;
+  //    htmlFor?: IonOr<string | undefined>;
+  //    httpEquiv?: IonOr<string | undefined>;
+  //    integrity?: IonOr<string | undefined>;
+  //    keyParams?: IonOr<string | undefined>;
+  //    keyType?: IonOr<string | undefined>;
+  //    kind?: IonOr<string | undefined>;
+  //    label?: IonOr<string | undefined>;
+  //    list?: IonOr<string | undefined>;
+  //    loop?: IonOr<Booleanish | undefined>;
+  //    low?: IonOr<number | undefined>;
+  //    manifest?: IonOr<string | undefined>;
+  //    marginHeight?: IonOr<number | undefined>;
+  //    marginWidth?: IonOr<number | undefined>;
+  //    max?: IonOr<number | string | undefined>;
+  //    maxLength?: IonOr<number | undefined>;
+  //    media?: IonOr<string | undefined>;
+  //    mediaGroup?: IonOr<string | undefined>;
+  //    method?: IonOr<string | undefined>;
+  //    min?: IonOr<number | string | undefined>;
+  //    minLength?: IonOr<number | undefined>;
+  //    multiple?: IonOr<Booleanish | undefined>;
+  //    muted?: IonOr<Booleanish | undefined>;
+  //    name?: IonOr<string | undefined>;
+  //    noValidate?: IonOr<Booleanish | undefined>;
+  //    open?: IonOr<Booleanish | undefined>;
+  //    optimum?: IonOr<number | undefined>;
+  //    pattern?: IonOr<string | undefined>;
+  //    placeholder?: IonOr<string | undefined>;
+  //    playsInline?: IonOr<Booleanish | undefined>;
+  //    poster?: IonOr<string | undefined>;
+  //    preload?: IonOr<string | undefined>;
+  //    readOnly?: IonOr<Booleanish | undefined>;
+  //    required?: IonOr<Booleanish | undefined>;
+  //    reversed?: IonOr<Booleanish | undefined>;
+  //    rows?: IonOr<number | undefined>;
+  //    rowSpan?: IonOr<number | undefined>;
+  //    sandbox?: IonOr<string | undefined>;
+  //    scope?: IonOr<string | undefined>;
+  //    scoped?: IonOr<Booleanish | undefined>;
+  //    scrolling?: IonOr<string | undefined>;
+  //    seamless?: IonOr<Booleanish | undefined>;
+  //    selected?: IonOr<Booleanish | undefined>;
+  //    shape?: IonOr<string | undefined>;
+  //    size?: IonOr<number | undefined>;
+  //    sizes?: IonOr<string | undefined>;
+  //    span?: IonOr<number | undefined>;
+  //    src?: IonOr<string | undefined>;
+  //    srcDoc?: IonOr<string | undefined>;
+  //    srcLang?: IonOr<string | undefined>;
+  //    srcSet?: IonOr<string | undefined>;
+  //    start?: IonOr<number | undefined>;
+  //    step?: IonOr<number | string | undefined>;
+  //    summary?: IonOr<string | undefined>;
+  //    target?: IonOr<string | undefined>;
+  //    type?: IonOr<string | undefined>;
+  //    useMap?: IonOr<string | undefined>;
+  //    value?: IonOr<string | readonly string[] | number | undefined>;
+  //    width?: IonOr<number | string | undefined>;
+  //    wmode?: IonOr<string | undefined>;
+  //    wrap?: IonOr<string | undefined>;
   // }
 
   type HTMLAttributeReferrerPolicy =
@@ -997,158 +997,158 @@ export namespace JSX {
 
 
   interface BaseHTMLAttributes<T> extends HTMLAttributes<T> {
-    href?: MaybeIon<string | undefined>;
-    target?: MaybeIon<string | undefined>;
+    href?: IonOr<string | undefined>;
+    target?: IonOr<string | undefined>;
   }
 
   interface AnchorHTMLAttributes<T> extends HTMLAttributes<T> {
-    download?: MaybeIon<unknown>;
-    href?: MaybeIon<string | undefined>;
-    hreflang?: MaybeIon<string | undefined>;
-    media?: MaybeIon<string | undefined>;
-    ping?: MaybeIon<string | undefined>;
-    target?: MaybeIon<HTMLAttributeAnchorTarget | undefined>;
-    type?: MaybeIon<string | undefined>;
-    referrerpolicy?: MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
+    download?: IonOr<unknown>;
+    href?: IonOr<string | undefined>;
+    hreflang?: IonOr<string | undefined>;
+    media?: IonOr<string | undefined>;
+    ping?: IonOr<string | undefined>;
+    target?: IonOr<HTMLAttributeAnchorTarget | undefined>;
+    type?: IonOr<string | undefined>;
+    referrerpolicy?: IonOr<HTMLAttributeReferrerPolicy | undefined>;
   }
 
   interface AudioHTMLAttributes<T> extends MediaHTMLAttributes<T> { }
 
   interface AreaHTMLAttributes<T> extends HTMLAttributes<T> {
-    alt?: MaybeIon<string | undefined>;
-    coords?: MaybeIon<string | undefined>;
-    download?: MaybeIon<unknown>;
-    href?: MaybeIon<string | undefined>;
-    hreflang?: MaybeIon<string | undefined>;
-    media?: MaybeIon<string | undefined>;
-    referrerpolicy?: MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
-    shape?: MaybeIon<string | undefined>;
-    target?: MaybeIon<string | undefined>;
-    ping?: MaybeIon<string | undefined>;
-    type?: MaybeIon<string | undefined>;
+    alt?: IonOr<string | undefined>;
+    coords?: IonOr<string | undefined>;
+    download?: IonOr<unknown>;
+    href?: IonOr<string | undefined>;
+    hreflang?: IonOr<string | undefined>;
+    media?: IonOr<string | undefined>;
+    referrerpolicy?: IonOr<HTMLAttributeReferrerPolicy | undefined>;
+    shape?: IonOr<string | undefined>;
+    target?: IonOr<string | undefined>;
+    ping?: IonOr<string | undefined>;
+    type?: IonOr<string | undefined>;
   }
 
   interface BlockquoteHTMLAttributes<T> extends HTMLAttributes<T> {
-    cite?: MaybeIon<string | undefined>;
+    cite?: IonOr<string | undefined>;
   }
 
   interface ButtonHTMLAttributes<T> extends HTMLAttributes<T> {
-    disabled?: MaybeIon<Booleanish | undefined>;
-    form?: MaybeIon<string | undefined>;
-    formaction?: MaybeIon<string | undefined>;
-    formenctype?: MaybeIon<string | undefined>;
-    formmethod?: MaybeIon<string | undefined>;
-    formnovalidate?: MaybeIon<Booleanish | undefined>;
-    formtarget?: MaybeIon<string | undefined>;
-    name?: MaybeIon<string | undefined>;
-    popovertarget?: MaybeIon<string>;
-    popovertargetaction?: MaybeIon<string>;
-    type?: MaybeIon<"submit" | "reset" | "button" | undefined | string>;
-    value?: MaybeIon<string | readonly string[] | number | undefined>;
+    disabled?: IonOr<Booleanish | undefined>;
+    form?: IonOr<string | undefined>;
+    formaction?: IonOr<string | undefined>;
+    formenctype?: IonOr<string | undefined>;
+    formmethod?: IonOr<string | undefined>;
+    formnovalidate?: IonOr<Booleanish | undefined>;
+    formtarget?: IonOr<string | undefined>;
+    name?: IonOr<string | undefined>;
+    popovertarget?: IonOr<string>;
+    popovertargetaction?: IonOr<string>;
+    type?: IonOr<"submit" | "reset" | "button" | undefined | string>;
+    value?: IonOr<string | readonly string[] | number | undefined>;
   }
 
   interface CanvasHTMLAttributes<T> extends HTMLAttributes<T> {
-    height?: MaybeIon<number | string | undefined>;
-    width?: MaybeIon<number | string | undefined>;
+    height?: IonOr<number | string | undefined>;
+    width?: IonOr<number | string | undefined>;
   }
 
   interface ColHTMLAttributes<T> extends HTMLAttributes<T> {
-    span?: MaybeIon<number | undefined>;
-    width?: MaybeIon<number | string | undefined>;
+    span?: IonOr<number | undefined>;
+    width?: IonOr<number | string | undefined>;
   }
 
   interface ColgroupHTMLAttributes<T> extends HTMLAttributes<T> {
-    span?: MaybeIon<number | undefined>;
+    span?: IonOr<number | undefined>;
   }
 
   interface DataHTMLAttributes<T> extends HTMLAttributes<T> {
-    value?: MaybeIon<string | readonly string[] | number | undefined>;
+    value?: IonOr<string | readonly string[] | number | undefined>;
   }
 
   interface DetailsHTMLAttributes<T> extends HTMLAttributes<T> {
-    open?: MaybeIon<Booleanish | undefined>;
-    name?: MaybeIon<string | undefined>;
+    open?: IonOr<Booleanish | undefined>;
+    name?: IonOr<string | undefined>;
   }
 
   interface DelHTMLAttributes<T> extends HTMLAttributes<T> {
-    cite?: MaybeIon<string | undefined>;
-    datetime?: MaybeIon<string | undefined>;
+    cite?: IonOr<string | undefined>;
+    datetime?: IonOr<string | undefined>;
   }
 
   interface DialogHTMLAttributes<T> extends HTMLAttributes<T> {
-    open?: MaybeIon<Booleanish | undefined>;
-    closedby?: MaybeIon<'any' | 'closerequest' | 'none'>
+    open?: IonOr<Booleanish | undefined>;
+    closedby?: IonOr<'any' | 'closerequest' | 'none'>
     'on:cancel'?: HandleEvent<T> | undefined;
     'on:close'?: HandleEvent<T> | undefined;
   }
 
   interface EmbedHTMLAttributes<T> extends HTMLAttributes<T> {
-    height?: MaybeIon<number | string | undefined>;
-    src?: MaybeIon<string | undefined>;
-    type?: MaybeIon<string | undefined>;
-    width?: MaybeIon<number | string | undefined>;
+    height?: IonOr<number | string | undefined>;
+    src?: IonOr<string | undefined>;
+    type?: IonOr<string | undefined>;
+    width?: IonOr<number | string | undefined>;
   }
 
   interface FieldsetHTMLAttributes<T> extends HTMLAttributes<T> {
-    disabled?: MaybeIon<Booleanish | undefined>;
-    form?: MaybeIon<string | undefined>;
-    name?: MaybeIon<string | undefined>;
+    disabled?: IonOr<Booleanish | undefined>;
+    form?: IonOr<string | undefined>;
+    name?: IonOr<string | undefined>;
   }
 
   interface FormHTMLAttributes<T> extends HTMLAttributes<T> {
-    'accept-charset'?: MaybeIon<string | undefined>;
+    'accept-charset'?: IonOr<string | undefined>;
     /**
      * DOM Property
      */
-    action?: MaybeIon<string | undefined>;
-    autocomplete?: MaybeIon<string | undefined>;
-    enctype?: MaybeIon<string | undefined>;
-    method?: MaybeIon<string | undefined>;
-    name?: MaybeIon<string | undefined>;
-    novalidate?: MaybeIon<Booleanish | undefined>;
-    target?: MaybeIon<string | undefined>;
+    action?: IonOr<string | undefined>;
+    autocomplete?: IonOr<string | undefined>;
+    enctype?: IonOr<string | undefined>;
+    method?: IonOr<string | undefined>;
+    name?: IonOr<string | undefined>;
+    novalidate?: IonOr<Booleanish | undefined>;
+    target?: IonOr<string | undefined>;
   }
 
   interface HtmlHTMLAttributes<T> extends HTMLAttributes<T> {
-    manifest?: MaybeIon<string | undefined>;
+    manifest?: IonOr<string | undefined>;
   }
 
   interface IframeHTMLAttributes<T> extends HTMLAttributes<T> {
-    allow?: MaybeIon<string | undefined>;
-    allowfullscreen?: MaybeIon<Booleanish | undefined>;
-    height?: MaybeIon<number | string | undefined>;
+    allow?: IonOr<string | undefined>;
+    allowfullscreen?: IonOr<Booleanish | undefined>;
+    height?: IonOr<number | string | undefined>;
     /**
      * DOM Property
      */
-    loading?: MaybeIon<"eager" | "lazy" | undefined>;
-    name?: MaybeIon<string | undefined>;
-    referrerpolicy?: MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
-    sandbox?: MaybeIon<string | undefined>;
-    seamless?: MaybeIon<Booleanish | undefined>;
-    src?: MaybeIon<string | undefined>;
-    srcdoc?: MaybeIon<string | undefined>;
-    width?: MaybeIon<number | string | undefined>;
+    loading?: IonOr<"eager" | "lazy" | undefined>;
+    name?: IonOr<string | undefined>;
+    referrerpolicy?: IonOr<HTMLAttributeReferrerPolicy | undefined>;
+    sandbox?: IonOr<string | undefined>;
+    seamless?: IonOr<Booleanish | undefined>;
+    src?: IonOr<string | undefined>;
+    srcdoc?: IonOr<string | undefined>;
+    width?: IonOr<number | string | undefined>;
   }
 
   interface ImgHTMLAttributes<T> extends HTMLAttributes<T> {
-    alt?: MaybeIon<string | undefined>;
-    crossorigin?: MaybeIon<CrossOrigin>;
-    ismap?: MaybeIon<Booleanish>
-    decoding?: MaybeIon<"async" | "auto" | "sync" | undefined>;
-    fetchpriority?: MaybeIon<"high" | "low" | "auto">;
-    height?: MaybeIon<number | string | undefined>;
-    loading?: MaybeIon<"eager" | "lazy" | undefined>;
-    referrerpolicy?: MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
-    sizes?: MaybeIon<string | undefined>;
-    src?: MaybeIon<string | undefined>;
-    srcset?: MaybeIon<string | undefined>;
-    usemap?: MaybeIon<string | undefined>;
-    width?: MaybeIon<number | string | undefined>;
+    alt?: IonOr<string | undefined>;
+    crossorigin?: IonOr<CrossOrigin>;
+    ismap?: IonOr<Booleanish>
+    decoding?: IonOr<"async" | "auto" | "sync" | undefined>;
+    fetchpriority?: IonOr<"high" | "low" | "auto">;
+    height?: IonOr<number | string | undefined>;
+    loading?: IonOr<"eager" | "lazy" | undefined>;
+    referrerpolicy?: IonOr<HTMLAttributeReferrerPolicy | undefined>;
+    sizes?: IonOr<string | undefined>;
+    src?: IonOr<string | undefined>;
+    srcset?: IonOr<string | undefined>;
+    usemap?: IonOr<string | undefined>;
+    width?: IonOr<number | string | undefined>;
   }
 
   interface InsHTMLAttributes<T> extends HTMLAttributes<T> {
-    cite?: MaybeIon<string | undefined>;
-    datetime?: MaybeIon<string | undefined>;
+    cite?: IonOr<string | undefined>;
+    datetime?: IonOr<string | undefined>;
   }
 
   type HTMLInputTypeAttribute =
@@ -1239,39 +1239,39 @@ export namespace JSX {
   type HTMLInputAutoCompleteAttribute = AutoFill | (string & {});
 
   interface InputHTMLAttributes<T> extends HTMLAttributes<T> {
-    accept?: MaybeIon<string | undefined>;
-    alt?: MaybeIon<string | undefined>;
-    autocomplete?: MaybeIon<HTMLInputAutoCompleteAttribute | undefined>;
-    capture?: MaybeIon<Booleanish | "user" | "environment" | undefined>; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
-    checked?: MaybeIon<Booleanish | undefined>;
-    dirname?: MaybeIon<string | undefined>;
-    disabled?: MaybeIon<Booleanish | undefined>;
-    form?: MaybeIon<string | undefined>;
-    formaction?: MaybeIon<string | undefined>;
-    formenctype?: MaybeIon<string | undefined>;
-    formmethod?: MaybeIon<string | undefined>;
-    formnovalidate?: MaybeIon<Booleanish | undefined>;
-    formtarget?: MaybeIon<string | undefined>;
-    height?: MaybeIon<number | string | undefined>;
-    list?: MaybeIon<string | undefined>;
-    max?: MaybeIon<number | string | undefined>;
-    maxlength?: MaybeIon<number | undefined>;
-    min?: MaybeIon<number | string | undefined>;
-    minlength?: MaybeIon<number | undefined>;
-    multiple?: MaybeIon<Booleanish | undefined>;
-    name?: MaybeIon<string | undefined>;
-    pattern?: MaybeIon<string | undefined>;
-    placeholder?: MaybeIon<string | undefined>;
-    popovertarget?: MaybeIon<string>;
-    popovertargetaction?: MaybeIon<string>;
-    readonly?: MaybeIon<Booleanish | undefined>;
-    required?: MaybeIon<Booleanish | undefined>;
-    size?: MaybeIon<number | undefined>;
-    src?: MaybeIon<string | undefined>;
-    step?: MaybeIon<number | string | undefined>;
-    type?: MaybeIon<HTMLInputTypeAttribute | undefined>;
-    value?: MaybeIon<string | readonly string[] | number | undefined>;
-    width?: MaybeIon<number | string | undefined>;
+    accept?: IonOr<string | undefined>;
+    alt?: IonOr<string | undefined>;
+    autocomplete?: IonOr<HTMLInputAutoCompleteAttribute | undefined>;
+    capture?: IonOr<Booleanish | "user" | "environment" | undefined>; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
+    checked?: IonOr<Booleanish | undefined>;
+    dirname?: IonOr<string | undefined>;
+    disabled?: IonOr<Booleanish | undefined>;
+    form?: IonOr<string | undefined>;
+    formaction?: IonOr<string | undefined>;
+    formenctype?: IonOr<string | undefined>;
+    formmethod?: IonOr<string | undefined>;
+    formnovalidate?: IonOr<Booleanish | undefined>;
+    formtarget?: IonOr<string | undefined>;
+    height?: IonOr<number | string | undefined>;
+    list?: IonOr<string | undefined>;
+    max?: IonOr<number | string | undefined>;
+    maxlength?: IonOr<number | undefined>;
+    min?: IonOr<number | string | undefined>;
+    minlength?: IonOr<number | undefined>;
+    multiple?: IonOr<Booleanish | undefined>;
+    name?: IonOr<string | undefined>;
+    pattern?: IonOr<string | undefined>;
+    placeholder?: IonOr<string | undefined>;
+    popovertarget?: IonOr<string>;
+    popovertargetaction?: IonOr<string>;
+    readonly?: IonOr<Booleanish | undefined>;
+    required?: IonOr<Booleanish | undefined>;
+    size?: IonOr<number | undefined>;
+    src?: IonOr<string | undefined>;
+    step?: IonOr<number | string | undefined>;
+    type?: IonOr<HTMLInputTypeAttribute | undefined>;
+    value?: IonOr<string | readonly string[] | number | undefined>;
+    width?: IonOr<number | string | undefined>;
 
     'mu:value'?: Quarky.MutableIon<unknown>
     'mu:checked'?: Quarky.MutableIon<Booleanny>
@@ -1282,266 +1282,266 @@ export namespace JSX {
    * DEPRECATED
    */
   interface KeygenHTMLAttributes<T> extends HTMLAttributes<T> {
-    challenge?: MaybeIon<string | undefined>;
-    disabled?: MaybeIon<Booleanish | undefined>;
-    form?: MaybeIon<string | undefined>;
-    keytype?: MaybeIon<string | undefined>;
-    keyparams?: MaybeIon<string | undefined>;
-    name?: MaybeIon<string | undefined>;
+    challenge?: IonOr<string | undefined>;
+    disabled?: IonOr<Booleanish | undefined>;
+    form?: IonOr<string | undefined>;
+    keytype?: IonOr<string | undefined>;
+    keyparams?: IonOr<string | undefined>;
+    name?: IonOr<string | undefined>;
   }
 
   interface LabelHTMLAttributes<T> extends HTMLAttributes<T> {
-    form?: MaybeIon<string | undefined>;
-    for?: MaybeIon<string | undefined>;
+    form?: IonOr<string | undefined>;
+    for?: IonOr<string | undefined>;
   }
 
   interface LiHTMLAttributes<T> extends HTMLAttributes<T> {
-    value?: MaybeIon<string | readonly string[] | number | undefined>;
+    value?: IonOr<string | readonly string[] | number | undefined>;
   }
 
   interface LinkHTMLAttributes<T> extends HTMLAttributes<T> {
-    as?: MaybeIon<string | undefined>;
-    blocking?: MaybeIon<string | undefined>;
-    crossorigin?: MaybeIon<CrossOrigin>;
-    fetchpriority?: MaybeIon<"high" | "low" | "auto">;
-    href?: MaybeIon<string | undefined>;
-    hreflang?: MaybeIon<string | undefined>;
-    integrity?: MaybeIon<string | undefined>;
-    media?: MaybeIon<string | undefined>;
-    imagesrcset?: MaybeIon<string | undefined>;
-    imagesizes?: MaybeIon<string | undefined>;
-    referrerpolicy?: MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
-    sizes?: MaybeIon<string | undefined>;
-    type?: MaybeIon<string | undefined>;
-    charset?: MaybeIon<string | undefined>;
+    as?: IonOr<string | undefined>;
+    blocking?: IonOr<string | undefined>;
+    crossorigin?: IonOr<CrossOrigin>;
+    fetchpriority?: IonOr<"high" | "low" | "auto">;
+    href?: IonOr<string | undefined>;
+    hreflang?: IonOr<string | undefined>;
+    integrity?: IonOr<string | undefined>;
+    media?: IonOr<string | undefined>;
+    imagesrcset?: IonOr<string | undefined>;
+    imagesizes?: IonOr<string | undefined>;
+    referrerpolicy?: IonOr<HTMLAttributeReferrerPolicy | undefined>;
+    sizes?: IonOr<string | undefined>;
+    type?: IonOr<string | undefined>;
+    charset?: IonOr<string | undefined>;
   }
 
   interface MapHTMLAttributes<T> extends HTMLAttributes<T> {
-    name?: MaybeIon<string | undefined>;
+    name?: IonOr<string | undefined>;
   }
 
   interface MenuHTMLAttributes<T> extends HTMLAttributes<T> {
-    type?: MaybeIon<string | undefined>;
+    type?: IonOr<string | undefined>;
   }
 
 
   interface MediaHTMLAttributes<T> extends HTMLAttributes<T> {
-    autoplay?: MaybeIon<Booleanish | undefined>;
-    controls?: MaybeIon<Booleanish | undefined>;
-    crossorigin?: MaybeIon<CrossOrigin>;
-    loop?: MaybeIon<Booleanish | undefined>;
-    mediagroup?: MaybeIon<string | undefined>;
-    muted?: MaybeIon<Booleanish | undefined>;
-    preload?: MaybeIon<string | undefined>;
-    src?: MaybeIon<string | undefined>;
+    autoplay?: IonOr<Booleanish | undefined>;
+    controls?: IonOr<Booleanish | undefined>;
+    crossorigin?: IonOr<CrossOrigin>;
+    loop?: IonOr<Booleanish | undefined>;
+    mediagroup?: IonOr<string | undefined>;
+    muted?: IonOr<Booleanish | undefined>;
+    preload?: IonOr<string | undefined>;
+    src?: IonOr<string | undefined>;
   }
 
   interface MetaHTMLAttributes<T> extends HTMLAttributes<T> {
-    charset?: MaybeIon<string | undefined>;
-    content?: MaybeIon<string | undefined>;
-    'http-equiv'?: MaybeIon<string | undefined>;
-    media?: MaybeIon<string | undefined>;
-    name?: MaybeIon<string | undefined>;
+    charset?: IonOr<string | undefined>;
+    content?: IonOr<string | undefined>;
+    'http-equiv'?: IonOr<string | undefined>;
+    media?: IonOr<string | undefined>;
+    name?: IonOr<string | undefined>;
   }
 
   interface MeterHTMLAttributes<T> extends HTMLAttributes<T> {
-    form?: MaybeIon<string | undefined>;
-    high?: MaybeIon<number | undefined>;
-    low?: MaybeIon<number | undefined>;
-    max?: MaybeIon<number | string | undefined>;
-    min?: MaybeIon<number | string | undefined>;
-    optimum?: MaybeIon<number | undefined>;
-    value?: MaybeIon<string | readonly string[] | number | undefined>;
+    form?: IonOr<string | undefined>;
+    high?: IonOr<number | undefined>;
+    low?: IonOr<number | undefined>;
+    max?: IonOr<number | string | undefined>;
+    min?: IonOr<number | string | undefined>;
+    optimum?: IonOr<number | undefined>;
+    value?: IonOr<string | readonly string[] | number | undefined>;
   }
 
   interface QuoteHTMLAttributes<T> extends HTMLAttributes<T> {
-    cite?: MaybeIon<string | undefined>;
+    cite?: IonOr<string | undefined>;
   }
 
   interface ObjectHTMLAttributes<T> extends HTMLAttributes<T> {
-    data?: MaybeIon<string | undefined>;
-    form?: MaybeIon<string | undefined>;
-    height?: MaybeIon<number | string | undefined>;
-    name?: MaybeIon<string | undefined>;
-    type?: MaybeIon<string | undefined>;
-    usemap?: MaybeIon<string | undefined>;
-    width?: MaybeIon<number | string | undefined>;
+    data?: IonOr<string | undefined>;
+    form?: IonOr<string | undefined>;
+    height?: IonOr<number | string | undefined>;
+    name?: IonOr<string | undefined>;
+    type?: IonOr<string | undefined>;
+    usemap?: IonOr<string | undefined>;
+    width?: IonOr<number | string | undefined>;
   }
 
   interface OlHTMLAttributes<T> extends HTMLAttributes<T> {
-    reversed?: MaybeIon<Booleanish | undefined>;
-    start?: MaybeIon<number | undefined>;
-    type?: MaybeIon<"1" | "a" | "A" | "i" | "I" | undefined>;
+    reversed?: IonOr<Booleanish | undefined>;
+    start?: IonOr<number | undefined>;
+    type?: IonOr<"1" | "a" | "A" | "i" | "I" | undefined>;
   }
 
   interface OptgroupHTMLAttributes<T> extends HTMLAttributes<T> {
-    disabled?: MaybeIon<Booleanish | undefined>;
-    label?: MaybeIon<string | undefined>;
+    disabled?: IonOr<Booleanish | undefined>;
+    label?: IonOr<string | undefined>;
   }
 
   interface OptionHTMLAttributes<T> extends HTMLAttributes<T> {
-    disabled?: MaybeIon<Booleanish | undefined>;
-    label?: MaybeIon<string | undefined>;
-    selected?: MaybeIon<Booleanish | undefined>;
-    value?: MaybeIon<string | readonly string[] | number | undefined>;
+    disabled?: IonOr<Booleanish | undefined>;
+    label?: IonOr<string | undefined>;
+    selected?: IonOr<Booleanish | undefined>;
+    value?: IonOr<string | readonly string[] | number | undefined>;
   }
 
   interface OutputHTMLAttributes<T> extends HTMLAttributes<T> {
-    form?: MaybeIon<string | undefined>;
-    for?: MaybeIon<string | undefined>;
-    name?: MaybeIon<string | undefined>;
+    form?: IonOr<string | undefined>;
+    for?: IonOr<string | undefined>;
+    name?: IonOr<string | undefined>;
   }
 
   interface ParamHTMLAttributes<T> extends HTMLAttributes<T> {
-    name?: MaybeIon<string | undefined>;
-    value?: MaybeIon<string | readonly string[] | number | undefined>;
+    name?: IonOr<string | undefined>;
+    value?: IonOr<string | readonly string[] | number | undefined>;
   }
 
   interface ProgressHTMLAttributes<T> extends HTMLAttributes<T> {
-    max?: MaybeIon<number | string | undefined>;
-    value?: MaybeIon<string | readonly string[] | number | undefined>;
+    max?: IonOr<number | string | undefined>;
+    value?: IonOr<string | readonly string[] | number | undefined>;
   }
 
   interface SlotHTMLAttributes<T> extends HTMLAttributes<T> {
-    name?: MaybeIon<string | undefined>;
+    name?: IonOr<string | undefined>;
   }
 
   interface ScriptHTMLAttributes<T> extends HTMLAttributes<T> {
-    async?: MaybeIon<Booleanish | undefined>;
-    crossorigin?: MaybeIon<CrossOrigin>;
-    defer?: MaybeIon<Booleanish | undefined>;
-    integrity?: MaybeIon<string | undefined>;
-    nomodule?: MaybeIon<Booleanish | undefined>;
-    referrerpolicy?: MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
-    src?: MaybeIon<string | undefined>;
-    type?: MaybeIon<string | undefined>;
+    async?: IonOr<Booleanish | undefined>;
+    crossorigin?: IonOr<CrossOrigin>;
+    defer?: IonOr<Booleanish | undefined>;
+    integrity?: IonOr<string | undefined>;
+    nomodule?: IonOr<Booleanish | undefined>;
+    referrerpolicy?: IonOr<HTMLAttributeReferrerPolicy | undefined>;
+    src?: IonOr<string | undefined>;
+    type?: IonOr<string | undefined>;
   }
 
   interface SelectHTMLAttributes<T> extends HTMLAttributes<T> {
-    autocomplete?: MaybeIon<string | undefined>;
-    disabled?: MaybeIon<Booleanish | undefined>;
-    form?: MaybeIon<string | undefined>;
-    multiple?: MaybeIon<Booleanish | undefined>;
-    name?: MaybeIon<string | undefined>;
-    required?: MaybeIon<Booleanish | undefined>;
-    size?: MaybeIon<number | undefined>;
-    value?: MaybeIon<string | readonly string[] | number | undefined>;
+    autocomplete?: IonOr<string | undefined>;
+    disabled?: IonOr<Booleanish | undefined>;
+    form?: IonOr<string | undefined>;
+    multiple?: IonOr<Booleanish | undefined>;
+    name?: IonOr<string | undefined>;
+    required?: IonOr<Booleanish | undefined>;
+    size?: IonOr<number | undefined>;
+    value?: IonOr<string | readonly string[] | number | undefined>;
     'on:change'?: HandleChangeEvent<T> | undefined;
     'mu:value'?: Quarky.MutableIon<string> | undefined
   }
 
   interface SourceHTMLAttributes<T> extends HTMLAttributes<T> {
-    height?: MaybeIon<number | string | undefined>;
-    media?: MaybeIon<string | undefined>;
-    sizes?: MaybeIon<string | undefined>;
-    src?: MaybeIon<string | undefined>;
-    srcset?: MaybeIon<string | undefined>;
-    type?: MaybeIon<string | undefined>;
-    width?: MaybeIon<number | string | undefined>;
+    height?: IonOr<number | string | undefined>;
+    media?: IonOr<string | undefined>;
+    sizes?: IonOr<string | undefined>;
+    src?: IonOr<string | undefined>;
+    srcset?: IonOr<string | undefined>;
+    type?: IonOr<string | undefined>;
+    width?: IonOr<number | string | undefined>;
   }
 
   interface StyleHTMLAttributes<T> extends HTMLAttributes<T> {
-    media?: MaybeIon<string | undefined>;
-    scoped?: MaybeIon<Booleanish | undefined>;
-    type?: MaybeIon<string | undefined>;
+    media?: IonOr<string | undefined>;
+    scoped?: IonOr<Booleanish | undefined>;
+    type?: IonOr<string | undefined>;
   }
 
   interface TableHTMLAttributes<T> extends HTMLAttributes<T> {
     // ALL DEPRECATED
-    // align?: MaybeIon<"left" | "center" | "right" | undefined>;
-    // bgcolor?: MaybeIon<string | undefined>;
-    // border?: MaybeIon<number | undefined>;
-    // cellPadding?: MaybeIon<number | string | undefined>;
-    // cellSpacing?: MaybeIon<number | string | undefined>;
-    // frame?: MaybeIon<Booleanish | undefined>;
-    // rules?: MaybeIon<"none" | "groups" | "rows" | "columns" | "all" | undefined>;
-    // summary?: MaybeIon<string | undefined>;
-    // width?: MaybeIon<number | string | undefined>;
+    // align?: IonOr<"left" | "center" | "right" | undefined>;
+    // bgcolor?: IonOr<string | undefined>;
+    // border?: IonOr<number | undefined>;
+    // cellPadding?: IonOr<number | string | undefined>;
+    // cellSpacing?: IonOr<number | string | undefined>;
+    // frame?: IonOr<Booleanish | undefined>;
+    // rules?: IonOr<"none" | "groups" | "rows" | "columns" | "all" | undefined>;
+    // summary?: IonOr<string | undefined>;
+    // width?: IonOr<number | string | undefined>;
   }
 
   interface TextareaHTMLAttributes<T> extends HTMLAttributes<T> {
-    autocomplete?: MaybeIon<string | undefined>;
-    cols?: MaybeIon<number | undefined>;
-    dirname?: MaybeIon<string | undefined>;
-    disabled?: MaybeIon<Booleanish | undefined>;
-    form?: MaybeIon<string | undefined>;
-    maxlength?: MaybeIon<number | undefined>;
-    minlength?: MaybeIon<number | undefined>;
-    name?: MaybeIon<string | undefined>;
-    placeholder?: MaybeIon<string | undefined>;
-    readonly?: MaybeIon<Booleanish | undefined>;
-    required?: MaybeIon<Booleanish | undefined>;
-    rows?: MaybeIon<number | undefined>;
-    value?: MaybeIon<string | readonly string[] | number | undefined>;
-    wrap?: MaybeIon<string | undefined>;
+    autocomplete?: IonOr<string | undefined>;
+    cols?: IonOr<number | undefined>;
+    dirname?: IonOr<string | undefined>;
+    disabled?: IonOr<Booleanish | undefined>;
+    form?: IonOr<string | undefined>;
+    maxlength?: IonOr<number | undefined>;
+    minlength?: IonOr<number | undefined>;
+    name?: IonOr<string | undefined>;
+    placeholder?: IonOr<string | undefined>;
+    readonly?: IonOr<Booleanish | undefined>;
+    required?: IonOr<Booleanish | undefined>;
+    rows?: IonOr<number | undefined>;
+    value?: IonOr<string | readonly string[] | number | undefined>;
+    wrap?: IonOr<string | undefined>;
 
     'mu:value'?: Quarky.MutableIon<string>
     'on:change'?: HandleChangeEvent<T> | undefined;
   }
 
   interface TdHTMLAttributes<T> extends HTMLAttributes<T> {
-    align?: MaybeIon<"left" | "center" | "right" | "justify" | "char" | undefined>;
-    colSpan?: MaybeIon<number | undefined>;
-    headers?: MaybeIon<string | undefined>;
-    rowSpan?: MaybeIon<number | undefined>;
-    scope?: MaybeIon<string | undefined>;
-    abbr?: MaybeIon<string | undefined>;
-    height?: MaybeIon<number | string | undefined>;
-    width?: MaybeIon<number | string | undefined>;
-    valign?: MaybeIon<"top" | "middle" | "bottom" | "baseline" | undefined>;
+    align?: IonOr<"left" | "center" | "right" | "justify" | "char" | undefined>;
+    colSpan?: IonOr<number | undefined>;
+    headers?: IonOr<string | undefined>;
+    rowSpan?: IonOr<number | undefined>;
+    scope?: IonOr<string | undefined>;
+    abbr?: IonOr<string | undefined>;
+    height?: IonOr<number | string | undefined>;
+    width?: IonOr<number | string | undefined>;
+    valign?: IonOr<"top" | "middle" | "bottom" | "baseline" | undefined>;
   }
 
   interface ThHTMLAttributes<T> extends HTMLAttributes<T> {
-    colspan?: MaybeIon<number | undefined>;
-    headers?: MaybeIon<string | undefined>;
-    rowspan?: MaybeIon<number | undefined>;
-    scope?: MaybeIon<string | undefined>;
-    abbr?: MaybeIon<string | undefined>;
+    colspan?: IonOr<number | undefined>;
+    headers?: IonOr<string | undefined>;
+    rowspan?: IonOr<number | undefined>;
+    scope?: IonOr<string | undefined>;
+    abbr?: IonOr<string | undefined>;
   }
 
   interface TimeHTMLAttributes<T> extends HTMLAttributes<T> {
-    datetime?: MaybeIon<string | undefined>;
+    datetime?: IonOr<string | undefined>;
   }
 
   interface TrackHTMLAttributes<T> extends HTMLAttributes<T> {
-    default?: MaybeIon<Booleanish | undefined>;
-    kind?: MaybeIon<string | undefined>;
-    label?: MaybeIon<string | undefined>;
-    src?: MaybeIon<string | undefined>;
-    srclang?: MaybeIon<string | undefined>;
+    default?: IonOr<Booleanish | undefined>;
+    kind?: IonOr<string | undefined>;
+    label?: IonOr<string | undefined>;
+    src?: IonOr<string | undefined>;
+    srclang?: IonOr<string | undefined>;
   }
 
   interface VideoHTMLAttributes<T> extends MediaHTMLAttributes<T> {
-    height?: MaybeIon<number | string | undefined>;
-    controlslist?: MaybeIon<string | undefined>;
-    playsinline?: MaybeIon<Booleanish | undefined>;
-    poster?: MaybeIon<string | undefined>;
-    width?: MaybeIon<number | string | undefined>;
-    disablepictureinpicture?: MaybeIon<Booleanish | undefined>;
-    disableremoteplayback?: MaybeIon<Booleanish | undefined>;
+    height?: IonOr<number | string | undefined>;
+    controlslist?: IonOr<string | undefined>;
+    playsinline?: IonOr<Booleanish | undefined>;
+    poster?: IonOr<string | undefined>;
+    width?: IonOr<number | string | undefined>;
+    disablepictureinpicture?: IonOr<Booleanish | undefined>;
+    disableremoteplayback?: IonOr<Booleanish | undefined>;
   }
 
 
   interface SVGAttributes<T> extends AriaAttributes, GlobalAttributes, DOMAttributes<T> {
     // Attributes which also defined in HTMLAttributes
-    href?: MaybeIon<string | undefined>;
-    hreflang?: MaybeIon<string | undefined>;
-    media?: MaybeIon<string | undefined>;
-    ping?: MaybeIon<string | undefined>;
-    target?: MaybeIon<HTMLAttributeAnchorTarget | string | undefined>;
-    type?: MaybeIon<string | undefined>;
-    referrerpolicy?: MaybeIon<HTMLAttributeReferrerPolicy | undefined>;
+    href?: IonOr<string | undefined>;
+    hreflang?: IonOr<string | undefined>;
+    media?: IonOr<string | undefined>;
+    ping?: IonOr<string | undefined>;
+    target?: IonOr<HTMLAttributeAnchorTarget | string | undefined>;
+    type?: IonOr<string | undefined>;
+    referrerpolicy?: IonOr<HTMLAttributeReferrerPolicy | undefined>;
 
-    height?: MaybeIon<number | string | undefined>;
-    width?: MaybeIon<number | string | undefined>;
+    height?: IonOr<number | string | undefined>;
+    width?: IonOr<number | string | undefined>;
 
-    crossorigin?: MaybeIon<CrossOrigin>;
-    fetchpriority?: MaybeIon<"high" | "low" | "auto">;
+    crossorigin?: IonOr<CrossOrigin>;
+    fetchpriority?: IonOr<"high" | "low" | "auto">;
 
     // SVG Specific attributes
-    accumulate?: MaybeIon<"none" | "sum" | undefined>;
-    additive?: MaybeIon<"replace" | "sum" | undefined>;
-    'alignment-baseline'?: MaybeIon<
+    accumulate?: IonOr<"none" | "sum" | undefined>;
+    additive?: IonOr<"replace" | "sum" | undefined>;
+    'alignment-baseline'?: IonOr<
       | "auto"
       | "baseline"
       | "before-edge"
@@ -1556,92 +1556,92 @@ export namespace JSX {
       | "mathematical"
       | "inherit"
       | undefined>;
-    allowReorder?: MaybeIon<"no" | "yes" | undefined>;
-    alphabetic?: MaybeIon<number | string | undefined>;
-    amplitude?: MaybeIon<number | string | undefined>;
-    'arabic-form'?: MaybeIon<"initial" | "medial" | "terminal" | "isolated" | undefined>;
-    attributeName?: MaybeIon<string | undefined>;
-    attributeType?: MaybeIon<string | undefined>;
-    autoReverse?: MaybeIon<Booleanish | undefined>;
-    azimuth?: MaybeIon<number | string | undefined>;
-    baseFrequency?: MaybeIon<number | string | undefined>;
-    'baseline-shift'?: MaybeIon<number | string | undefined>;
-    begin?: MaybeIon<number | string | undefined>;
-    bias?: MaybeIon<number | string | undefined>;
-    by?: MaybeIon<number | string | undefined>;
-    calcMode?: MaybeIon<number | string | undefined>;
-    clipPathUnits?: MaybeIon<number | string | undefined>;
-    'clip-path'?: MaybeIon<string | undefined>;
-    'clip-rule'?: MaybeIon<number | string | undefined>;
-    color?: MaybeIon<string | undefined>;
-    'color-interpolation'?: MaybeIon<number | string | undefined>;
-    'color-interpolation-filters'?: MaybeIon<"auto" | "sRGB" | "linearRGB" | "inherit" | undefined>;
-    'color-rendering'?: MaybeIon<number | string | undefined>;
-    cursor?: MaybeIon<number | string | undefined>;
-    cx?: MaybeIon<number | string | undefined>;
-    cy?: MaybeIon<number | string | undefined>;
-    d?: MaybeIon<string | undefined>;
-    decelerate?: MaybeIon<number | string | undefined>;
-    diffuseConstant?: MaybeIon<number | string | undefined>;
-    direction?: MaybeIon<number | string | undefined>;
-    display?: MaybeIon<number | string | undefined>;
-    divisor?: MaybeIon<number | string | undefined>;
-    'dominant-baseline'?: MaybeIon<number | string | undefined>;
-    dur?: MaybeIon<number | string | undefined>;
-    dx?: MaybeIon<number | string | undefined>;
-    dy?: MaybeIon<number | string | undefined>;
-    edgeMode?: MaybeIon<number | string | undefined>;
-    elevation?: MaybeIon<number | string | undefined>;
-    end?: MaybeIon<number | string | undefined>;
-    exponent?: MaybeIon<number | string | undefined>;
-    fill?: MaybeIon<string | undefined>;
-    'fill-opacity'?: MaybeIon<number | string | undefined>;
-    'fill-rule'?: MaybeIon<"nonzero" | "evenodd" | "inherit" | undefined>;
-    filter?: MaybeIon<string | undefined>;
-    filterUnits?: MaybeIon<number | string | undefined>;
-    'flood-color'?: MaybeIon<number | string | undefined>;
-    'flood-opacity'?: MaybeIon<number | string | undefined>;
-    focusable?: MaybeIon<Booleanish | "auto" | undefined>;
-    'font-family'?: MaybeIon<string | undefined>;
-    'font-size'?: MaybeIon<number | string | undefined>;
-    'font-size-adjust'?: MaybeIon<number | string | undefined>;
-    'font-style'?: MaybeIon<number | string | undefined>;
-    'font-variant'?: MaybeIon<number | string | undefined>;
-    'font-weight'?: MaybeIon<number | string | undefined>;
-    fr?: MaybeIon<number | string | undefined>;
-    from?: MaybeIon<number | string | undefined>;
-    fx?: MaybeIon<number | string | undefined>;
-    fy?: MaybeIon<number | string | undefined>;
-    gradientTransform?: MaybeIon<string | undefined>;
-    gradientUnits?: MaybeIon<string | undefined>;
-    'image-rendering'?: MaybeIon<number | string | undefined>;
-    in2?: MaybeIon<number | string | undefined>;
-    in?: MaybeIon<string | undefined>;
-    intercept?: MaybeIon<number | string | undefined>;
-    k1?: MaybeIon<number | string | undefined>;
-    k2?: MaybeIon<number | string | undefined>;
-    k3?: MaybeIon<number | string | undefined>;
-    k4?: MaybeIon<number | string | undefined>;
-    kernelMatrix?: MaybeIon<number | string | undefined>;
-    kernelUnitLength?: MaybeIon<number | string | undefined>;
-    keyPoints?: MaybeIon<number | string | undefined>;
-    keySplines?: MaybeIon<number | string | undefined>;
-    keyTimes?: MaybeIon<number | string | undefined>;
-    lengthAdjust?: MaybeIon<number | string | undefined>;
-    'letter-spacing'?: MaybeIon<number | string | undefined>;
-    'lighting-color'?: MaybeIon<number | string | undefined>;
-    limitingConeAngle?: MaybeIon<number | string | undefined>;
-    'marker-end'?: MaybeIon<string | undefined>;
-    'marker-mid'?: MaybeIon<string | undefined>;
-    'marker-start'?: MaybeIon<string | undefined>;
-    markerHeight?: MaybeIon<number | string | undefined>;
-    markerUnits?: MaybeIon<number | string | undefined>;
-    markerWidth?: MaybeIon<number | string | undefined>;
-    mask?: MaybeIon<string | undefined>;
-    maskContentUnits?: MaybeIon<number | string | undefined>;
-    maskUnits?: MaybeIon<number | string | undefined>;
-    max?: MaybeIon<number | string | undefined>;
-    min?: MaybeIon<number | string | undefined>;
+    allowReorder?: IonOr<"no" | "yes" | undefined>;
+    alphabetic?: IonOr<number | string | undefined>;
+    amplitude?: IonOr<number | string | undefined>;
+    'arabic-form'?: IonOr<"initial" | "medial" | "terminal" | "isolated" | undefined>;
+    attributeName?: IonOr<string | undefined>;
+    attributeType?: IonOr<string | undefined>;
+    autoReverse?: IonOr<Booleanish | undefined>;
+    azimuth?: IonOr<number | string | undefined>;
+    baseFrequency?: IonOr<number | string | undefined>;
+    'baseline-shift'?: IonOr<number | string | undefined>;
+    begin?: IonOr<number | string | undefined>;
+    bias?: IonOr<number | string | undefined>;
+    by?: IonOr<number | string | undefined>;
+    calcMode?: IonOr<number | string | undefined>;
+    clipPathUnits?: IonOr<number | string | undefined>;
+    'clip-path'?: IonOr<string | undefined>;
+    'clip-rule'?: IonOr<number | string | undefined>;
+    color?: IonOr<string | undefined>;
+    'color-interpolation'?: IonOr<number | string | undefined>;
+    'color-interpolation-filters'?: IonOr<"auto" | "sRGB" | "linearRGB" | "inherit" | undefined>;
+    'color-rendering'?: IonOr<number | string | undefined>;
+    cursor?: IonOr<number | string | undefined>;
+    cx?: IonOr<number | string | undefined>;
+    cy?: IonOr<number | string | undefined>;
+    d?: IonOr<string | undefined>;
+    decelerate?: IonOr<number | string | undefined>;
+    diffuseConstant?: IonOr<number | string | undefined>;
+    direction?: IonOr<number | string | undefined>;
+    display?: IonOr<number | string | undefined>;
+    divisor?: IonOr<number | string | undefined>;
+    'dominant-baseline'?: IonOr<number | string | undefined>;
+    dur?: IonOr<number | string | undefined>;
+    dx?: IonOr<number | string | undefined>;
+    dy?: IonOr<number | string | undefined>;
+    edgeMode?: IonOr<number | string | undefined>;
+    elevation?: IonOr<number | string | undefined>;
+    end?: IonOr<number | string | undefined>;
+    exponent?: IonOr<number | string | undefined>;
+    fill?: IonOr<string | undefined>;
+    'fill-opacity'?: IonOr<number | string | undefined>;
+    'fill-rule'?: IonOr<"nonzero" | "evenodd" | "inherit" | undefined>;
+    filter?: IonOr<string | undefined>;
+    filterUnits?: IonOr<number | string | undefined>;
+    'flood-color'?: IonOr<number | string | undefined>;
+    'flood-opacity'?: IonOr<number | string | undefined>;
+    focusable?: IonOr<Booleanish | "auto" | undefined>;
+    'font-family'?: IonOr<string | undefined>;
+    'font-size'?: IonOr<number | string | undefined>;
+    'font-size-adjust'?: IonOr<number | string | undefined>;
+    'font-style'?: IonOr<number | string | undefined>;
+    'font-variant'?: IonOr<number | string | undefined>;
+    'font-weight'?: IonOr<number | string | undefined>;
+    fr?: IonOr<number | string | undefined>;
+    from?: IonOr<number | string | undefined>;
+    fx?: IonOr<number | string | undefined>;
+    fy?: IonOr<number | string | undefined>;
+    gradientTransform?: IonOr<string | undefined>;
+    gradientUnits?: IonOr<string | undefined>;
+    'image-rendering'?: IonOr<number | string | undefined>;
+    in2?: IonOr<number | string | undefined>;
+    in?: IonOr<string | undefined>;
+    intercept?: IonOr<number | string | undefined>;
+    k1?: IonOr<number | string | undefined>;
+    k2?: IonOr<number | string | undefined>;
+    k3?: IonOr<number | string | undefined>;
+    k4?: IonOr<number | string | undefined>;
+    kernelMatrix?: IonOr<number | string | undefined>;
+    kernelUnitLength?: IonOr<number | string | undefined>;
+    keyPoints?: IonOr<number | string | undefined>;
+    keySplines?: IonOr<number | string | undefined>;
+    keyTimes?: IonOr<number | string | undefined>;
+    lengthAdjust?: IonOr<number | string | undefined>;
+    'letter-spacing'?: IonOr<number | string | undefined>;
+    'lighting-color'?: IonOr<number | string | undefined>;
+    limitingConeAngle?: IonOr<number | string | undefined>;
+    'marker-end'?: IonOr<string | undefined>;
+    'marker-mid'?: IonOr<string | undefined>;
+    'marker-start'?: IonOr<string | undefined>;
+    markerHeight?: IonOr<number | string | undefined>;
+    markerUnits?: IonOr<number | string | undefined>;
+    markerWidth?: IonOr<number | string | undefined>;
+    mask?: IonOr<string | undefined>;
+    maskContentUnits?: IonOr<number | string | undefined>;
+    maskUnits?: IonOr<number | string | undefined>;
+    max?: IonOr<number | string | undefined>;
+    min?: IonOr<number | string | undefined>;
 
     /**
      * The method attribute indicates the method by which text should be rendered along the path of a <textPath> element.
@@ -1650,49 +1650,49 @@ export namespace JSX {
      * 
      * source: https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/method
      */
-    method?: MaybeIon<'align' | 'stretch'>;
-    mode?: MaybeIon<number | string | undefined>;
-    name?: MaybeIon<string | undefined>;
-    numOctaves?: MaybeIon<number | string | undefined>;
-    offset?: MaybeIon<number | string | undefined>;
-    opacity?: MaybeIon<number | string | undefined>;
-    operator?: MaybeIon<number | string | undefined>;
-    order?: MaybeIon<number | string | undefined>;
-    orient?: MaybeIon<number | string | undefined>;
-    origin?: MaybeIon<number | string | undefined>;
-    overflow?: MaybeIon<number | string | undefined>;
-    'overline-position'?: MaybeIon<number | string | undefined>;
-    'overline-thickness'?: MaybeIon<number | string | undefined>;
-    'paint-order'?: MaybeIon<number | string | undefined>;
-    path?: MaybeIon<string | undefined>;
-    pathLength?: MaybeIon<number | string | undefined>;
-    patternContentUnits?: MaybeIon<string | undefined>;
-    patternTransform?: MaybeIon<number | string | undefined>;
-    patternUnits?: MaybeIon<string | undefined>;
-    'pointer-events'?: MaybeIon<number | string | undefined>;
-    points?: MaybeIon<string | undefined>;
-    pointsAtX?: MaybeIon<number | string | undefined>;
-    pointsAtY?: MaybeIon<number | string | undefined>;
-    pointsAtZ?: MaybeIon<number | string | undefined>;
-    preserveAlpha?: MaybeIon<Booleanish | undefined>;
-    preserveAspectRatio?: MaybeIon<string | undefined>;
-    primitiveUnits?: MaybeIon<number | string | undefined>;
-    r?: MaybeIon<number | string | undefined>;
-    radius?: MaybeIon<number | string | undefined>;
-    refX?: MaybeIon<number | string | undefined>;
-    refY?: MaybeIon<number | string | undefined>;
-    renderingIntent?: MaybeIon<number | string | undefined>;
-    repeatCount?: MaybeIon<number | string | undefined>;
-    repeatDur?: MaybeIon<number | string | undefined>;
-    requiredExtensions?: MaybeIon<number | string | undefined>;
-    restart?: MaybeIon<number | string | undefined>;
-    result?: MaybeIon<string | undefined>;
-    rotate?: MaybeIon<number | string | undefined>;
-    rx?: MaybeIon<number | string | undefined>;
-    ry?: MaybeIon<number | string | undefined>;
-    scale?: MaybeIon<number | string | undefined>;
-    seed?: MaybeIon<number | string | undefined>;
-    'shape-rendering'?: MaybeIon<number | string | undefined>;
+    method?: IonOr<'align' | 'stretch'>;
+    mode?: IonOr<number | string | undefined>;
+    name?: IonOr<string | undefined>;
+    numOctaves?: IonOr<number | string | undefined>;
+    offset?: IonOr<number | string | undefined>;
+    opacity?: IonOr<number | string | undefined>;
+    operator?: IonOr<number | string | undefined>;
+    order?: IonOr<number | string | undefined>;
+    orient?: IonOr<number | string | undefined>;
+    origin?: IonOr<number | string | undefined>;
+    overflow?: IonOr<number | string | undefined>;
+    'overline-position'?: IonOr<number | string | undefined>;
+    'overline-thickness'?: IonOr<number | string | undefined>;
+    'paint-order'?: IonOr<number | string | undefined>;
+    path?: IonOr<string | undefined>;
+    pathLength?: IonOr<number | string | undefined>;
+    patternContentUnits?: IonOr<string | undefined>;
+    patternTransform?: IonOr<number | string | undefined>;
+    patternUnits?: IonOr<string | undefined>;
+    'pointer-events'?: IonOr<number | string | undefined>;
+    points?: IonOr<string | undefined>;
+    pointsAtX?: IonOr<number | string | undefined>;
+    pointsAtY?: IonOr<number | string | undefined>;
+    pointsAtZ?: IonOr<number | string | undefined>;
+    preserveAlpha?: IonOr<Booleanish | undefined>;
+    preserveAspectRatio?: IonOr<string | undefined>;
+    primitiveUnits?: IonOr<number | string | undefined>;
+    r?: IonOr<number | string | undefined>;
+    radius?: IonOr<number | string | undefined>;
+    refX?: IonOr<number | string | undefined>;
+    refY?: IonOr<number | string | undefined>;
+    renderingIntent?: IonOr<number | string | undefined>;
+    repeatCount?: IonOr<number | string | undefined>;
+    repeatDur?: IonOr<number | string | undefined>;
+    requiredExtensions?: IonOr<number | string | undefined>;
+    restart?: IonOr<number | string | undefined>;
+    result?: IonOr<string | undefined>;
+    rotate?: IonOr<number | string | undefined>;
+    rx?: IonOr<number | string | undefined>;
+    ry?: IonOr<number | string | undefined>;
+    scale?: IonOr<number | string | undefined>;
+    seed?: IonOr<number | string | undefined>;
+    'shape-rendering'?: IonOr<number | string | undefined>;
     /**
      * EXPERIMENTAL
      * 
@@ -1700,88 +1700,88 @@ export namespace JSX {
      * 
      * https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/side
      */
-    side?: MaybeIon<'left' | 'right'>;
-    slope?: MaybeIon<number | string | undefined>;
-    spacing?: MaybeIon<number | string | undefined>;
-    specularConstant?: MaybeIon<number | string | undefined>;
-    specularExponent?: MaybeIon<number | string | undefined>;
-    spreadMethod?: MaybeIon<string | undefined>;
-    startOffset?: MaybeIon<number | string | undefined>;
-    stdDeviation?: MaybeIon<number | string | undefined>;
-    stitchTiles?: MaybeIon<number | string | undefined>;
-    'stop-color'?: MaybeIon<string | undefined>;
-    'stop-opacity'?: MaybeIon<number | string | undefined>;
-    'strikethrough-Position'?: MaybeIon<number | string | undefined>;
-    'strikethrough-Thickness'?: MaybeIon<number | string | undefined>;
-    stroke?: MaybeIon<string | undefined>;
-    'stroke-dasharray'?: MaybeIon<string | number | undefined>;
-    'stroke-dashoffset'?: MaybeIon<string | number | undefined>;
-    'stroke-linecap'?: MaybeIon<"butt" | "round" | "square" | "inherit" | undefined>;
-    'stroke-linejoin'?: MaybeIon<"miter" | "round" | "bevel" | "inherit" | undefined>;
-    'stroke-miterlimit'?: MaybeIon<number | string | undefined>;
-    'stroke-opacity'?: MaybeIon<number | string | undefined>;
-    'stroke-width'?: MaybeIon<number | string | undefined>;
-    surfaceScale?: MaybeIon<number | string | undefined>;
-    systemLanguage?: MaybeIon<number | string | undefined>;
-    tableValues?: MaybeIon<number | string | undefined>;
-    targetX?: MaybeIon<number | string | undefined>;
-    targetY?: MaybeIon<number | string | undefined>;
-    'text-anchor'?: MaybeIon<string | undefined>;
-    'text-decoration'?: MaybeIon<number | string | undefined>;
+    side?: IonOr<'left' | 'right'>;
+    slope?: IonOr<number | string | undefined>;
+    spacing?: IonOr<number | string | undefined>;
+    specularConstant?: IonOr<number | string | undefined>;
+    specularExponent?: IonOr<number | string | undefined>;
+    spreadMethod?: IonOr<string | undefined>;
+    startOffset?: IonOr<number | string | undefined>;
+    stdDeviation?: IonOr<number | string | undefined>;
+    stitchTiles?: IonOr<number | string | undefined>;
+    'stop-color'?: IonOr<string | undefined>;
+    'stop-opacity'?: IonOr<number | string | undefined>;
+    'strikethrough-Position'?: IonOr<number | string | undefined>;
+    'strikethrough-Thickness'?: IonOr<number | string | undefined>;
+    stroke?: IonOr<string | undefined>;
+    'stroke-dasharray'?: IonOr<string | number | undefined>;
+    'stroke-dashoffset'?: IonOr<string | number | undefined>;
+    'stroke-linecap'?: IonOr<"butt" | "round" | "square" | "inherit" | undefined>;
+    'stroke-linejoin'?: IonOr<"miter" | "round" | "bevel" | "inherit" | undefined>;
+    'stroke-miterlimit'?: IonOr<number | string | undefined>;
+    'stroke-opacity'?: IonOr<number | string | undefined>;
+    'stroke-width'?: IonOr<number | string | undefined>;
+    surfaceScale?: IonOr<number | string | undefined>;
+    systemLanguage?: IonOr<number | string | undefined>;
+    tableValues?: IonOr<number | string | undefined>;
+    targetX?: IonOr<number | string | undefined>;
+    targetY?: IonOr<number | string | undefined>;
+    'text-anchor'?: IonOr<string | undefined>;
+    'text-decoration'?: IonOr<number | string | undefined>;
     /**
      * *default*: 'clip'
      */
-    'text-overflow'?: MaybeIon<'clip' | 'ellipses'>;
-    'text-rendering'?: MaybeIon<number | string | undefined>;
-    textLength?: MaybeIon<number | string | undefined>;
-    to?: MaybeIon<number | string | undefined>;
-    transform?: MaybeIon<string | undefined>;
-    'transform-origin'?: MaybeIon<string | undefined>;
-    'underline-position'?: MaybeIon<number | string | undefined>;
-    'underline-thickness'?: MaybeIon<number | string | undefined>;
-    'unicode-bidi'?: MaybeIon<number | string | undefined>;
-    values?: MaybeIon<string | undefined>;
-    'vector-effect'?: MaybeIon<number | string | undefined>;
-    viewBox?: MaybeIon<string | undefined>;
-    visibility?: MaybeIon<number | string | undefined>;
-    'white-space'?: MaybeIon<'normal' | 'pre' | 'nowrap' | 'pre-wrap' | 'break-space' | 'pre-line'>;
-    'word-spacing'?: MaybeIon<number | string | undefined>;
-    'writing-mode'?: MaybeIon<number | string | undefined>;
-    x1?: MaybeIon<number | string | undefined>;
-    x2?: MaybeIon<number | string | undefined>;
-    x?: MaybeIon<number | string | undefined>;
-    xChannelSelector?: MaybeIon<string | undefined>;
-    'xlink:actuate'?: MaybeIon<string | undefined>;
-    'xlink:role'?: MaybeIon<string | undefined>;
-    xmlns?: MaybeIon<string | undefined>;
-    'xmlns:xlink'?: MaybeIon<string | undefined>;
-    y1?: MaybeIon<number | string | undefined>;
-    y2?: MaybeIon<number | string | undefined>;
-    y?: MaybeIon<number | string | undefined>;
-    yChannelSelector?: MaybeIon<string | undefined>;
-    z?: MaybeIon<number | string | undefined>;
-    zoomAndPan?: MaybeIon<string | undefined>;
+    'text-overflow'?: IonOr<'clip' | 'ellipses'>;
+    'text-rendering'?: IonOr<number | string | undefined>;
+    textLength?: IonOr<number | string | undefined>;
+    to?: IonOr<number | string | undefined>;
+    transform?: IonOr<string | undefined>;
+    'transform-origin'?: IonOr<string | undefined>;
+    'underline-position'?: IonOr<number | string | undefined>;
+    'underline-thickness'?: IonOr<number | string | undefined>;
+    'unicode-bidi'?: IonOr<number | string | undefined>;
+    values?: IonOr<string | undefined>;
+    'vector-effect'?: IonOr<number | string | undefined>;
+    viewBox?: IonOr<string | undefined>;
+    visibility?: IonOr<number | string | undefined>;
+    'white-space'?: IonOr<'normal' | 'pre' | 'nowrap' | 'pre-wrap' | 'break-space' | 'pre-line'>;
+    'word-spacing'?: IonOr<number | string | undefined>;
+    'writing-mode'?: IonOr<number | string | undefined>;
+    x1?: IonOr<number | string | undefined>;
+    x2?: IonOr<number | string | undefined>;
+    x?: IonOr<number | string | undefined>;
+    xChannelSelector?: IonOr<string | undefined>;
+    'xlink:actuate'?: IonOr<string | undefined>;
+    'xlink:role'?: IonOr<string | undefined>;
+    xmlns?: IonOr<string | undefined>;
+    'xmlns:xlink'?: IonOr<string | undefined>;
+    y1?: IonOr<number | string | undefined>;
+    y2?: IonOr<number | string | undefined>;
+    y?: IonOr<number | string | undefined>;
+    yChannelSelector?: IonOr<string | undefined>;
+    z?: IonOr<number | string | undefined>;
+    zoomAndPan?: IonOr<string | undefined>;
   }
 
   interface WebViewHTMLAttributes<T> extends HTMLAttributes<T> {
-    allowfullscreen?: MaybeIon<Booleanish | undefined>;
-    allowpopups?: MaybeIon<Booleanish | undefined>;
-    autosize?: MaybeIon<Booleanish | undefined>;
-    blinkfeatures?: MaybeIon<string | undefined>;
-    enableblinkfeatures?: MaybeIon<string | undefined>;
-    disableblinkfeatures?: MaybeIon<string | undefined>;
-    disableguestresize?: MaybeIon<Booleanish | undefined>;
-    disablewebsecurity?: MaybeIon<Booleanish | undefined>;
-    guestinstance?: MaybeIon<string | undefined>;
-    httpreferrer?: MaybeIon<string | undefined>;
-    nodeintegration?: MaybeIon<Booleanish | undefined>;
-    nodeintegrationinsubframes?: MaybeIon<Booleanish | undefined>;
-    partition?: MaybeIon<string | undefined>;
-    plugins?: MaybeIon<Booleanish | undefined>;
-    preload?: MaybeIon<string | undefined>;
-    src?: MaybeIon<string | undefined>;
-    useragent?: MaybeIon<string | undefined>;
-    webpreferences?: MaybeIon<string | undefined>;
+    allowfullscreen?: IonOr<Booleanish | undefined>;
+    allowpopups?: IonOr<Booleanish | undefined>;
+    autosize?: IonOr<Booleanish | undefined>;
+    blinkfeatures?: IonOr<string | undefined>;
+    enableblinkfeatures?: IonOr<string | undefined>;
+    disableblinkfeatures?: IonOr<string | undefined>;
+    disableguestresize?: IonOr<Booleanish | undefined>;
+    disablewebsecurity?: IonOr<Booleanish | undefined>;
+    guestinstance?: IonOr<string | undefined>;
+    httpreferrer?: IonOr<string | undefined>;
+    nodeintegration?: IonOr<Booleanish | undefined>;
+    nodeintegrationinsubframes?: IonOr<Booleanish | undefined>;
+    partition?: IonOr<string | undefined>;
+    plugins?: IonOr<Booleanish | undefined>;
+    preload?: IonOr<string | undefined>;
+    src?: IonOr<string | undefined>;
+    useragent?: IonOr<string | undefined>;
+    webpreferences?: IonOr<string | undefined>;
   }
 
 

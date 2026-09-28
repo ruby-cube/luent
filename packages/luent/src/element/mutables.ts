@@ -1,5 +1,5 @@
 import { isGetter, isIon, MutableIon, awaitRender, queueTask, RUN_EAGERLY, swiftUpdate, toValue, trackForRender, Ion, observe } from "@luent/quarky";
-import { MaybeIon } from "../component/bindings-types";
+import { IonOr } from "../component/bindings-types";
 import { AnyObject } from "@luent/types";
 
 // | Property                    | Elements                            | Typical event      | Notes                                     |
@@ -24,7 +24,7 @@ export function isMutableIon(ion: unknown): ion is MutableIon<any> {
   return isIon(ion) && 'value' in ion
 }
 
-export function setUpMutables(element: Element, mutables: { [key: string]: MaybeIon<any> }) {
+export function setUpMutables(element: Element, mutables: { [key: string]: IonOr<any> }) {
   for (const key in mutables) {
     if (!(key in element)) continue;
     bindMutable(element, key, mutables[key], getEvent(element, key as keyof Element))
@@ -56,7 +56,7 @@ const eventMap = {
   AUDIO: mediaEventMap
 }
 
-function bindMutable(element: AnyObject, key: PropertyKey, mutable: MaybeIon<any>, event: string) {
+function bindMutable(element: AnyObject, key: PropertyKey, mutable: IonOr<any>, event: string) {
   if (!event) return;
   if (!isGetter(mutable)) {
     if (__DEV__) console.warn('[LUENT] mu binding must receive a mutable ion for two-way binding to work', mutable)

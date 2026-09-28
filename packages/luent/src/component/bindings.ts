@@ -278,17 +278,17 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
         composed.showIf = bindings['display-if']
         break;
 
-      //  'animate-item'?: boolean | MaybeIon<string>
-      //  'transition-item'?: boolean | MaybeIon<string>
-      //  'transit-class'?: MaybeIon<string>
+      //  'animate-item'?: boolean | IonOr<string>
+      //  'transition-item'?: boolean | IonOr<string>
+      //  'transit-class'?: IonOr<string>
       //  'transit-key'?: any
       //  'transit-port'?: any
-      //  'animate-intro'?: boolean | MaybeIon<string>
-      //  'animate-in'?: boolean | MaybeIon<string>
-      //  'animate-out'?: boolean | MaybeIon<string>
+      //  'animate-intro'?: boolean | IonOr<string>
+      //  'animate-in'?: boolean | IonOr<string>
+      //  'animate-out'?: boolean | IonOr<string>
 
-      //  'transition-from'?: MaybeIon<string>
-      //  'transition-in'?: MaybeIon<string>
+      //  'transition-from'?: IonOr<string>
+      //  'transition-in'?: IonOr<string>
 
 
       case 'animate-intro':

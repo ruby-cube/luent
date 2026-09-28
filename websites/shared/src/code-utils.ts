@@ -1,7 +1,7 @@
-import { MaybeIon } from 'luent'
+import { IonOr } from 'luent'
 import { escapeHTML } from '@luent/utils'
 
-export function trusted(html: MaybeIon<string>) {
+export function trusted(html: IonOr<string>) {
   return {
     trusted: true,
     html

@@ -120,7 +120,7 @@ export function $PendingBatch(): $PendingBatch {
       }
 
       unresolved.add(promise)
-      if (!resolved) {
+      if (!resolve) {
         startTime = performance.now()
         $pending.value = new Promise<void>((res, rej) => { resolve = res; reject = rej });
       }

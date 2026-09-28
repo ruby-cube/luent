@@ -7,7 +7,7 @@ import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
 import { Context, Provided, callWithContext, createContextNode, wrapWithContext } from "../context/Context";
 import { ViewType } from "../conditional/If";
-import { MaybeIon, RenderTag } from "../component/bindings-types";
+import { IonOr, RenderTag } from "../component/bindings-types";
 import { DOMNode, DOMParent, VineNode } from "./VineNode";
 import { ComponentKit } from "@luent/nextscript";
 import { createShadowRoot } from "../component/shadow";
@@ -73,7 +73,7 @@ export type EventsConfig = {
 
 
 // export type $Classes = Ion<ClassInput[]>
-// export type ClassInput = MaybeIon<string | Falsey> | $Classes
+// export type ClassInput = IonOr<string | Falsey> | $Classes
 
 export type ElementConfig<K extends TagName = TagName> = {
   [K in keyof HTMLElementEventMap as `on${K}`]?: (event: HTMLElementEventMap[K]) => void; } &

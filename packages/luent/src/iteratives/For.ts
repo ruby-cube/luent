@@ -1,5 +1,5 @@
 import { getFlask } from "@luent/flask";
-import { MaybeIon } from "../component/bindings-types";
+import { IonOr } from "../component/bindings-types";
 import { normalizeToRenderFunction, RawJSXNode } from "../node/makeJSXNode";
 import { ListKit, toAsyncRenderItem } from "./ItemList";
 import { queueInternalRender, awaitPrelude, awaitRender, Ion, Ionic, isGetter, PRELUDE, queueTask, toIon, toValue, observe } from "@luent/quarky";
@@ -17,9 +17,9 @@ import { AnyObject } from "@luent/types";
 //    : (item: any, $i: Ion<number>) => RawJSXNode
 
 
-export type ListData = MaybeIon<AnyObject | Nullish>
+export type ListData = IonOr<AnyObject | Nullish>
 export type UniqueItem = any;
-export type Collection<T> = MaybeIon<T[]>
+export type Collection<T> = IonOr<T[]>
 
 type GetKey<L> = L extends (infer I)[] ? (item: I) => unknown : never
 
@@ -72,7 +72,7 @@ function wrapWithList(renderItem: RenderItem<any>, list: any) {
 
 
 
-export function For<L, U>(data: L & MaybeIon<Ionic<any[]> | any[] | Nullish>, getKey: GetKey<ToValue<L>>, render: RenderItem<ToValue<L>>): ListKit | undefined | RawJSXNode
+export function For<L, U>(data: L & IonOr<Ionic<any[]> | any[] | Nullish>, getKey: GetKey<ToValue<L>>, render: RenderItem<ToValue<L>>): ListKit | undefined | RawJSXNode
 export function For<L, U>(data: L & ListData, render: RenderIndex<L>): ListKit | undefined | RawJSXNode
 export function For<L, U>(data: L & ListData, renderOrGetUID: GetKey<ToValue<L>> | RenderIndex<L>, render?: RenderItem<ToValue<L>>): ListKit | undefined | RawJSXNode {
   if (!data) return;

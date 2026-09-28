@@ -4,34 +4,22 @@ import { Ion, ion, SuspenseIon, awaitsPrelude, $Async, Observer, $PendingBatch, 
 
 export function Awaits<T>(promise: Promise<T> | Ion<Promise<T>> | Ion<T> & $Async<T>, render: (result: T) => any) {
   console.log('AWAITS')
-  const fetch = 'then' in promise ? () => promise : 'pending' in promise ? (oo: Observer) => {
-    oo(() => promise.resolved); return promise.pending
+  const fetch = 'then' in promise ? () => promise : ASYNC_QUARK in promise ? (oo: Observer) => {
+    /* oo(promise[ASYNC_QUARK].$pending);  */return oo(() => promise.promised)
   } : (oo: Observer) => oo(promise)
 
   const $loaded = ion(false as Promise<any> | false)
   const $result = ion(undefined as T, {
-    '-fetch': fetch,
-    // 'awaited': false
+    '-fetch': fetch
   })
 
-
-
-  // observe(fetch, ({ current }) => {
-  //   if (!current) return;
-  //   console.log('current', current)
-  //   current.then(() => {
-  //     $loaded.value = current
-  //   }).catch(error => {
-  //     if (error === 'cancelled') return;
-  //     else throw error
-  //   })
-  // }, { phase: PRELUDE, eager: true })
-
   awaitsPrelude(oo => {
-    const promise = fetch(oo)
+    const promise = fetch(oo);
+    if (!promise) return;
     console.log('current', promise)
     promise.then(() => {
       console.log('AWAITS LOADED')
+      $count.value++;
       $loaded.value = promise
     }).catch(error => {
       if (error === 'cancelled') return;
@@ -40,6 +28,7 @@ export function Awaits<T>(promise: Promise<T> | Ion<Promise<T>> | Ion<T> & $Asyn
   })
 
   const $suspense = SuspenseIon()
+  const $count = ion(0)
 
   if (typeof promise === 'function') {
     return {
@@ -49,7 +38,9 @@ export function Awaits<T>(promise: Promise<T> | Ion<Promise<T>> | Ion<T> & $Asyn
           // pushAwaiting($suspense)
           return <>
             {As($loaded, () => {
-              return render($result() as T)
+              const output = render($result() as T)
+              console.log('RENDER AS!', output)
+              return output
             })}
           </>
         }
