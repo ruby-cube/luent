@@ -67,7 +67,7 @@ function isAsSeriesElement(node, seriesType) {
 function isAwaitSeriesElement(node, seriesType) {
    return t.isCallExpression(node) && (
       node.callee.name === 'Await'
-      || node.callee.name === 'Awaits'
+      // || node.callee.name === 'Awaits'
       || node.callee.name === 'Meanwhile'
       || node.callee.name === 'Twiddle'
       || node.callee.name === 'Catch' && seriesType === 'Await'
@@ -179,9 +179,9 @@ function transformJSXChildrenToArrayExpression(paths) {
                array.push(createAsSeries(series)) // TODO:
                break;
 
-            case 'Awaits':
-               array.push(createAwaitSeries(series))
-               break;
+            // case 'Awaits':
+            //    array.push(createAwaitSeries(series))
+            //    break;
 
             case 'Await':
                array.push(createAwaitSeries(series))
@@ -234,7 +234,7 @@ function transformJSXChildrenToArrayExpression(paths) {
          }
       }
       else if (t.isJSXExpressionContainer(node) && isAwaitSeriesElement(node.expression, seriesType)) {
-         if (node.expression.callee.name === 'Await' || node.expression.callee.name === 'Awaits') {
+         if (node.expression.callee.name === 'Await'/*  || node.expression.callee.name === 'Awaits' */) {
             closeSeries()
             seriesType = node.expression.callee.name
             series = [node.expression]

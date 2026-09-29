@@ -69,7 +69,7 @@ export function runDemo() {
       {/* <DayView/> */}
       {/* <TestStyleComments/> */}
       {/* <TestColorSort></TestColorSort> */}
-      <TestAsyncTabs/>
+      <TestAsyncSelect/>
     </>
     // return <TestInnerHTML/>
   }, '#root')

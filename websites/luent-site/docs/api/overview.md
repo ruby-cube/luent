@@ -104,7 +104,7 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 <!-- - `DOMNode()` <span class='doc-tag'>Experimental</span> to create a DOM node  -->
 
 ## Async rendering
-- `$PendingBatch()` to create a promise ion that batches the promises of other fetched-state ions.
+- `$Promised()` to create a promise ion that batches the promises of other fetched-state ions.
 - `$Fetched()` to create an ion with asynchronously updated state
 - `Dispatch()` to create async actions
 - `LazyView()` to create a lazy loaded component or render function

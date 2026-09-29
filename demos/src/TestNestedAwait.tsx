@@ -21,10 +21,10 @@ export function A() {
   return (
     <div class="box">
       A (rendered: {count.A}x) - complete in: {a}s
-      {/* {Await( */}
+      {Await(
       <B />
-      {/* )}
-      {Meanwhile(() => 'loading...')} */}
+      )}
+      {Meanwhile(() => 'loading...')}
     </div>
   );
 }
@@ -36,10 +36,7 @@ function B() {
   return (
     <div class="box">
       B (rendered: {count.B}x) - complete in: {b}s
-      {Awaits(c,
-        <C c={c}/>
-      )}
-      {/* {Meanwhile(() => 'loading...')} FIX:*/}
+      {Awaits(c, <C c={c}/>)}
     </div>
   );
 }

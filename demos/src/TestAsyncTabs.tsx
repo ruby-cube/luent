@@ -40,16 +40,16 @@ export function TestAsyncTabs() {
       ))}
     </ul>
     <hr></hr>
-    <ul class="inline">
-      {For(openTabs, m => m, tab => (
-        <li class={() => $tab() === tab && 'selected'} on:click={e => { !e.from('span') && ($tab.value = tab) }}>
-          {tabNames[tab]}
-          <span style="padding: 1em" on:click={e => closeTab(tab)}>x</span>
-        </li>
-      ))}
-    </ul>
 
-    {Await(view =>
+    {Await(view => <>
+      <ul class="inline">
+        {For(openTabs, m => m, tab => (
+          <li class={() => $tab() === tab && 'selected'} on:click={e => { !e.from('span') && ($tab.value = tab) }}>
+            {tabNames[tab]}
+            <span style="padding: 1em" on:click={() => closeTab(tab)}>x</span>
+          </li>
+        ))}
+      </ul>
       <div class={() => `tab ${view.ifPending('pending')}`}>
         <o:preserve>
           {As($tab, view =>
@@ -62,7 +62,7 @@ export function TestAsyncTabs() {
           )}
         </o:preserve>
       </div>
-    )}
+    </>)}
     {Meanwhile(
       <>loading...</>
     )}

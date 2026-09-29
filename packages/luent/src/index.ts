@@ -53,8 +53,8 @@ export {
 
   queueTask,
 
-  $PendingBatch,
-  Promised
+  Promised,
+  getAwaiting
 
 } from '@luent/quarky'
 export { isMutableIon } from './element/mutables'

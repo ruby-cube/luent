@@ -1,5 +1,4 @@
-import {  SuspenseIon } from "@luent/quarky";
-import { Await, Awaits, ion, Meanwhile, Promised } from "luent";
+import { Await, Awaits, getAwaiting, ion, Meanwhile, Promised } from "luent";
 
 function multiply(
   a: number,
@@ -12,7 +11,7 @@ function multiply(
 }
 
 
-export function TestAsyncMultiply() {
+export function TestAsyncMultiplyA() {
   const $n = ion(1);
 
   const $a = ion(0, { '-fetch': oo => multiply(oo($n), 1) });
@@ -51,7 +50,6 @@ export function TestAsyncMultiply() {
   </>
 }
 
-
 export function TestAsyncMultiplyB() {
   const $n = ion(1);
 
@@ -60,29 +58,68 @@ export function TestAsyncMultiplyB() {
   const $c = ion(0, { '-fetch': oo => multiply(oo($n), 3) });
   const $d = ion(0, { '-fetch': oo => multiply(oo($n), 4) });
   const $e = ion(0, { '-fetch': oo => multiply(oo($n), 5) });
-SuspenseIon
+
+  const { ifPending, $promised } = Promised($a, $b, $c, $d, $e)
+
   return <>
-    {Await(view => {
-      console.log('view.$promised', view.$promised())
+    {Await(() =>
+      <>
+        <button type="button" on:click={() => $n.value++}>
+          {$n}
+          {() => ifPending('...')}
+        </button>
+        <p>
+          {Awaits($promised, $n)} * 1 = {Awaits($promised, $a)}
+        </p>
+        <p>
+          {Awaits($promised, $n)} * 2 = {Awaits($promised, $b)}
+        </p>
+        <p>
+          {Awaits($promised, $n)} * 3 = {Awaits($promised, $c)}
+        </p>
+        <p>
+          {Awaits($promised, $n)} * 4 = {Awaits($promised, $d)}
+        </p>
+        <p>
+          {Awaits($promised, $n)} * 5 = {Awaits($promised, $e)}
+        </p>
+      </>
+    )}
+    {Meanwhile(() => (console.log('RENDERING LOADING....'), 'loading...'))}
+  </>
+}
+
+
+export function TestAsyncMultiply() {
+  const $n = ion(1);
+
+  const $a = ion(0, { '-fetch': oo => multiply(oo($n), 1) });
+  const $b = ion(0, { '-fetch': oo => multiply(oo($n), 2) });
+  const $c = ion(0, { '-fetch': oo => multiply(oo($n), 3) });
+  const $d = ion(0, { '-fetch': oo => multiply(oo($n), 4) });
+  const $e = ion(0, { '-fetch': oo => multiply(oo($n), 5) });
+
+  return <>
+    {Await(({ $promised, ifPending }) => {
       return <>
         <button type="button" on:click={() => $n.value++}>
           {$n}
-          {() => view.ifPending('...')}
+          {() => ifPending('...')}
         </button>
         <p>
-          {Awaits(view.$promised, $n)} * 1 = {Awaits(view.$promised, $a)}
+          {Awaits($promised, $n)} * 1 = {Awaits($promised, $a)}
         </p>
         <p>
-          {Awaits(view.$promised, $n)} * 2 = {Awaits(view.$promised, $b)}
+          {Awaits($promised, $n)} * 2 = {Awaits($promised, $b)}
         </p>
         <p>
-          {Awaits(view.$promised, $n)} * 3 = {Awaits(view.$promised, $c)}
+          {Awaits($promised, $n)} * 3 = {Awaits($promised, $c)}
         </p>
         <p>
-          {Awaits(view.$promised, $n)} * 4 = {Awaits(view.$promised, $d)}
+          {Awaits($promised, $n)} * 4 = {Awaits($promised, $d)}
         </p>
         <p>
-          {Awaits(view.$promised, $n)} * 5 = {Awaits(view.$promised, $e)}
+          {Awaits($promised, $n)} * 5 = {Awaits($promised, $e)}
         </p>
       </>
     })}

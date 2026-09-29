@@ -135,7 +135,7 @@ function asIon(
     const fetch = setup['-fetch']
     delete setup['-fetch']
     // return AsyncIon(initialState, fetch, setup)
-    return createAsyncIon({ initialState, fetch, wrap: setup['-as'] })
+    return createAsyncIon({ initialState, fetch, wrap: setup['-as'], awaited: setup['-awaited'] })
   }
   return createAtomicIon(initialState, setup)
 }

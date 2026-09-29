@@ -4,6 +4,8 @@ import { $Async, ASYNC_QUARK, AsyncIon, AsyncQuark, getAwaiting } from "./AsyncI
 import { createAtomicIon } from "../ion/AtomicIon"
 import { awaitsPrelude } from "../reactivity/IonicTask"
 import { createMemoizedDerivation } from "../ion/DerivationIon"
+import { observe } from "../reactivity/Observer"
+import { createHybridIon } from "../ion/HybridIon"
 
 export type SuspenseIon = Ion<Promise<void> | null> & {
   initial: boolean
@@ -78,21 +80,26 @@ export function SuspenseIon<P>(): SuspenseIon {
   let reject: ((reason?: any) => void) | null
 
   function Pending() {
-    return new Promise<void>((fulfill, rej) => {
+    const promise = new Promise<void>((fulfill, rej) => {
       resolve = fulfill
       reject = rej
     })
+    promise.catch(error => {
+      console.log('SUSPENSE ION caught error', error)
+    })
+    return promise
   }
 
   const unresolved = new Set()
 
   const $loaded = createMemoizedDerivation(() => {
     for (const { $loaded } of quarks) {
-      if ($loaded()) return true;
+      if (!$loaded()) return false;
     }
-    return false;
+    return true;
   }) as Ion<boolean>
 
+  // const $loaded = createAtomicIon(false)
 
   const $resolved = createMemoizedDerivation(() => {
     for (const { $pending } of quarks) {
@@ -101,13 +108,26 @@ export function SuspenseIon<P>(): SuspenseIon {
     return true
   })
 
+  const $propagatedError = createAtomicIon(null as Error | null)
+
   const $error = createMemoizedDerivation(() => {
     for (const { $error } of quarks) {
       const error = $error()
       if (error) return error;
     }
-    return null;
+    return $propagatedError();
   }) as Ion<Error | null>
+
+  observe($error, ({ current: error }) => {
+    if (error === null) return;
+    unresolved.clear()
+    if (reject) {
+      reject(error)
+      resolve = null
+      reject = null
+    }
+    $promised.value = null
+  })
 
   const cancelIfFetching = () => {
     let success = false
@@ -139,6 +159,9 @@ export function SuspenseIon<P>(): SuspenseIon {
       $promise: () => $promised(),
       $loaded,
       $error,
+      setError(error: Error) {
+        $propagatedError.value = error
+      },
       $pending: () => !$resolved(),
       cancelIfFetching,
       include,
@@ -162,7 +185,9 @@ export function SuspenseIon<P>(): SuspenseIon {
 
   function include(this: SuspenseIon, quark: AsyncQuark) {
     if (import.meta.env.SSR) return;
+    if (quark === this[SUSPENSE_QUARK]) return;
     if (quarks.has(quark)) return;
+    console.log('add quark', quark)
     quarks.add(quark)
 
     getActiveFlask().onDiscard(() => {
@@ -199,6 +224,7 @@ export function SuspenseIon<P>(): SuspenseIon {
             reject = null
           }
           $promised.value = null
+          // if (!$error()) $loaded.value = true
           if ($suspense.initial) $suspense.initial = false
         }
         return;
@@ -212,21 +238,8 @@ export function SuspenseIon<P>(): SuspenseIon {
         startTime = performance.now()
         $promised.value = Pending()
       }
-
-      promise
-        .catch(err => {
-          unresolved.clear()
-          if (err === 'cancelled') {
-            return;
-          }
-          if (reject) {
-            reject(err)
-            resolve = null
-            reject = null
-          }
-          $promised.value = null
-        })
     })
+
     return this
   }
 

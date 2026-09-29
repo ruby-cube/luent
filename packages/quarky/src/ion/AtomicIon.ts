@@ -42,10 +42,10 @@ export class AtomicIonQuark implements Atom {
    }
 }
 
-export function createAtomicIon(
-   initialState: unknown,
+export function createAtomicIon<T>(
+   initialState: T,
    setup?: AnyObject
-) {
+): MutableIon<T> {
    const quark = new AtomicIonQuark(new SimpleState(initialState), setup)
    const $state = (
       quark.castGet

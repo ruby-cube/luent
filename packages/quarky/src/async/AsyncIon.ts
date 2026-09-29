@@ -83,10 +83,11 @@ export type $Async<T> = {
   promised: Promise<T>,
   loaded: boolean,
   ifPending: <T, U>(suspense: T, value?: U) => T | U | undefined
+  ifErred: <T, U>(errorValue: T, value?: U) => T | U | undefined
 
   status: 'fetching' | 'fulfilled' | 'erred:fetch' | 'dispatching' | 'erred:dispatch'
 
-  // refetch(): void
+  refetch(): void
   // cancel(): void
   // onCancel(task: () => void): void
 
@@ -451,11 +452,12 @@ type AsyncIonSetup<T = any, U = any> = {
   initialState: U | undefined,
   fetch: (observe: (fn: () => any) => any) => Promise<T> | T,
   wrap: ((value: T) => U) | undefined
+  awaited: boolean | undefined
 }
 
 
 export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
-  const { initialState, fetch, wrap = o => o } = setup;
+  const { initialState, fetch, wrap = o => o, awaited = true } = setup;
 
   // Pending state
   let resolve: ((value: T | PromiseLike<T>) => void) | null;
@@ -467,11 +469,17 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
       reject = rej;
     })
     promise.catch(error => {
-      if (error === 'cancelled') {
-        console.log('caught error', error)
-        return;
-      }
-      else throw error
+      console.log('AsyncIon catch error', error)
+      // errors are propogated through $error
+      return;
+      // if (error === 'cancelled') {
+      //   console.log('caught error', error)
+      //   return;
+      // }
+      // else {
+      //   console.log('THROWING AGAIN', error)
+      //   throw error
+      // }
     })
     return promise
   }
@@ -493,7 +501,7 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
   }
 
   const $fetched = createMemoizedDerivation(() => {
-    untracked(() => emitAwait(quark))
+    if (awaited) untracked(() => emitAwait(quark))
     return $state()
   }, ({
     [ASYNC_QUARK]: quark,
@@ -511,6 +519,10 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
     },
 
     ifPending,
+
+    ifErred,
+
+    refetch,
 
     // then(onfulfilled, onrejected) {
     //   console.log('THEN', onfulfilled)
@@ -568,8 +580,19 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
     return $pending() ? suspense : value
   }
 
+  function ifErred<T, U>(errorValue: T, value?: U): T | U | undefined {
+    return $error() ? errorValue : value
+  }
+
+  const $refetchCount = createAtomicIon(0)
+
+  function refetch() {
+    $refetchCount.value++
+  }
+
   // Observe
   awaitsPrelude(oo => {
+    oo($refetchCount);
     const promise = toPromise(fetch(oo)) as PromiseLike<any>
     if (promise === pendingPromise) return;
 
@@ -597,19 +620,21 @@ export function createAsyncIon<T>(setup: AsyncIonSetup<T>) {
       $state.value = value
       $pending.value = false
       $loaded.value = true
+      $error.value = null
     })
 
     if ('catch' in p && typeof p.catch === 'function') {
       (p as Promise<unknown>).catch(error => {
+        if (!awaited) return; // supresses error for Awaits() $result
+        console.warn('catching error', error)
         pendingPromise = null
         if (reject) {
           reject(error)
           resolve = null
           reject = null
         }
-        $error.value = toError(error)
         $pending.value = false
-        $loaded.value = true
+        $error.value = toError(error)
       })
     }
   })
