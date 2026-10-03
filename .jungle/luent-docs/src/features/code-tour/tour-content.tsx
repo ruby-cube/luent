@@ -548,7 +548,7 @@ LifecycleHooks.tsx =
   <input
     type="text"
     at:mount={node => node.focus()}
-    mu:value={$of(todo).title}
+    mu:value={$$(todo).title}
     on:blur={e => doneEdit(todo)}
   />
 )}

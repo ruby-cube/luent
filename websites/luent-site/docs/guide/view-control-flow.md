@@ -138,7 +138,7 @@ function TodoList() {
     <ul>
       {For(todos, u => u.id, (todo, $index) =>
         <Todo 
-          mu:text={$of(todo).title} 
+          mu:text={$$(todo).title} 
           removeItem={() => removeItem($index())} 
         />
       )}

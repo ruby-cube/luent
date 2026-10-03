@@ -1,4 +1,4 @@
-import { $from, $of, component, Else, For, If } from "luent";
+import { $from, $$, component, Else, For, If } from "luent";
 import { ion, ionic, observe } from "@luent/quarky";
 
 let id = 0
@@ -64,11 +64,11 @@ export function BulletJournal() {
             <input
               type='text'
               on:keyup={e => reKeyup(e, item, index())}
-              mu:value={$of(item).text}
+              mu:value={$$(item).text}
             />
           )}
           {Else(
-            <>{$of(item).text}</>
+            <>{$$(item).text}</>
           )}
         </li>
       )}

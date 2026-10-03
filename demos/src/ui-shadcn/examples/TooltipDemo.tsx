@@ -31,7 +31,7 @@ export function TooltipDemo() {
   })
 
   return (
-    <o:context provide={[TOOLTIP_CONFIG({ /* delay: 500, hideDelay: 500 */ })]}>
+    <o:context map={[TOOLTIP_CONFIG({ /* delay: 500, hideDelay: 500 */ })]}>
       <div data-align='center' class={demoBoxStyle}>
 
         {/* <div style='background-color: lightblue' before:mount={tooltip.anchor.bold}>b</div> */}

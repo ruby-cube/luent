@@ -65,7 +65,6 @@ export { NodeRef, asJSX } from './node/NodeRef'
 // export * from './component/Component'
 // export * from './boundaries/Portal'
 // export * from './boundaries/Await'
-export { type IonOr } from './component/bindings-types'
 export { awaiting } from './async/awaiting'
 // export * from './component/Style'
 // export * from './component/bindings'
@@ -155,7 +154,7 @@ export type {
   TagType,
 } from './node/makeJSXNode'
 export type { ContextEntryKey } from './context/ContextKey'
-export type { FromTag, RenderTag, WithRef } from './component/bindings-types'
+export type { FromTag, RenderTag, WithRef, IonOr } from './component/bindings-types'
 export type { TagClass } from './element/styles'
 export type { TagName } from './element/setUpElement'
 export type { ViewType } from './conditional/If'
@@ -171,7 +170,7 @@ export type KeyboardEvent<T = Element> = JSX.KeyboardEvent<T>
 export type MouseEvent = JSX.MouseEvent
 export type ModifierKey = JSX.ModifierKey
 
-export { JSXComponent as expose, toª as to$, ªªof as $of } from '@luent/nextscript'
+export { JSXComponent as expose, toª as to$, ªªof as $$ } from '@luent/nextscript'
 export type { ComponentKit } from '@luent/nextscript'
 
 export { $_preserve_context } from './async/context'

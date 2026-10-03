@@ -25,7 +25,7 @@ The API reference is in the works. In the meantime, here is an overview of Luent
 - `awaitsLayout()` to observe a layout-phase task and rerun it on change.
 - `awaitsTick()` to observe a task scheduled for the upcoming render cycle tick and rerun it on change.
 - `Finitron()` to create a finite reactive state machine
-- `$of()` to access property ions from an ionic object
+- `$$()` to access property ions from an ionic object
 
 ## Component bindings
 - `FromTag` to provide type validation and annotations for tag bindings
@@ -45,7 +45,6 @@ The API reference is in the works. In the meantime, here is an overview of Luent
 
 ## Context bindings
 - `fromContext()` to access a value from the nearest providing context node
-- `fromContext$()` to access an ion from the nearest providing context node
 - `ContextKey()` to create a context key for context bindings
 - `mergeKeys()` to merge multiple keys into one
 - `<o:context>` to provide context bindings
@@ -57,9 +56,9 @@ The API reference is in the works. In the meantime, here is an overview of Luent
 - `<o—-root>` to provide root bindings
 - `<o—-ground>` to provide global bindings
 
-#### Convenience factories
-- `RootBinding()` to define a tree-wide value and create its accessor
-- `GroundBinding()` to define a global value and create its accessor
+<!-- #### Convenience factories -->
+<!-- - `RootBinding()` to define a tree-wide value and create its accessor -->
+<!-- - `GroundBinding()` to define a global value and create its accessor -->
 <!-- - `RootService()` to define an tree-wide value that exists only if in use and create its accessor -->
 <!-- - `GroundService()` to define a global value that exists only if in use and create its accessor -->
 
@@ -71,7 +70,7 @@ Control flow functions are called within JSX to direct the control flow of view 
 - `As`/`Default`
 - `For`/`Empty`
 - `Thru`
-- `Await`/`Meanwhile`/`Twiddle`/`Catch`
+- `Await`/`Meanwhile`/`Catch`
 - `Try`/`Catch`
 
 ## Orbital tags
@@ -104,9 +103,10 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 <!-- - `DOMNode()` <span class='doc-tag'>Experimental</span> to create a DOM node  -->
 
 ## Async rendering
-- `$Promised()` to create a promise ion that batches the promises of other fetched-state ions.
 - `$Fetched()` to create an ion with asynchronously updated state
 - `Dispatch()` to create async actions
+- `$Promised()` to create a promise ion that batches the promises of other fetched-state ions.
+- `Awaits()` to render asynchronously. Holds previous state until promise resolves.
 - `LazyView()` to create a lazy loaded component or render function
 <!-- - `Lax()` to create async updates -->
 <!-- - `lax()` for async updates -->

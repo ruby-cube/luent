@@ -161,7 +161,7 @@ Class instances may also be made reactive using `ionic()`. To learn more, see [C
 <p align="right"><a href="#reactive-structures" style="text-decoration: none">[top]</a></p>
 
 <!-- ### Ion access
-Property ions may be accessed using the `$of()` helper.
+Property ions may be accessed using the `$$()` helper.
 ```tsx
 
 ``` -->
@@ -202,12 +202,12 @@ awaitsTick(oo => oo(() => {
 }))
 ```
 
-Alternatively, a persistent copy of the ion may be accessed using the `$of()` helper (rather than creating a new inline derivation each time). In NextScript, simply use the accessor operator `@`.
+Alternatively, a persistent copy of the ion may be accessed using the `$$()` helper (rather than creating a new inline derivation each time). In NextScript, simply use the accessor operator `@`.
 ```nsx
 <label on:dblclick={() => editTodo(todo)}>{todo.title@}</label>
 ```
 ```tsx
-<label on:dblclick={() => editTodo(todo)}>{$of(todo).$title}</label>
+<label on:dblclick={() => editTodo(todo)}>{$$(todo).$title}</label>
 ```
 
 This is useful when a mutable ion is needed for a mutable binding
@@ -223,7 +223,7 @@ This is useful when a mutable ion is needed for a mutable binding
 ```tsx
 <input
   type="text"
-  mu:value={$of(todo).title}
+  mu:value={$$(todo).title}
   at:attach={node => node.focus()}
   on:blur={() => doneEdit(todo)}
   on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}

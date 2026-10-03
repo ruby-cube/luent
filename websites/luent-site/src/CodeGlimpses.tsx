@@ -644,7 +644,7 @@ MutationSafety.nsx =
       this.push(chooseRandom(powers))
     }
   })
-    <:>
+  <:>
     <EmojiBoard powers={powerset}/>
     <Powerset mu:powers={powerset} limit={10}/>
   </:>
@@ -728,7 +728,7 @@ LifecycleHooks.tsx =
     <input
       type="text"
       at:mount={node => node.focus()}
-      mu:value={$of(todo).title}
+      mu:value={$$(todo).title}
       on:blur={e => doneEdit(todo)}
     />
   )
@@ -749,9 +749,9 @@ function Portals() {
 
 Portals.filename = 'portal-examples'
 Portals.nsx =
-  `< o--portal to = '#sidebar' >
+  `<o--portal to='#sidebar'>
   <Preview document={document} />
-</o--portal >
+</o--portal>
 
 <o--body>
   {If(show@, 
@@ -764,9 +764,9 @@ Portals.nsx =
 `
 
 Portals.tsx =
-  `< o--portal to = '#sidebar' >
+  `<o--portal to='#sidebar'>
   <Preview document={document} />
-</o--portal >
+</o--portal>
 
 <o--body>
   {If($show, 
@@ -804,7 +804,7 @@ function App() {
   get theme = ion('dark' as Theme);
   const settings = new Settings();
   <:>
-    <o:context provide={[THEME(theme@), SETTINGS(settings)]}>
+    <o:context map={[THEME(theme@), SETTINGS(settings)]}>
       <Main />
       <Sidebar />
     </o:context>
@@ -836,7 +836,7 @@ function App() {
   const $theme = ion('dark' as Theme);
   const settings = new Settings();
   return <>
-    <o:context provide={[THEME($theme), SETTINGS(settings)]}>
+    <o:context map={[THEME($theme), SETTINGS(settings)]}>
       <Main />
       <Sidebar />
     </o:context>
@@ -871,8 +871,7 @@ function ViewPreservation() {
 ViewPreservation.filename = 'App'
 ViewPreservation.nsx =
   `<div>
-{
-  If(showSidebar@, 'preserve',
+  {If(showSidebar@, 'preserve',
     <Sidebar selected={tab@}/>
   )}
 <o:preserve>
@@ -889,11 +888,9 @@ ViewPreservation.nsx =
 
 ViewPreservation.tsx =
   `<div>
-{
-  If($showSidebar, 'preserve',
+  {If($showSidebar, 'preserve',
     <Sidebar selected={$tab} />
-  )
-}
+  )}
 <o:preserve>
   {As($tab,
     <Editor content={tabNames[$tab()]} />

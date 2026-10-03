@@ -3,16 +3,16 @@
 layout: home
 
 hero:
-  name: "NextScript"
+  name: "NoriScript"
   text: "A TypeScript + JSX Language Extension"
-  tagline: for clear, ergonomic, type-safe code
+  tagline: for clear, readable, type-safe code
   actions:
     - theme: alt
-      text: Preview NextScript
+      text: Preview NoriScript
       link: /#code-glimpses
 
 features:
-  - title: Ergonomic syntax
+  - title: Readable syntax
     details: Reduce boilerplate code while remaining clear and expressive.
   - title: Language coherence
     details: Write new yet familiar syntax confidently through predictable semantics.
@@ -27,9 +27,9 @@ features:
   </div> -->
   <section id='code-glimpses' class="home-glimpses-heading tour-copy">
     <h2>Preview</h2>
-    <p style='text-wrap: balance'><strong>NextScript is in early development.</strong> Here's a glimpse of what's taking shape.</p>
+    <p style='text-wrap: balance'><strong>NoriScript is in early development.</strong> Here's a glimpse of what's taking shape.</p>
     <p class='preview-note' style='text-wrap: balance'><small>
-    <strong>Note:</strong> Examples use API from <a href="https://luent.dev">Luent</a> for demonstration purposes. NextScript itself is framework-agnostic.</small></p>
+    <strong>Note:</strong> Examples use API from <a href="https://luent.dev">Luent</a> for demonstration purposes. NoriScript itself is framework-agnostic.</small></p>
   </section>
 
   <!-- <div id="home-tour-root"></div> -->

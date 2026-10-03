@@ -1,4 +1,4 @@
-import { ion, Ion, Ionic, ionic, $of, css, Else, For, FromTag, If, RenderTag, Style, TagClass } from "luent";
+import { ion, Ion, Ionic, ionic, $$, css, Else, For, FromTag, If, RenderTag, Style, TagClass } from "luent";
 
 
 
@@ -96,7 +96,7 @@ function Powerset(setup: FromTag<{
   const { mu, limit, $class } = setup;
   const { powerset } = mu
 
-  const count = $of(powerset).length
+  const count = $$(powerset).length
   const remaining = ion(() => limit - count())
 
   return <>
@@ -378,7 +378,7 @@ EmojiQuest.tsxPowerset = `function Powerset(setup: FromTag<{
 
         <div class='stats'>
           <span class='stats-label'>Total</span>
-          <span class='stats-value'>{$of(powers).length}/{limit}</span>
+          <span class='stats-value'>{$$(powers).length}/{limit}</span>
         </div>
       </div>
 

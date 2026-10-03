@@ -6,7 +6,7 @@ import { AnyObject, Booleanny } from "@luent/types";
 import { PortalNodeInput } from "../../boundaries/Portal";
 import { TransitionBindings, TransitionConfigs } from "../../transitions/transitions";
 import { matchEventTarget } from "../../events/target";
-import { IonOr } from "../../component/bindings-types";
+import { IonOr, RenderTag } from "../../component/bindings-types";
 import { LuentHooks } from "../../flask/template-hooks";
 import { ComponentRef } from "../../node/NodeRef";
 import { Provided } from "../../context/Context";
@@ -1840,14 +1840,14 @@ export namespace JSX {
     'shadow-root': { children: any, mode: 'open' | 'closed' }
     'o--portal': PortalNodeInput & { children: any }
 
-    'o-style': StyleHTMLAttributes<HTMLStyleElement> & LuentAttributes<HTMLStyleElement> & { 'portal-to'?: 'body' | 'head', text: string }
+    'o-style': StyleHTMLAttributes<HTMLStyleElement> & LuentAttributes<HTMLStyleElement> & { 'portal-to'?: 'body' | 'head', 'scope'?: RenderTag }
     'o-link': LinkHTMLAttributes<HTMLLinkElement> & LuentAttributes<HTMLLinkElement> & { 'portal-to'?: 'body' | 'head' }
     'o--head': HTMLAttributes<HTMLHeadElement> & LuentAttributes<HTMLHeadElement>
     'o--body': HTMLAttributes<HTMLBodyElement> & LuentAttributes<HTMLBodyElement>
     'o--window': HTMLAttributes<Window> & LuentAttributes<Window>
     'o--host': HTMLAttributes<Window> & LuentAttributes<Window>
     'o:preserve': { children: any[] | any; discard?: Quarky.Ion<Booleanish> }
-    'o:context': { children: any[] | any; provide: Provided }
+    'o:context': { children: any[] | any; map: Provided }
     'o:transition': { children: any[] | any; } & TransitionBindings
 
     'o--dock': HTMLAttributes<HTMLDivElement> & TransitionConfigs & LuentAttributes<HTMLDivElement>

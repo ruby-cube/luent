@@ -45,8 +45,8 @@ export default defineConfig({
   },
 
 
-  title: 'NextScript',
-  description: 'NextScript documentation and resources',
+  title: 'NoriScript',
+  description: 'NoriScript documentation and resources',
   themeConfig: {
     logo: '/assets/nextscript-logo-512px.png',
     search: {
@@ -84,7 +84,8 @@ export default defineConfig({
             },
             { text: 'Type Syntax', link: '/guide/type-syntax' },
             { text: 'JSX Syntax', link: '/guide/jsx-syntax' },
-            { text: 'JSX Terminology', link: '/guide/terminology' }
+            { text: 'JSX Terminology', link: '/guide/terminology' },
+            { text: 'Boundary Syntax', link: '/guide/boundary-syntax' }
           ]
         },
       ],

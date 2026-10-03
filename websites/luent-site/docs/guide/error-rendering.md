@@ -54,7 +54,7 @@ function FooApp() {
 
   return <>
     <Notices>
-      {If($of(errable).$error, 
+      {If($$(errable).error, 
         <ErrorNotice error={errable.error} retry={() => errable.retry()}/>
       )}
     </Notices>

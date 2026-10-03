@@ -379,9 +379,9 @@ JSX statements fences form a container for JavaScript statements that appear wit
 <!-- <code><style><i>css rules</i></style></code> -->
 <code>&lt;style&gt;<i>css</i>&lt;/style&gt;</code>
 
-A JSX style tag is a special JSX tag whose slot is parsed as template literal text. Plain curly braces are treated as text while curly braces prefixed with a dollar sign, `${}`, serve as JavaScript expression containers. 
+A JSX style tag is a special JSX tag whose slot content is parsed as template literal text. Plain curly braces are treated as text while curly braces prefixed with a dollar sign, `${}`, serve as JavaScript expression containers. 
 
-It is transformed into a tagged template literal call (`jsxCSS` by default). The tag function must be provided by the JSX runtime.
+It's slot content is transformed into a tagged template literal call (<code>jsx.css``</code> by default). The tag function must be provided by the JSX runtime as a property of `jsx`.
 
 ```nsx
 const FONT_SIZE = 16;
@@ -392,7 +392,7 @@ function Foo() {
     <style>
       .message {
         color: blue;
-        font-size: ${FONT_SIZE}
+        font-size: ${FONT_SIZE};
       }
     </style>
   </:>
@@ -400,25 +400,26 @@ function Foo() {
 ```
 :::info transpiled tsx
 ```tsx
-import { jsxCSS } from 'luent/jsx-runtime'
+import { jsx } from 'luent/jsx-runtime'
 const FONT_SIZE = 16;
 
 function Foo() {
   return <>
     <div class='message'>Hello world</div>
-    {jsxCSS`
+    <style>
+      {jsx.css`
       .message {
         color: blue;
-        font-size: ${FONT_SIZE}
-      }
-    `)}
+        font-size: ${FONT_SIZE};
+      `}
+    </style>
   </>
 }
 ```
 :::
 
 
-The `lang` attribute is used to modify the name of the tag function, using the pattern <code>jsx<i>LANG</i></code>. If a `lang` is not specified, the tag function will default to `jsxCSS`.
+The `lang` attribute is used as the name of the tag function. If a `lang` is not specified, the tag function will default to `jsx.css`.
 ```nsx
 <style lang='scss'>
   .message {
@@ -429,19 +430,20 @@ The `lang` attribute is used to modify the name of the tag function, using the p
 ```
 :::info transpiled tsx
 ```tsx
-{jsxSCSS`
+<style lang='scss'>
+  {jsx.scss`
   .message {
     color: blue;
     font-size: ${FONT_SIZE}
-  }
-`}
+  `}
+</style>
 ```
 :::
 
 
 Frameworks and libraries may register custom style element names in the NextScript config. For example:
-```tsx
-// nextscript.config.ts
+```js
+// nextscript.config.js
 
 export default configureNextScript({
   jsx: {
@@ -459,13 +461,15 @@ export default configureNextScript({
 ```
 :::info transpiled tsx
 ```tsx
-{jsxCSS['o-style']`
+<o-style>
+  {jsx.css`
   .message {
     color: blue;
     font-size: ${FONT_SIZE}
-  }
-`}
+  `}
+</o-style>
 ```
+
 :::
 
 
@@ -475,7 +479,7 @@ export default configureNextScript({
 <code><<i>node</i> style=\`css rules\`></<i>node</i>></code>
 
 
-JSX style binding values that are wrapped in backticks will be transformed into tagged template literals, using the `jsxStyle` tag function provided by the JSX runtime.
+JSX style binding values that are wrapped in backticks will be transformed into tagged template literals, using the `css` tag function provided by the JSX runtime.
 
 ```nsx
 <div
@@ -494,6 +498,8 @@ JSX style binding values that are wrapped in backticks will be transformed into 
 
 :::info transpiled tsx
 ```tsx
+import { css as _css } from 'luent/jsx-runtime'
+
 <div
   on:pointerdown={e => maybeDrag(e, item, $index())}
   on:transitionend={() => $taggingAlong.value = false}
@@ -501,7 +507,7 @@ JSX style binding values that are wrapped in backticks will be transformed into 
     'tag-along': $tagalong,
     'dragged': $dragged,
   }}
-  style={css`
+  style={_css`
     z-index: ${() => $dragged() ? order(index) : 0};
     transform: ${() => $dragged() ? $transform() : undefined)@};
   `}

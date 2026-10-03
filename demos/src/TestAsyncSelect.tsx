@@ -1,5 +1,5 @@
 import { toPromise } from "@luent/quarky";
-import { Await, Awaits, For, Meanwhile, mountIsland, PRELUDE, SYNC, observe, ion, awaitTick, Ion, awaitsPrelude, $_preserve_context, If, Catch, RenderTag, Try } from "luent";
+import { Await, Awaits, For, Meanwhile, mountIsland, SYNC, observe, ion, awaitTick, Ion, awaitsPrelude, $_preserve_context, If, Catch, RenderTag, Try } from "luent";
 // import { addToSuspense, getActiveUpdate, getAwaiting, popUpdate, pushUpdate } from "@luent/quarky";
 // import { $_run_with_, $_snap_context, getFlask } from "@luent/flask";
 
@@ -13,6 +13,7 @@ import { Await, Awaits, For, Meanwhile, mountIsland, PRELUDE, SYNC, observe, ion
 
 const TEST_LATENCY_0 = 1000
 const TEST_LATENCY_1 = 500
+
 
 export function TestAsyncSelect() {
 

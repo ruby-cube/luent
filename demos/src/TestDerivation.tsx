@@ -1,4 +1,4 @@
-import { $of, component, For, template } from "luent";
+import { $$, component, For, template } from "luent";
 import { ionic, SYNC, observe } from "@luent/quarky";
 
 
@@ -27,7 +27,7 @@ export function TestDerivationA() {
       console.log('labelA', /* count.value */) // This FAILS to run on count value change
    }, { phase: SYNC })
 
-   observe($of(count).value, () => {
+   observe($$(count).value, () => {
       console.log('pion', /* count.value */)
    }, { phase: SYNC })
 
@@ -42,13 +42,13 @@ export function TestDerivationB() {
       value: 0
    })
 
-   $of(count).value
+   $$(count).value
 
    observe(() => count.value, () => {
       console.log('label', count.value) // This runs on count value change
    }, { phase: SYNC })
 
-   observe($of(count).value, () => {
+   observe($$(count).value, () => {
       console.log('pion', count.value)
    }, { phase: SYNC })
 
@@ -71,7 +71,7 @@ export function TestDerivationD() {
       console.log('label', count.value) // This FAILS
    }, { phase: SYNC })
 
-   observe($of(count).value, () => {
+   observe($$(count).value, () => {
       console.log('pion', count.value)
    }, { phase: SYNC })
 
@@ -89,7 +89,7 @@ export function TestDerivationC() {
       value: 0
    })
 
-   observe($of(count).value, () => {
+   observe($$(count).value, () => {
       console.log('pion', count.value)
    }, { phase: SYNC })
 

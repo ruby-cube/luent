@@ -22,6 +22,10 @@ function declareStyles(strings: TemplateStringsArray, ...values: any[]): string 
   return composeCSSText(strings, values)
 }
 
+function composeCSSText(strings: TemplateStringsArray, values: string[]) {
+  return strings.reduce((cssText, string, i) => cssText + string + (i < values.length ? values[i] : ''), '')
+}
+
 function createStyleTag(cssText: string, id: string, shadow: true | undefined) {
   const style = document.createElement('style');
   style.id = id;
@@ -31,9 +35,7 @@ function createStyleTag(cssText: string, id: string, shadow: true | undefined) {
 
 
 
-function composeCSSText(strings: TemplateStringsArray, values: string[]) {
-  return strings.reduce((cssText, string, i) => cssText + string + (i < values.length ? values[i] : ''), '')
-}
+
 
 export const css = declareStyles
 export const style = declareStyles

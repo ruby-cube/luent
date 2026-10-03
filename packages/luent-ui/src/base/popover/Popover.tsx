@@ -26,7 +26,7 @@ function PopoverRoot(setup: FromTag<{
   return (
     <>
       {If(() => popover.visible, 'create', // TODO: configure activation type
-        <o:context provide={[POPOVER(popover), POPOVER_NODE($popover)]}>
+        <o:context map={[POPOVER(popover), POPOVER_NODE($popover)]}>
           <div
             at:mount={() => console.log('mounting popover!')}
             before:attach={node => maybeFlip(node, popover)}

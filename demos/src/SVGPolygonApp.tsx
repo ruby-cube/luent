@@ -1,4 +1,4 @@
-import { component, template, For, FromTag, Style, css, $of, } from "luent"
+import { component, template, For, FromTag, Style, css, $$, } from "luent"
 import { as, ion, ionic, EACH, Ion, Ionic } from "@luent/quarky"
 
 // Demo from Vue.js
@@ -51,7 +51,7 @@ export function SVGPolygonApp() {
       {For(stats, $stat =>
         <div>
           <label>{() => $stat().label}</label>
-          <input type="range" mu:value={$of($stat()).value} min="0" max="100" />
+          <input type="range" mu:value={$$($stat()).value} min="0" max="100" />
           <span>{() => $stat().value}</span>
           <button on:click={e => remove($stat())} class="remove">X</button>
         </div>
@@ -163,7 +163,7 @@ function PolyGraph({ stats }: {
         <AxisLabel
           stat={$stat}
           index={index}
-          total={$of(stats).length}
+          total={$$(stats).length}
         >
         </AxisLabel>
       )}

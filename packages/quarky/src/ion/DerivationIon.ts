@@ -76,7 +76,7 @@ export function createMemoizedDerivation(
    }
 
 
-   $derivedState['~ion'] = true as const;
+  //  $derivedState['~ion'] = true as const;
    $derivedState[QUARK] = quark
    if (__DEV__) quark.asTraceable = new Traceable(setup?.devName)
 

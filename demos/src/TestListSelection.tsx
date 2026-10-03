@@ -1,4 +1,4 @@
-import { component, template, mountIsland, For, listen, NodeRef, Style, css, $of } from "luent";
+import { component, template, mountIsland, For, listen, NodeRef, Style, css, $$ } from "luent";
 import { moveUniqueItems, useRandomColorGenerator } from "@luent/utils";
 import './style.css'
 import { ion, EACH, ionic } from "@luent/quarky";
@@ -128,7 +128,7 @@ export function TestListSelection() {
                     </p>
 
                     <li on:click={() => item.changeContent()}>
-                      {$of(item)?.content}
+                      {$$(item)?.content}
                     </li>
                     <p>{$index}</p>
                     <div on:click={() => { insertItem($index() + 1) }} style="background-color: gray; cursor: pointer">
@@ -150,7 +150,7 @@ export function TestListSelection() {
             {For($listClone, m => m.id, (item, $index) =>
               <div style={{ border: 'solid gray 1px', margin: '10px' }}>
                 <li>
-                  {($of(item).content)}
+                  {($$(item).content)}
                 </li>
                 <p>{$index}</p>
               </div>

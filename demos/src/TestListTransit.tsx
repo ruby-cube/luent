@@ -1,4 +1,4 @@
-import { For, FromTag, Style, css, $of, ion, ionic, Ion, Ionic, awaiting, render, queueTask } from "luent";
+import { For, FromTag, Style, css, $$, ion, ionic, Ion, Ionic, awaiting, render, queueTask } from "luent";
 import './TestListTransit.css'
 
 // Modified Demo from Svelte
@@ -141,7 +141,7 @@ function TodoList(input: FromTag<{
             ref={[lis, $i]}
           >
             <label>
-              <input type="checkbox" mu:checked={$of(todo).done} />
+              <input type="checkbox" mu:checked={$$(todo).done} />
               <span>{todo.description}</span>
               <button on:click={() => remove(todo)} aria-label="Remove">{'X'}</button>
             </label>

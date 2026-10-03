@@ -1,4 +1,4 @@
-import { $of, component, css, Else, For, FromTag, If, RenderTag, Style, TagClass } from "luent";
+import { $$, component, css, Else, For, FromTag, If, RenderTag, Style, TagClass } from "luent";
 import { ion, Ion, Ionic, ionic } from "@luent/quarky";
 
 
@@ -83,7 +83,7 @@ function Powerset(setup: FromTag<{
   const { mu, limit, $class } = setup;
   const { powerset } = mu
 
-  const count = $of(powerset).length
+  const count = $$(powerset).length
   const remaining = ion(() => limit - count())
 
   return (

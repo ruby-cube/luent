@@ -19,7 +19,7 @@ function DropdownMenu(setup: FromTag<{
   const { dropdown, menu } = DropdownKit()
 
   return (
-    <o:context provide={DROPDOWN(dropdown)}>
+    <o:context map={DROPDOWN(dropdown)}>
       <Face menu={menu}/>
       <Slot/>
     </o:context>

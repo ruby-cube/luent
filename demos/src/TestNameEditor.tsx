@@ -1,4 +1,4 @@
-import { $of, FromTag, NodeRef } from "luent";
+import { $$, FromTag, NodeRef } from "luent";
 
 export function TestNameEditor(setup: FromTag<{
   'mu:user': { name: { first: string, last: string } }
@@ -11,7 +11,7 @@ export function TestNameEditor(setup: FromTag<{
   }
 
   return <>
-    <div>{$of(user.name).first} {$of(user.name).last}</div>
+    <div>{$$(user.name).first} {$$(user.name).last}</div>
     <form
       on:submit={e => {
         e.preventDefault();

@@ -3,10 +3,10 @@
 Views are created through [JSX syntax](#jsx-transpilation), HTML-like syntax that can interpolate JavaScript.
 
 ```nsx
-<>
+<:>
   <h1>Hello World</h1>  
   <p>It is {new Date().toLocaleString()}</p>
-</>
+</:>
 ```
 
 ```tsx

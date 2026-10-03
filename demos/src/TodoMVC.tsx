@@ -1,4 +1,4 @@
-import { KeyboardEvent, For, If, listen, $of, Ion, Ionic, ionic, ion, FromTag, FormEvent, awaitsTick } from "luent"
+import { KeyboardEvent, For, If, listen, $$, Ion, Ionic, ionic, ion, FromTag, FormEvent, awaitsTick } from "luent"
 
 interface Todo {
   id: number
@@ -199,7 +199,7 @@ function TodoList(setup: FromTag<{
         return <>
           <li class={['todo', { 'completed': () => todo.completed, 'editing': $isEditing }]}>
             <div class="view">
-              <input class="toggle" type="checkbox" mu:checked={$of(todo).completed} />
+              <input class="toggle" type="checkbox" mu:checked={$$(todo).completed} />
               <label on:dblclick={() => editTodo(todo)}>{() => todo.title}</label>
               <button class="destroy" on:click={() => removeTodo(todo)}></button>
             </div>
@@ -207,7 +207,7 @@ function TodoList(setup: FromTag<{
               <input
                 class="edit"
                 type="text"
-                mu:value={$of(todo).title}
+                mu:value={pionic(todo).title}
                 at:attach={node => node.focus()}
                 on:blur={() => doneEdit(todo)}
                 on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}

@@ -5,12 +5,12 @@ import { createHybridIon } from "./HybridIon";
 import { AnyObject } from "@luent/types";
 import { $Async, AsyncIon, createAsyncIon } from "../async/AsyncIon";
 import { isIon } from "./utils";
-import { Ionic, ionic } from "../ionic/Ionic";
+import { ionic } from "../ionic/Ionic";
 
 /* API */
 export interface Ion<T = unknown> {
   (): T
-  '~ion'?: true
+  value?: T
 }
 
 // type MaybeInert<T = unknown> = IsIonic<ExcludePrimitives<T>> extends true ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T

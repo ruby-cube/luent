@@ -232,10 +232,10 @@ There are four main types of component bindings:
 ## Ion normalization
 **Creating a context key**
 ```nsx
-const USER = ContextKey<Ion<User>>()
+const [USER] = ContextKey.Ion<User>()
 ```
 ```tsx
-const USER = ContextKey<Ion<User>>()
+const [USER, $USER] = ContextKey.Ion<User>()
 ```
 **Declaring & accessing the binding**
 ```nsx
@@ -249,7 +249,7 @@ function UserProfile() {
 ```
 ```tsx
 function UserProfile() {
-  const $user = fromContext$(USER)
+  const $user = fromContext($USER)
   return <>
     <h1>{() => $user().name}</h1>
     <p>{() => $user().description}</p>

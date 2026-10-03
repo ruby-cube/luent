@@ -1,4 +1,4 @@
-import { ExcludePrimitives, OnlyPrimitives, Primitive } from "@luent/types";
+import { ExcludePrimitives, Glass, OnlyPrimitives, Primitive } from "@luent/types";
 import { Ion, Ionic } from "@luent/quarky";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { NodeRef, RefSource } from "../node/NodeRef";
@@ -9,6 +9,18 @@ import { JSX } from "../jsx-runtime"
 export type HandleEvent<E = {}> = keyof E extends never ? (() => void) | ((event: E) => void) : (event: E) => void
 
 export type IonOr<T> = T | (() => T)
+
+export type MuPack<T> = { mu: Readonly<T> }
+export type Mu<T> = { mu: T }
+
+// { mu?: { user?: User }, user?: User } 
+export type MuOr<T extends object, U extends undefined | '?' = undefined> = U extends '?' ? { mu?: Glass<OptionalProperties<T>> } & Glass<OptionalProperties<T>> : { mu: T } & T
+
+type OptionalProperties<T> = { [K in keyof T]?: T[K] }
+
+// interface User {name: string}
+
+// type MuOrUser = MuOr<{user: User}, '?'>
 
 
 // two types of component input

@@ -180,6 +180,10 @@ export function Code(setup: FromTag<{
       {/* </o:preserve> */}
     </div>
     {Style(css`
+        .code-container .code {
+          line-height: 1rem;
+        }
+
         .code-container {
           position: relative;
           margin: 16px 0;
@@ -279,7 +283,7 @@ function CodeBlock(setup: FromTag<{ tab: CodeTab, highlight: (code: string, lang
   const delay = useDelay()
 
   return <>
-    <o:context provide={TOOLTIP_CONFIG({ delay, hideDelay: delay })}>
+    <o:context map={TOOLTIP_CONFIG({ delay, hideDelay: delay })}>
       <div ref={$container} class='code'>{{ html: $code, trusted }}</div>
       {Await($code, <>
         {If(tab.hover, () => {

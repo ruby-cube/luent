@@ -1,4 +1,4 @@
-import { For, listen, NodeRef, Style, css, $of } from "luent";
+import { For, listen, NodeRef, Style, css, $$ } from "luent";
 import { moveUniqueItems, useRandomColorGenerator } from "@luent/utils";
 import './style.css'
 import { ion, awaitRender, queueTask, EACH, ionic } from "@luent/quarky";
@@ -142,7 +142,7 @@ export function TestListSelectTransition() {
                   </button>
 
                   <li on:click={e => item.changeContent()}>
-                    {$of(item).content}
+                    {$$(item).content}
                   </li>
                   <p>{$index}</p>
                   <div on:click={e => { insertItem($index() + 1) }} style="background-color: gray; cursor: pointer">

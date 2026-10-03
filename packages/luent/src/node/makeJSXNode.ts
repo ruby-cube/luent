@@ -29,7 +29,7 @@ export type TagType = RenderTag | string
 // }
 
 declare global {
-  function Slot<T>(input: { children?: RawJSXNode } & { provide?: Provided } & AnyObject): T
+  function Slot<T>(input: { children?: RawJSXNode } & { map?: Provided } & AnyObject): T
 }
 
 export type RawJSXNode =
@@ -187,7 +187,7 @@ export function makeJSXNode(
 
   switch (nodeType) {
     case 'o:context':
-      return Context({ Slot, provide: config.provide } as any)
+      return Context({ Slot, provide: config.map } as any)
 
     case 'o:transition':
       if (!Slot) return;

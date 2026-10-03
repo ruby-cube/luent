@@ -1,4 +1,4 @@
-import { For, If, Style, css, $of } from "luent"
+import { For, If, Style, css, $$ } from "luent"
 import { ion, Ionic, ionic } from "@luent/quarky"
 
 // Modified Demo from Vue.js
@@ -94,7 +94,7 @@ export function CircleApp() {
           <input
             type="range"
             mu:value={(selected?.r@)@}
-            // mu:value={() => $of($selected())?.r}
+            // mu:value={() => $$($selected())?.r}
           min="1" max="300"
           />
         </div>
