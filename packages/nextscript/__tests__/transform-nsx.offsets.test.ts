@@ -4,7 +4,7 @@ import { parseNSX } from "../src/2-parse";
 import { transformNSX } from "../src/3-transform";
 import { printTSX } from "../src/4-generate";
 
-describe('NextScript transform with offsets', () => {
+describe('NoriScript transform with offsets', () => {
    it('transforms block derivation expressions', () => {
       const { code, edits } = preprocessNSX(
          `get foo = ref(0);\n` +

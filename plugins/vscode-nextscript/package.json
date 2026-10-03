@@ -1,7 +1,7 @@
 {
    "name": "vscode-nextscript",
-   "displayName": "NextScript for VS Code",
-   "description": "NextScript language support via Volar TS plugin plus syntax highlighting for NextScript-specific tokens.",
+   "displayName": "NoriScript for VS Code",
+   "description": "NoriScript language support via Volar TS plugin plus syntax highlighting for NoriScript-specific tokens.",
    "version": "0.2.8",
    "publisher": "local",
    "main": "./out/extension.js",
@@ -43,7 +43,7 @@
          {
             "id": "nsxGetterAccess",
             "superType": "operator",
-            "description": "The @ getter-access operator in NextScript syntax."
+            "description": "The @ getter-access operator in NoriScript syntax."
          }
       ],
       "grammars": [

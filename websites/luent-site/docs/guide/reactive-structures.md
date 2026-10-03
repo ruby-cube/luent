@@ -202,7 +202,7 @@ awaitsTick(oo => oo(() => {
 }))
 ```
 
-Alternatively, a persistent copy of the ion may be accessed using the `$$()` helper (rather than creating a new inline derivation each time). In NextScript, simply use the accessor operator `@`.
+Alternatively, a persistent copy of the ion may be accessed using the `$$()` helper (rather than creating a new inline derivation each time). In NoriScript, simply use the accessor operator `@`.
 ```nsx
 <label on:dblclick={() => editTodo(todo)}>{todo.title@}</label>
 ```

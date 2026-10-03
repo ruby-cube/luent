@@ -82,7 +82,7 @@ export default defineConfig({
           collapsed: false,
           items: [{
             text: '&nbsp;&nbsp;&nbsp;&nbsp;nsx&nbsp;&nbsp;&nbsp;&nbsp;tsx'
-          }, {text: '* NextScript (nsx) is currently in preview, not yet ready for use'}]
+          }, {text: '* NoriScript (nsx) is currently in preview, not yet ready for use'}]
         },
         {
           text: 'Essentials',

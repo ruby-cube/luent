@@ -77,7 +77,7 @@ async function resolveTypeScriptSdkPath(
 }
 
 export async function activate(context: vscode.ExtensionContext) {
-  outputChannel = vscode.window.createOutputChannel("NextScript Extension");
+  outputChannel = vscode.window.createOutputChannel("NoriScript Extension");
   context.subscriptions.push(outputChannel);
 
   const serverModule = vscode.Uri.joinPath(
@@ -113,7 +113,7 @@ export async function activate(context: vscode.ExtensionContext) {
   if (!tsdk) {
     outputChannel.appendLine("[startup] Failed to resolve TypeScript SDK path.");
     void vscode.window.showErrorMessage(
-      "NextScript could not locate a TypeScript SDK. Set 'typescript.tsdk' to a valid lib folder.",
+      "NoriScript could not locate a TypeScript SDK. Set 'typescript.tsdk' to a valid lib folder.",
     );
     return;
   }
@@ -133,7 +133,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   client = new lsp.LanguageClient(
     "nextscript-language-server",
-    "NextScript Language Server",
+    "NoriScript Language Server",
     serverOptions,
     clientOptions,
   );

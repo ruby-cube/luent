@@ -1,5 +1,5 @@
 <template>
-    <div class='ns-hero-code' aria-label='NextScript example code'>
+    <div class='ns-hero-code' aria-label='NoriScript example code'>
       <div class='ns-hero-code__header'>
         <span class='ns-hero-code__dot'></span>
         <span class='ns-hero-code__dot'></span>

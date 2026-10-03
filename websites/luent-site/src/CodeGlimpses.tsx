@@ -78,7 +78,7 @@ export function CodeGlimpses() {
                   //           >
                   //             <p class='ns-note'>
                   //               <small>
-                  //                 NextScript is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. It is currently preview-only, not ready for use.
+                  //                 NoriScript is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. It is currently preview-only, not ready for use.
                   //               </small>
                   //             </p>
                   //           </TooltipContent>
@@ -226,7 +226,7 @@ function FunctionalComponents($tab: Ion<'main' | 'alt'>) {
     </p>
     <a href='/guide/rendering-views' class='medium brand'>Learn more</a>
     {/* <p>
-      Luent components may be written in <a href='https://www.typescriptlang.org/docs/handbook/jsx.html' target="_blank">TypeScript + JSX</a> (.tsx) or <a href='' target="_blank">NextScript</a> (.ns/.nsx), an extension of TypeScript + JSX.
+      Luent components may be written in <a href='https://www.typescriptlang.org/docs/handbook/jsx.html' target="_blank">TypeScript + JSX</a> (.tsx) or <a href='' target="_blank">NoriScript</a> (.ns/.nsx), an extension of TypeScript + JSX.
     </p> */}
   </>
 }
@@ -311,7 +311,7 @@ function UnifiedReactivity($tab: Ion<'main' | 'alt'>) {
       )}
       {Else(
         <>
-          <strong>Note:</strong> In NextScript (NSX), the <code>get</code> keyword declares accessor variables. It does not serve as a reactivity marker. The syntax exists independently of reactivity and vice versa.
+          <strong>Note:</strong> In NoriScript (NSX), the <code>get</code> keyword declares accessor variables. It does not serve as a reactivity marker. The syntax exists independently of reactivity and vice versa.
         </>
       )}
     </p>

@@ -169,7 +169,7 @@ The `FromTag` type utility provides type validation for the component tag based 
 ### Ion Normalization
 A binding typed with `Ion<T>` validates the binding with `T | Ion<T>`. This allows the component consumer the flexibility to decide whether a binding should be reactive or not.
 
-The component itself normalizes the binding to an accessor by accessing it with a `$` prefix (or with the `@` postfix in NextScript) and treats it as potentially reactive. This prevents cluttering the code with `isIon()` checks.
+The component itself normalizes the binding to an accessor by accessing it with a `$` prefix (or with the `@` postfix in NoriScript) and treats it as potentially reactive. This prevents cluttering the code with `isIon()` checks.
 
 ```nsx
 function MessageDisplay(setup: FromTag<{

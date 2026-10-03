@@ -4,7 +4,7 @@ import { parseNSX } from "../src/2-parse";
 import { transformNSX } from "../src/3-transform";
 import { printTSX } from "../src/4-generate";
 
-describe('NextScript JSX transforms', () => {
+describe('NoriScript JSX transforms', () => {
 
    it('transforms jsx attribute shorthand', () => {
       const { code, edits } = preprocessNSX(

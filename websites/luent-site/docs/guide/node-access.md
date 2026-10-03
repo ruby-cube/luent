@@ -112,7 +112,7 @@ const tds = NodeRef('td', [])
 
 
 ## Component Nodes
-A component may expose data and methods to its consumer through the `expose()` method. In NextScript, a component instance may be exposed through the component return syntax, <code><:: as={<i>component</i>}></code>.
+A component may expose data and methods to its consumer through the `expose()` method. In NoriScript, a component instance may be exposed through the component return syntax, <code><:: as={<i>component</i>}></code>.
 
 
 ```nsx

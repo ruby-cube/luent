@@ -5,7 +5,7 @@ import { transformNSX } from "../src/3-transform"
 import { printTSX } from "../src/4-generate"
 import { describe } from "node:test"
 
-describe('NextScript TypeGuard transforms', () => {
+describe('NoriScript TypeGuard transforms', () => {
    it('transforms if statement type guards - reads in body', () => {
       const { code, edits } = preprocessNSX(
          `get obj = ref(undefined)\n` +

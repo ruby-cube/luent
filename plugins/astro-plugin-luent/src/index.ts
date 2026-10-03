@@ -34,7 +34,7 @@ export default function luent(): AstroIntegration {
             // },
             resolve: {
               conditions: ['luentWorkspace'],
-              // Keep Vite defaults for extensionless imports and add .nsx for NextScript files.
+              // Keep Vite defaults for extensionless imports and add .nsx for NoriScript files.
               extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.nsx']
             },
             plugins: [

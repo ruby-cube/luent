@@ -1,6 +1,6 @@
-# NextScript for VS Code
+# NoriScript for VS Code
 
-This extension wires NextScript language support into TypeScript using a Volar-based TS Server plugin.
+This extension wires NoriScript language support into TypeScript using a Volar-based TS Server plugin.
 
 ## Capabilities
 
@@ -10,8 +10,8 @@ This extension wires NextScript language support into TypeScript using a Volar-b
   - go to definition / references
   - rename
   - diagnostics
-- Semantic token for NextScript `@` ref access markers.
-- TextMate injection for `get` keyword highlighting in NextScript patterns.
+- Semantic token for NoriScript `@` ref access markers.
+- TextMate injection for `get` keyword highlighting in NoriScript patterns.
 
 ## Notes
 

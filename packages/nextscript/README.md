@@ -5,9 +5,9 @@
 <p><a href='https://nextscript.org/accessor-syntax'>learn</a> &nbsp;-&nbsp; <a href='https://nextscript.org/examples'>demos</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a> &nbsp;-&nbsp; <a href='#design-principles'>principles</a></p>
 </div>
 
-# NextScript
+# NoriScript
 
-NextScript is an experimental TypeScript + JSX language extension designed to improve the readability, ergonomics, and type safety of UI templates and accessor-based reactive code. Its syntax is guided by [our language design principles](#design-principles).
+NoriScript is an experimental TypeScript + JSX language extension designed to improve the readability, ergonomics, and type safety of UI templates and accessor-based reactive code. Its syntax is guided by [our language design principles](#design-principles).
 
 > **This project is in early development.** Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. To get a sense of the syntax, explore these [code glimpses](#code-glimpse) and [examples]().
 >
@@ -23,7 +23,7 @@ Getter functions, popularized in the form of signals by Solid.js, show real prom
 
 On the templating side, JSX, though elegant in its syntactic rules, can quickly become unwieldy and difficult to read when indentation from fragments and nesting cumulate into indentation hell.
 
-NextScript proposes to address these caveats with a dash of syntactic sugar.
+NoriScript proposes to address these caveats with a dash of syntactic sugar.
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -31,7 +31,7 @@ NextScript proposes to address these caveats with a dash of syntactic sugar.
 
 ## Code Examples
 
-Check out [code glimpses]() and [demos]() on [NextScript's site](https://nextscript.org). 
+Check out [code glimpses]() and [demos]() on [NoriScript's site](https://nextscript.org). 
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>
@@ -39,17 +39,17 @@ Check out [code glimpses]() and [demos]() on [NextScript's site](https://nextscr
 ## Design Principles
 
 ### Conceptual elegance and predictability
-When language rules are simple and consistent, code is less bug-prone and less mentally taxing to read and write. As a language extension, NextScript strives to remain coherent with its foundational languages and preserve predictable behavior.
+When language rules are simple and consistent, code is less bug-prone and less mentally taxing to read and write. As a language extension, NoriScript strives to remain coherent with its foundational languages and preserve predictable behavior.
 
 —
 
 ### Pragmatic syntactic elegance
-NextScript prioritizes syntactic elegance that allows developers to read and write code with less friction, improving readability and developer ergonomics.
+NoriScript prioritizes syntactic elegance that allows developers to read and write code with less friction, improving readability and developer ergonomics.
 
 —
 
 ### Principled magic, not spookiness
-NextScript introduces new syntax carefully, favoring explicitness whenever possible. It allows implicit behavior only when that behavior is locally deducible and provides sufficient ergonomic benefit to justify the added language complexity.
+NoriScript introduces new syntax carefully, favoring explicitness whenever possible. It allows implicit behavior only when that behavior is locally deducible and provides sufficient ergonomic benefit to justify the added language complexity.
 
 The goal is not to avoid magic altogether, but to avoid *unaccountable* magic: behavior that feels arbitrary, exceptional, or difficult to reason about.
 
@@ -57,7 +57,7 @@ The goal is not to avoid magic altogether, but to avoid *unaccountable* magic: b
 
 
 ## Monospace font recommendations
-Because NextScript makes use of an `@` postfix in its syntax, some developers may prefer fonts with a less visually dominant `@` glyph. Fonts that pair well with NextScript’s `@` syntax include:
+Because NoriScript makes use of an `@` postfix in its syntax, some developers may prefer fonts with a less visually dominant `@` glyph. Fonts that pair well with NoriScript’s `@` syntax include:
 - SF Mono (Apple’s system monospace font)
 - Space Mono
 - IBM Plex Mono

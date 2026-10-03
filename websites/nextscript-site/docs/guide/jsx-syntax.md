@@ -441,7 +441,7 @@ The `lang` attribute is used as the name of the tag function. If a `lang` is not
 :::
 
 
-Frameworks and libraries may register custom style element names in the NextScript config. For example:
+Frameworks and libraries may register custom style element names in the NoriScript config. For example:
 ```js
 // nextscript.config.js
 

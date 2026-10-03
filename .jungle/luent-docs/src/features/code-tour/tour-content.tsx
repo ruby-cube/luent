@@ -17,7 +17,7 @@ const FunctionalComponents: TourSection = {
   Note() {
     return <>
       <small>
-        <strong>Upcoming language alternative:</strong> <a href=''>NextScript (.nsx)</a> is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. Preview the syntax with the language toggle.
+        <strong>Upcoming language alternative:</strong> <a href=''>NoriScript (.nsx)</a> is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. Preview the syntax with the language toggle.
       </small>
     </>
   },
@@ -108,7 +108,7 @@ const UnifiedReactivity: TourSection = {
         )}
         {Else(
           <>
-            Note that, in NextScript (NSX), the <code>get</code> keyword declares accessor variables. It does not serve as a reactivity marker. The syntax exists independently of reactivity and vice versa.
+            Note that, in NoriScript (NSX), the <code>get</code> keyword declares accessor variables. It does not serve as a reactivity marker. The syntax exists independently of reactivity and vice versa.
           </>
         )}
       </small>
@@ -254,7 +254,7 @@ const SelectiveReactivity: TourSection = {
   Note() {
     return <>
       <small>
-        <strong>Upcoming language alternative:</strong> <a href=''>NextScript (.nsx)</a> is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. Preview the syntax with the language toggle.
+        <strong>Upcoming language alternative:</strong> <a href=''>NoriScript (.nsx)</a> is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. Preview the syntax with the language toggle.
       </small>
     </>
   },

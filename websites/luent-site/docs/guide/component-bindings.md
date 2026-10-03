@@ -160,7 +160,7 @@ function Counter(setup: FromTag<{
 
 To specify a reactive binding, type it with the `Ion` type helper.
 
-Reactive bindings are merely *potentially* reactive because reactivity is ultimately determined by what the consumer of the component passes in. The component itself normalizes the binding to an accessor through the `$` prefix (or `@` postfix in NextScript) and treats it as reactive. 
+Reactive bindings are merely *potentially* reactive because reactivity is ultimately determined by what the consumer of the component passes in. The component itself normalizes the binding to an accessor through the `$` prefix (or `@` postfix in NoriScript) and treats it as reactive. 
 
 [Ion normalization](/guide/components#ion-normalization) allows flexibility for the consumer while preserving simplicity in the component.
 

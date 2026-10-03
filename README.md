@@ -20,7 +20,7 @@ Core features:
 Experimental features:
 - type-explicit reactivity
 - compile-time mutation-safety checking that prevents accidental, hidden mutations while allowing statically traceable mutable bindings
-- language extension of TypeScript + JSX for improved readability and type safety of signal-based reactivity (see [NextScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
+- language extension of TypeScript + JSX for improved readability and type safety of signal-based reactivity (see [NoriScript](https://github.com/ruby-cube/luent/blob/main/packages/nextscript#nextscript))
 
 <br>
 
@@ -104,7 +104,7 @@ Once the API stabilizes, development will increasingly focus on runtime efficien
 
 ### In progress
 - API refinement and stabilization
-- NextScript transpiler and language services
+- NoriScript transpiler and language services
 - Mutation safety
 - Async rendering
 - Animation and transition APIs

@@ -22,7 +22,7 @@ export default configureNextScript({
 })
 ```
 
-This enables the `*` type postfix to be used in NextScript source code:
+This enables the `*` type postfix to be used in NoriScript source code:
 ```ns
 function getCompletedTodos (todos: Todo*[]*) {
   return todos.filter(todo => todo.completed)

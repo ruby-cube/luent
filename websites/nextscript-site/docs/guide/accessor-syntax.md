@@ -144,7 +144,7 @@ const foo = {
 console.log(foo.bar) // true
 ```
 
-In NextScript, accessor properties may also be defined via **colon notation** in object literals and **property definition** in class declarations.
+In NoriScript, accessor properties may also be defined via **colon notation** in object literals and **property definition** in class declarations.
 <p align="right"><a href="#getter-syntax" style="text-decoration: none">[top]</a></p>
 
 ### Colon notation

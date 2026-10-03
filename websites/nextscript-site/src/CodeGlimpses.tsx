@@ -140,7 +140,7 @@ AccessorVariables.Note = (setup: FromTag<{ '...': 'p' }>) => {
   const { ...rest } = setup
   return <>
     <p auto-bind={rest}>
-      <strong>Note:</strong> Reactivity depends on the getter implementation, which NextScript does not define. In this example, the getter implementation comes from Luent's <code>ion()</code>.
+      <strong>Note:</strong> Reactivity depends on the getter implementation, which NoriScript does not define. In this example, the getter implementation comes from Luent's <code>ion()</code>.
     </p>
   </>
 }
@@ -181,7 +181,7 @@ function DerivationExpressions() {
 
 DerivationExpressions.Note = (setup: FromTag<{ '...': 'p' }>) =>
   <p auto-bind={setup}>
-    <strong>Note:</strong> This example assumes a conservative JSX to JavaScript transpilation strategy that maps tag bindings directly to object properties. NextScript itself transpiles only to TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
+    <strong>Note:</strong> This example assumes a conservative JSX to JavaScript transpilation strategy that maps tag bindings directly to object properties. NoriScript itself transpiles only to TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
   </p>
 
 DerivationExpressions.filename = 'Counter'
