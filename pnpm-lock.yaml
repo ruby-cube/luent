@@ -368,9 +368,9 @@ importers:
       '@luent/luent-ui':
         specifier: workspace:*
         version: link:../packages/luent-ui
-      '@luent/nextscript':
+      '@luent/noriscript':
         specifier: workspace:*
-        version: link:../packages/nextscript
+        version: link:../packages/noriscript
       '@luent/quarky':
         specifier: workspace:*
         version: link:../packages/quarky
@@ -558,9 +558,9 @@ importers:
       '@luent/flask':
         specifier: workspace:*
         version: link:../flask
-      '@luent/nextscript':
+      '@luent/noriscript':
         specifier: workspace:*
-        version: link:../nextscript
+        version: link:../noriscript
       '@luent/quarky':
         specifier: workspace:*
         version: link:../quarky
@@ -614,7 +614,7 @@ importers:
         specifier: ^8.1.3
         version: 8.1.5(@types/node@26.4.0)(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.0)(sass@1.102.0)(stylus@0.62.0)
 
-  packages/nextscript:
+  packages/noriscript:
     dependencies:
       '@jridgewell/gen-mapping':
         specifier: ^0.3.13
@@ -753,11 +753,11 @@ importers:
         specifier: ^8.1.3
         version: 8.1.5(@types/node@26.4.0)(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.0)(sass@1.102.0)(stylus@0.62.0)
 
-  plugins/volar-nextscript:
+  plugins/volar-noriscript:
     dependencies:
-      '@luent/nextscript':
+      '@luent/noriscript':
         specifier: workspace:*
-        version: link:../../packages/nextscript
+        version: link:../../packages/noriscript
       '@types/estree':
         specifier: ^1.0.8
         version: 1.0.9
@@ -792,11 +792,11 @@ importers:
         specifier: ^3.0.8
         version: 3.1.0
 
-  plugins/vscode-nextscript:
+  plugins/vscode-noriscript:
     dependencies:
-      '@luent/nextscript':
+      '@luent/noriscript':
         specifier: workspace:*
-        version: link:../../packages/nextscript
+        version: link:../../packages/noriscript
       '@types/vscode':
         specifier: ^1.115.0
         version: 1.137.0
@@ -904,7 +904,7 @@ importers:
         specifier: 2.0.0-alpha.17
         version: 2.0.0-alpha.17(@types/node@26.4.0)(jiti@2.7.0)(less@4.8.0)(lightningcss@1.33.0)(postcss@8.5.23)(sass@1.102.0)(stylus@0.62.0)(typescript@7.0.2)
 
-  websites/nextscript-site:
+  websites/noriscript-site:
     dependencies:
       '@tailwindcss/vite':
         specifier: ^4.3.0
@@ -13646,7 +13646,7 @@ snapshots:
       '@babel/core': 8.0.1
       '@babel/plugin-syntax-typescript': 7.29.7(@babel/core@8.0.1)
       '@luent/babel-plugin-luent': link:plugins/babel-plugin-luent
-      '@luent/nextscript': link:packages/nextscript
+      '@luent/noriscript': link:packages/noriscript
       vite: 8.2.1(@types/node@26.4.0)(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.0)(sass@1.102.0)(stylus@0.62.0)
 
   vite-plugin-monaco-editor@1.1.0(monaco-editor@0.55.1):

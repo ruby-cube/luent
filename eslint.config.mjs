@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module'
 import tsParser from '@typescript-eslint/parser'
-// import { createNSXProcessor } from './packages/nextscript/scripts/eslint-nsx-processor.mjs'
+// import { createNSXProcessor } from './packages/noriscript/scripts/eslint-nsx-processor.mjs'
 
 const require = createRequire(import.meta.url)
 const muRules = require('@luent/eslint-plugin-mu')

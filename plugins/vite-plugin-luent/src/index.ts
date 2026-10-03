@@ -132,7 +132,7 @@ export default function LuentPlugin(options: LuentPluginOptions = {}): Plugin {
     //     return null
     //   }
 
-    //   const { transpileNextScript } = await import('@luent/nextscript/transpile')
+    //   const { transpileNextScript } = await import('@luent/noriscript/transpile')
 
     //   const code = await readFile(fileName, 'utf8')
     //   const { transpiled } = transpileNextScript(fileName, code)

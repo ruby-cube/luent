@@ -2,7 +2,7 @@ import { ContextNode, getClosestContext, popContext, pushContext } from "./conte
 import { ContextEntryKey, toContextKey } from "./ContextKey";
 import { FromTag, RenderTag } from "../component/bindings-types";
 import { debug, normalizeToArray } from "@luent/utils";
-import {  unnestComponent } from "@luent/nextscript";
+import {  unnestComponent } from "@luent/noriscript";
 import { component } from "..";
 
 export interface NodeContext {

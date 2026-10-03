@@ -4,7 +4,7 @@ import { RenderTag } from "../component/bindings-types";
 import { ComponentConfig, ElementConfig, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { $from } from "../utils/destructure";
 import { toString } from '../node/VineNode'
-import { isComponentKit } from "@luent/nextscript";
+import { isComponentKit } from "@luent/noriscript";
 import { instantUpdate, Ion, isGetter, toValue } from "@luent/quarky";
 import { isBooleanAttribute } from "../element/attributes";
 import { ReactiveClasses, TagClass, TagStyle } from "../element/styles";

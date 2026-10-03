@@ -48,7 +48,7 @@
       "build": "pnpm run build:js && pnpm run build:dts",
       "build:js": "tsdown",
       "build:dts": "pnpm run build:dts:deps && tsc -p tsconfig.build.json && node ./scripts/bundle-dts.mjs",
-      "build:dts:deps": "pnpm --filter @luent/types run build:types && pnpm --filter @luent/utils run build:types && pnpm --filter @luent/flask run build:types && pnpm --filter @luent/quarky run build:types && pnpm --filter @luent/tree-squirl run build:types && pnpm --filter @luent/nextscript run build:types",
+      "build:dts:deps": "pnpm --filter @luent/types run build:types && pnpm --filter @luent/utils run build:types && pnpm --filter @luent/flask run build:types && pnpm --filter @luent/quarky run build:types && pnpm --filter @luent/tree-squirl run build:types && pnpm --filter @luent/noriscript run build:types",
       "watch": "tsdown --watch",
       "prepack": "pnpm run build",
       "prep:publish": "npm pack --dry-run",
@@ -58,7 +58,7 @@
    },
    "devDependencies": {
       "@luent/flask": "workspace:*",
-      "@luent/nextscript": "workspace:*",
+      "@luent/noriscript": "workspace:*",
       "@luent/quarky": "workspace:*",
       "@luent/types": "workspace:*",
       "@luent/utils": "workspace:*",

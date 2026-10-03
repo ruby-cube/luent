@@ -13,7 +13,7 @@
     "class-variance-authority": "^0.7.1",
     "luent": "workspace:*",
     "@luent/luent-ui": "workspace:*",
-    "@luent/nextscript": "workspace:*",
+    "@luent/noriscript": "workspace:*",
     "@luent/quarky": "workspace:*",
     "@luent/utils": "workspace:*",
     "lodash-es": "^4.18.1",

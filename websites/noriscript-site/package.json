@@ -1,0 +1,29 @@
+{
+  "name": "@luent/noriscript-site",
+  "private": true,
+  "description": "",
+  "type": "module",
+  "devDependencies": {
+    "luent": "workspace:*",
+    "@luent/quarky": "workspace:*",
+    "@luent/websites-shared": "workspace:*",
+    "concurrently": "^10.0.3",
+    "shiki": "^4.1.0",
+    "vue": "^3.5.0",
+    "vitepress": "2.0.0-alpha.17",
+    "tailwind-merge": "^3.5.0"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "vite-plugin-luent": "workspace:*"
+  },
+  "author": "Ruby Yi Wang",
+  "license": "MIT",
+  "scripts": {
+    "docs:preview": "vitepress preview",
+    "islands:dev": "concurrently \"vite build --watch --config island.server.config.ts\" \"vite build --watch --config island.client.config.ts\"",
+    "docs:dev": "pnpm docs:prebuild && concurrently -k \"vite build --watch --config island.server.config.ts\" \"vite build --watch --config island.client.config.ts\" \"vitepress dev\"",
+    "docs:prebuild": "pnpm --dir ../../plugins/vite-plugin-luent run build && vite build --config island.server.config.ts && vite build --config island.client.config.ts",
+    "docs:build": "pnpm docs:prebuild && vitepress build"
+  }
+}

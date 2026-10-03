@@ -67,11 +67,11 @@
       "@luent/quarky/core": [
         "./packages/quarky/src/core/index.ts"
       ],
-      "@luent/nextscript": [
-        "./packages/nextscript/src/index.ts"
+      "@luent/noriscript": [
+        "./packages/noriscript/src/index.ts"
       ],
-      "@luent/nextscript/transpile": [
-        "./packages/nextscript/src/transpile.ts"
+      "@luent/noriscript/transpile": [
+        "./packages/noriscript/src/transpile.ts"
       ],
       "@luent/flask": [
         "packages/flask/src/index.ts"

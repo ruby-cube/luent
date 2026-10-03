@@ -1,4 +1,4 @@
-import { ªªof } from "@luent/nextscript";
+import { ªªof } from "@luent/noriscript";
 
 type $From<T> = T & AccessorsOf<T>
 

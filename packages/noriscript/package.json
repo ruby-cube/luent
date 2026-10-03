@@ -1,0 +1,52 @@
+{
+  "name": "@luent/noriscript",
+  "private": false,
+  "version": "0.1.0",
+  "description": "",
+  "exports": {
+    ".": {
+      "luentWorkspace": "./src/index.ts",
+      "types": "./dist/types/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./transpile": {
+      "types": "./dist/types/transpile.d.ts",
+      "default": "./dist/transpile.mjs"
+    }
+  },
+  "types": "./dist/types/index.d.ts",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm run build:js && pnpm run build:types",
+    "build:js": "tsdown",
+    "build:types": "tsc -p tsconfig.build.json",
+    "watch": "tsdown --watch",
+    "prepack": "pnpm run build",
+    "pack": "pnpm pack",
+    "publish:dry": "pnpm publish --dry-run --no-git-checks",
+    "publish:public": "pnpm publish --no-git-checks"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@jridgewell/gen-mapping": "^0.3.13",
+    "@luent/tree-squirl": "workspace:*",
+    "@luent/utils": "workspace:*",
+    "@types/estree": "^1.0.8",
+    "@types/estree-jsx": "^1.0.5",
+    "@volar/language-core": "~2.4.0",
+    "oxc-parser": "^0.124.0"
+  },
+  "devDependencies": {
+    "@luent/types": "workspace:*",
+    "tsdown": "^0.21.9",
+    "typescript": "^6.0.3"
+  },
+  "author": "Ruby Yi Wang",
+  "license": "MIT"
+}

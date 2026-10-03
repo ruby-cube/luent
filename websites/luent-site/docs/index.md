@@ -58,8 +58,8 @@ features:
   <section id='code-glimpses' class="home-glimpses-heading tour-copy">
     <h2 class='section-heading'>A glimpse of Luent</h2>
   </section>
-  <p class='nextscript-note' style='text-wrap: balance'>
-    <strong>Note:</strong> <a href='https://github.com/ruby-cube/luent/tree/main/packages/nextscript'>NoriScript (.ns/.nsx)</a> is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. It is currently preview-only, not ready for use.
+  <p class='noriscript-note' style='text-wrap: balance'>
+    <strong>Note:</strong> <a href='https://github.com/ruby-cube/luent/tree/main/packages/noriscript'>NoriScript (.ns/.nsx)</a> is an extension of TypeScript + JSX that offers improvements in ergonomics and type-safety. It is currently preview-only, not ready for use.
   </p>
 
 
@@ -70,7 +70,7 @@ features:
 
 <style>
 
-p.nextscript-note {
+p.noriscript-note {
   color: var(--vp-c-text-2);
   padding-block: 2rem;
   text-align: center;

@@ -9,7 +9,7 @@ import { Context, Provided, callWithContext, createContextNode, wrapWithContext 
 import { ViewType } from "../conditional/If";
 import { IonOr, RenderTag } from "../component/bindings-types";
 import { DOMNode, DOMParent, VineNode } from "./VineNode";
-import { ComponentKit } from "@luent/nextscript";
+import { ComponentKit } from "@luent/noriscript";
 import { createShadowRoot } from "../component/shadow";
 import { provideTransition } from "../transitions/Transition";
 import { fromContext } from "../context/provide";

@@ -1,4 +1,4 @@
-import { JSXComponent } from "@luent/nextscript"
+import { JSXComponent } from "@luent/noriscript"
 import { RenderTag } from "../component/bindings-types"
 import { ContextKey } from "../context/ContextKey"
 import { TransitionConfigs } from "./transitions"

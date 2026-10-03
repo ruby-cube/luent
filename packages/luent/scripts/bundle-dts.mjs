@@ -10,7 +10,7 @@ const remap = new Map([
   ['@luent/flask', resolve(outDir, '_deps/flask/index.d.ts')],
   ['@luent/quarky', resolve(outDir, '_deps/quarky/index.d.ts')],
   ['@luent/quarky/core', resolve(outDir, '_deps/quarky/core/index.d.ts')],
-  ['@luent/nextscript', resolve(outDir, '_deps/nextscript/index.d.ts')],
+  ['@luent/noriscript', resolve(outDir, '_deps/noriscript/index.d.ts')],
   ['@luent/types', resolve(outDir, '_deps/types/index.d.ts')],
   ['@luent/utils', resolve(outDir, '_deps/utils/index.d.ts')]
 ])
@@ -18,7 +18,7 @@ const remap = new Map([
 const depSourceRoots = new Map([
   ['@luent/flask', resolve(repoRoot, 'packages/flask/dist/types')],
   ['@luent/quarky', resolve(repoRoot, 'packages/quarky/dist/types')],
-  ['@luent/nextscript', resolve(repoRoot, 'packages/nextscript/dist/types')],
+  ['@luent/noriscript', resolve(repoRoot, 'packages/noriscript/dist/types')],
   ['@luent/types', resolve(repoRoot, 'packages/types/dist/types')],
   ['@luent/utils', resolve(repoRoot, 'packages/utils/dist/types')]
 ])

@@ -170,8 +170,8 @@ export type KeyboardEvent<T = Element> = JSX.KeyboardEvent<T>
 export type MouseEvent = JSX.MouseEvent
 export type ModifierKey = JSX.ModifierKey
 
-export { JSXComponent as expose, toª as to$, ªªof as $$ } from '@luent/nextscript'
-export type { ComponentKit } from '@luent/nextscript'
+export { JSXComponent as expose, toª as to$, ªªof as $$ } from '@luent/noriscript'
+export type { ComponentKit } from '@luent/noriscript'
 
 export { $_preserve_context } from './async/context'
 

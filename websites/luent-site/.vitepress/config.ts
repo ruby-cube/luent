@@ -64,7 +64,7 @@ export default defineConfig({
       { text: 'demos', link: '/demos/habit-tracker' },
       { text: 'reference', link: '/api/overview' },
       { text: 'motivation', link: 'https://github.com/ruby-cube/luent/tree/main#motivation' },
-      // { text: 'preview nextscript', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
+      // { text: 'preview noriscript', link: 'https://github.com/ruby-cube/luent/tree/main/#design-principles' },
       { text: 'v0.0.1', link: '/' },
     ],
 

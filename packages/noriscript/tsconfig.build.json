@@ -20,13 +20,11 @@
     "rootDir": "./src",
     "outDir": "./dist/types",
     "composite": true,
-    "tsBuildInfoFile": "./dist/.tsbuildinfo/luent.dts.tsbuildinfo"
+    "tsBuildInfoFile": "./dist/.tsbuildinfo/noriscript.dts.tsbuildinfo"
   },
   "include": [
     "../env.d.ts",
-    "./src/**/*.ts",
-    "./src/**/*.tsx",
-    "./src/**/*.d.ts"
+    "./src/**/*.ts"
   ],
   "exclude": [
     "./src/**/__tests__/**",
@@ -36,9 +34,6 @@
   "references": [
     { "path": "../types/tsconfig.build.json" },
     { "path": "../utils/tsconfig.build.json" },
-    { "path": "../flask/tsconfig.build.json" },
-    { "path": "../quarky/tsconfig.build.json" },
-    { "path": "../tree-squirl/tsconfig.build.json" },
-    { "path": "../noriscript/tsconfig.build.json" }
+    { "path": "../tree-squirl/tsconfig.build.json" }
   ]
 }

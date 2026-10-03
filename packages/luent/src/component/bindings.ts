@@ -5,7 +5,7 @@ import { NodeRefsConfig } from "../node/NodeRefs"
 import { Ion, MutableIon } from "@luent/quarky"
 import { TransitionConfigs } from "../transitions/transitions"
 import { TagClass, TagStyle } from "../element/styles"
-import { ComponentKit } from "@luent/nextscript"
+import { ComponentKit } from "@luent/noriscript"
 import { RawJSXNode } from "../node/makeJSXNode"
 import { $from } from "../utils/destructure"
 
