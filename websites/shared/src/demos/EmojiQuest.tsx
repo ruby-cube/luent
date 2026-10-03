@@ -139,13 +139,14 @@ function Powerset(setup: FromTag<{
 
     {Style(css`
         .powerset-panel {
-           box-sizing: border-box;
-           width: 100%;
-           display: grid;
-           gap: 0;
-           padding: 1rem;
-           background-color: #2d1b4e;
-           box-shadow: 0 0 20px rgba(212, 175, 55, .25), inset 0 0 10px rgba(138, 43, 226, .1);
+          touch-action: manipulation;
+          box-sizing: border-box;
+          width: 100%;
+          display: grid;
+          gap: 0;
+          padding: 1rem;
+          background-color: #2d1b4e;
+          box-shadow: 0 0 20px rgba(212, 175, 55, .25), inset 0 0 10px rgba(138, 43, 226, .1);
         }
 
         .powerset-panel > * + * {
