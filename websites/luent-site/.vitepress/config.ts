@@ -60,7 +60,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'tour', link: '/#code-glimpses' },
-      { text: 'learn', link: '/guide/rendering-views' },
+      // { text: 'learn', link: '/guide/rendering-views' },
       { text: 'demos', link: '/demos/habit-tracker' },
       { text: 'reference', link: '/api/overview' },
       { text: 'motivation', link: 'https://github.com/ruby-cube/luent/tree/main#motivation' },

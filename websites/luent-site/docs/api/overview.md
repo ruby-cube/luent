@@ -1,7 +1,7 @@
 # Luent APIs
 
 :::warning <span style='margin-right: .5rem'>🚧</span> UNDER CONSTRUCTION 
-The API reference is in the works. In the meantime, here is an overview of Luent's APIs
+The guide and API reference are in the works. In the meantime, here is an overview of Luent's APIs
 :::
 
 ## Island rendering
@@ -103,7 +103,7 @@ Orbital tags represent nodes that scope rendering behavior without rendering add
 <!-- - `DOMNode()` <span class='doc-tag'>Experimental</span> to create a DOM node  -->
 
 ## Async rendering
-- `$Fetched()` to create an ion with asynchronously updated state
+<!-- - `$Fetched()` to create an ion with asynchronously updated state -->
 - `Dispatch()` to create async actions
 - `$Promised()` to create a promise ion that batches the promises of other fetched-state ions.
 - `Awaits()` to render asynchronously. Holds previous state until promise resolves.

@@ -7,21 +7,21 @@
 
 # NoriScript
 
-NoriScript is an experimental TypeScript + JSX language extension designed to improve the readability, ergonomics, and type safety of UI templates and accessor-based reactive code. Its syntax is guided by [our language design principles](#design-principles).
+NoriScript is an experimental TypeScript + JSX language extension designed to improve the readability, clarity, and type safety of JSX and accessor/signal-based reactive code. Its syntax design is guided by [our language design principles](#design-principles).
 
 > **This project is in early development.** Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. To get a sense of the syntax, explore these [code glimpses](#code-glimpse) and [examples]().
->
-> We'd love help getting this project off the ground. Learn how to [contribute]().
+<!-- >
+> We'd love help getting this project off the ground. Learn how to [contribute](). -->
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Motivation
 
-Reactive UI programming and JSX have both been game changers in web development, turning complex UI updates into simple view bindings. However, JavaScript variables are not natively reactive, and existing solutions to making them reactive have their caveats. What initially seems simple and elegant often creates downstream complexity, conceptual overhead, and/or performance issues through implicit behaviors that do not always align with native JavaScript semantics or patterns.
+Reactive UI programming and JSX have both been game changers in web development, turning complex UI updates into simple view bindings. However, JavaScript variables are not natively reactive, and existing solutions to making them reactive have their caveats. What initially seems simple and elegant often creates downstream complexity, conceptual overhead, and/or performance issues through implicit behaviors that are inconsistent with native JavaScript semantics or patterns.
 
-Getter functions, popularized in the form of signals by Solid.js, show real promise as an explicit, performant conduit to reactivity in JavaScript. Unfortunately, getters have their own set of caveats, such as opaqueness to TypeScript type guards, the visual clutter of accessor function calls, or confusion caused by functions with data variable names.
+Accessor functions, popularized in the form of signals by Solid.js, show real promise as an explicit, performant conduit to reactivity in JavaScript. Unfortunately, accessors have their own set of caveats, such as opaqueness to TypeScript type guards, the visual clutter of function calls, or confusion caused by functions with data variable names.
 
-On the templating side, JSX, though elegant in its syntactic rules, can quickly become unwieldy and difficult to read when indentation from fragments and nesting cumulate into indentation hell.
+Meanwhile, JSX, though elegant in its syntactic rules, can quickly become unwieldy and difficult to read when indentation from fragments and nesting cumulate into indentation hell. Or when co-locating state with its relevant view through visually disruptive function expressions and bulky IIFEs.
 
 NoriScript proposes to address these caveats with a dash of syntactic sugar.
 
@@ -44,7 +44,7 @@ When language rules are simple and consistent, code is less bug-prone and less m
 —
 
 ### Pragmatic syntactic elegance
-NoriScript prioritizes syntactic elegance that allows developers to read and write code with less friction, improving readability and developer ergonomics.
+NoriScript offers syntactic elegance when it allows developers to read and write code with less friction, improving readability and developer ergonomics. Conciseness, however, should never get in the way of language consistency and predictability.
 
 —
 

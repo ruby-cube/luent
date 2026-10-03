@@ -224,7 +224,7 @@ function FunctionalComponents($tab: Ion<'main' | 'alt'>) {
     <p style='text-wrap: balance'>
       Write components as render functions that run once to create a view. Views are composed using JSX and updated through fine-grained reactivity.
     </p>
-    <a href='/guide/rendering-views' class='medium brand'>Learn more</a>
+    {/* <a href='/guide/rendering-views' class='medium brand'>Learn more</a> */}
     {/* <p>
       Luent components may be written in <a href='https://www.typescriptlang.org/docs/handbook/jsx.html' target="_blank">TypeScript + JSX</a> (.tsx) or <a href='' target="_blank">NoriScript</a> (.ns/.nsx), an extension of TypeScript + JSX.
     </p> */}
@@ -315,7 +315,7 @@ function UnifiedReactivity($tab: Ion<'main' | 'alt'>) {
         </>
       )}
     </p>
-    <a href='/guide/reactivity-in-depth' class='medium brand'>Learn more</a>
+    {/* <a href='/guide/reactivity-in-depth' class='medium brand'>Learn more</a> */}
   </>
 }
 
@@ -488,7 +488,7 @@ function ReusableLogic() {
     <p style='text-wrap: balance'>
       Compose reusable logic independently of views. Define domain models with JavaScript classes and encapsulate stateful systems in destructurable kits—headless counterparts to components.
     </p>
-    <a href='/guide/reusable-logic' class='medium brand'>Learn more</a>
+    {/* <a href='/guide/reusable-logic' class='medium brand'>Learn more</a> */}
   </>
 }
 
@@ -549,7 +549,7 @@ function FlowExpressions() {
       Describe the control flow of dynamic views through flow functions such as <code>If</code>/<code>Else</code>, <code>For</code>/<code>Empty</code>, and <code>Await</code>/<code>Meanwhile</code>.
       {/* Control flow functions such as <code>If</code>/<code>Else</code>, <code>For</code>/<code>Empty</code>, and <code>Await</code>/<code>Meanwhile</code> create and manage dynamic views. */}
     </p>
-    <a href='/guide/view-control-flow' class='medium brand'>Learn more</a>
+    {/* <a href='/guide/view-control-flow' class='medium brand'>Learn more</a> */}
   </>
 }
 
@@ -632,7 +632,7 @@ function MutationSafety() {
         Compile-time mutation checking* prevent hidden nonlocal mutations, while explicit mutable bindings enable safer, statically traceable cross-boundary mutations.
       </p>
       <p><small>* currently in development, not yet available</small></p>
-      <a href='/guide/mutation-safety' class='medium brand'>Learn more</a>
+      {/* <a href='/guide/mutation-safety' class='medium brand'>Learn more</a> */}
     </>
   }
 
@@ -651,10 +651,10 @@ MutationSafety.nsx =
 }
 
 function Powerset(setup: FromTag<{
-  'mu:powers': Ionic<string[]> & { addRandomPower(): void }
+  +mu:powers: Ionic<string[]> & { addRandomPower(): void }
   limit: number,
 }>) {
-  const { mu: { powers }, limit } = setup;
+  const { +mu:powers, limit } = setup;
   <:>
     <div class='powerset-panel'>
       <Powers {powers}>
@@ -704,7 +704,7 @@ function LifecycleHooks() {
       <p>
         Lifecycle behavior specific to a view node may be declared inline through lifecycle bindings such as <code>at:mount</code> and <code>before:unmount</code>.
       </p>
-      <a href='/guide/lifecycle-hooks' class='medium brand'>Learn more</a>
+      {/* <a href='/guide/lifecycle-hooks' class='medium brand'>Learn more</a> */}
     </>
   }
 
@@ -716,7 +716,7 @@ LifecycleHooks.nsx =
       type="text"
       at:mount={node => node.focus()}
       mu:value={todo.title@}
-on: blur = { e => doneEdit(todo) }
+      on: blur = { e => doneEdit(todo) }
   />
 )}
 
@@ -743,7 +743,7 @@ function Portals() {
       <p>
         Visually distinctive portal tags make it clear which sections of the view are rendered elsewhere in the DOM. Declare metadata locally in components through head elements like <code>{'<o-link>'}</code> and <code>{'<o-style>'}</code>.
       </p>
-      <a href='/guide/portals' class='medium brand'>Learn more</a>
+      {/* <a href='/guide/portals' class='medium brand'>Learn more</a> */}
     </>
   }
 
@@ -786,7 +786,7 @@ function ContextBindings() {
       <p>
         Provide multiple context bindings in a single <code>{'<o:context>'}</code> tag to avoid excessive tag nesting. Merge context keys to provide the same binding across multiple decoupled components.
       </p>
-      <a href='/guide/contextual-bindings' class='medium brand'>Learn more</a>
+      {/* <a href='/guide/contextual-bindings' class='medium brand'>Learn more</a> */}
     </>
   }
 // Provide from the root of an application locally with <code>{'<o--root>'}</code> or from reusable kits with <code>provideRoot()</code>. 
@@ -864,7 +864,7 @@ function ViewPreservation() {
       <p>
         Preserve the UI state and DOM nodes of temporarily hidden views with the <code>{'<o:preserve>'}</code> orbital tag or the <code>"preserve"</code> directive. Discard with <code>view.markDiscard()</code> when the view is no longer needed or state needs to be refreshed.
       </p>
-      <a href='/guide/preserving-views' class='medium brand'>Learn more</a>
+      {/* <a href='/guide/preserving-views' class='medium brand'>Learn more</a> */}
     </>
   }
 

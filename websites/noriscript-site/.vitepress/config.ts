@@ -55,7 +55,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Preview', link: '/#code-glimpses' },
-      { text: 'Learn', link: '/guide/accessor-syntax' },
+      // { text: 'Learn', link: '/guide/accessor-syntax' },
       { text: 'Demos', link: '/demos/habit-tracker' },
       { text: 'Motivation', link: 'https://github.com/ruby-cube/luent/tree/main/packages/noriscript#motivation' },
       { text: 'Design Principles', link: 'https://github.com/ruby-cube/luent/tree/main/packages/noriscript#design-principles' },

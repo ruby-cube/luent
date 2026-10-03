@@ -212,7 +212,7 @@ If the JSX block leads with a JSX expression container, JSX text, or JSX stateme
 <p align="right"><a href="#jsx-syntax" style="text-decoration: none">[top]</a></p>
 
 ### Type guarding
-`If`/`Else` flow expressions will perform type narrowing and widening similar to `if` statements in TypeScript.
+`If`/`ElseIf`/`Else` flow expressions participate in type narrowing and widening using semantics similar to TypeScript's if-else statements.
 
 ```tsx
 <div>

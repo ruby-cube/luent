@@ -68,7 +68,7 @@ export function CodeGlimpses() {
           {GatewayFunction()}
         </TourSection>
 
-        <TourSection
+        {/* <TourSection
           flow={flowDirection()}
           mainCode={{ name: 'nsx', code: styleNSX }}
           altCode={{ name: 'tsx equivalent', code: styleTSX, lang: 'tsx' }}
@@ -76,7 +76,7 @@ export function CodeGlimpses() {
           filename={TaggedTemplateStyles.filename}
         >
           {TaggedTemplateStyles()}
-        </TourSection>
+        </TourSection> */}
 
         <TourSection
           flow={flowDirection()}
@@ -132,7 +132,7 @@ function AccessorVariables() {
     <p>
       —scope-level, locally-bound, type-guard-aware counterpart to native accessor properties
     </p>
-    <a href='/guide/accessor-syntax' class='medium brand'>Learn more</a>
+    {/* <a href='/guide/accessor-syntax' class='medium brand'>Learn more</a> */}
   </>
 }
 
@@ -175,7 +175,7 @@ function DerivationExpressions() {
     <p>
       —derivation-first shorthand for derivational arrow function expressions
     </p>
-    <a href='/guide/accessor-syntax#derivation-expressions' class='medium brand'>Learn more</a>
+    {/* <a href='/guide/accessor-syntax#derivation-expressions' class='medium brand'>Learn more</a> */}
   </>
 }
 
@@ -215,7 +215,7 @@ function FlowExpressions() {
     <p>
       —view control flow with implicit JSX fragment factories
     </p>
-    <a href='/guide/jsx-syntax#jsx-flow-expressions' class='medium brand'>Learn more</a>
+    {/* <a href='/guide/jsx-syntax#jsx-flow-expressions' class='medium brand'>Learn more</a> */}
   </>
 }
 
@@ -254,7 +254,7 @@ function GatewayFunction() {
     <p>
       —shorthand for an arrow function expression that returns a JSX fragment in flow expressions
     </p>
-    <a href='/guide/jsx-syntax#jsx-flow-gateway-function' class='medium brand'>Learn more</a>
+    {/* <a href='/guide/jsx-syntax#jsx-flow-gateway-function' class='medium brand'>Learn more</a> */}
   </>
 }
 
@@ -292,7 +292,7 @@ function GatewayReturn() {
     <p>
       —shorthand JSX fragment return statements
     </p>
-    <a href='/guide/jsx-syntax#jsx-gateway' class='medium brand'>Learn more</a>
+    {/* <a href='/guide/jsx-syntax#jsx-gateway' class='medium brand'>Learn more</a> */}
   </>
 }
 
@@ -336,7 +336,7 @@ function JSXFragmentReturn() {
     <p>
       —auto-returned fragment
     </p>
-    <a href='/guide/jsx-syntax#jsx-fragment-return' class='medium brand'>Learn more</a>
+    {/* <a href='/guide/jsx-syntax#jsx-fragment-return' class='medium brand'>Learn more</a> */}
   </>
 }
 
@@ -374,7 +374,7 @@ function JSXComponent() {
     <p>
       —auto-returned component with component instance type information
     </p>
-    <a href='' class='medium brand'>Learn more</a>
+    {/* <a href='' class='medium brand'>Learn more</a> */}
   </>
 }
 const componentNSX =
@@ -432,7 +432,7 @@ function TaggedTemplateStyles() {
     <p>
       —tagged template literals for style bindings and style tags
     </p>
-    <a href='/guide/jsx-syntax#jsx-style-tags' class='medium brand'>Learn more</a>
+    {/* <a href='/guide/jsx-syntax#jsx-style-tags' class='medium brand'>Learn more</a> */}
   </>
 }
 
@@ -475,7 +475,7 @@ function TypeGuards() {
     <p>
       —type narrowing and widening of accessor variables
     </p>
-    <a href='/guide/accessor-syntax#type-guards' class='medium brand'>Learn more</a>
+    {/* <a href='/guide/accessor-syntax#type-guards' class='medium brand'>Learn more</a> */}
   </>
 }
 
