@@ -1,13 +1,6 @@
 <div align="center">
-<!-- <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded-dark.png">
-  <img width="200" alt="luent logo" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded-light.png">
-</picture> -->
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded-dark.png?raw=true">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded-light.png?raw=true">
-  <img width="200" alt="luent logo" src="https://github.com/ruby-cube/luent/blob/cave/assets/luent-logo-padded-dark.png?raw=true">
-</picture>
+<img width="200" alt="luent logo" src="assets/luent-logo-padded-light.png#gh-light-mode-only">
+<img width="200" alt="luent logo" src="assets/luent-logo-padded-dark.png#gh-dark-mode-only">
   
 <p><a href='https://luent.dev/#code-glimpses'>tour</a> &nbsp;-&nbsp; <a href='http://luent.dev/demos/habit-tracker.html'>demo</a> &nbsp;-&nbsp; <a href='http://luent.dev/api/overview.html'>API</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a>
 </div>
