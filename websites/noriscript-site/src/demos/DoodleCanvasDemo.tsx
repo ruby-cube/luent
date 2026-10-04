@@ -262,46 +262,44 @@ function DoodleCanvas() {
     clearCanvas 
   } = DrawingKit($canvas)
 
-  return (
-    <>
-      <div class="canvas-app">
-        <div class="frame">
-          <canvas
-            ref={$canvas}
-            width="900"
-            height="300"
-            on:pointerdown={startDrawing}
-            on:pointermove={draw}
-            on:pointerup={stopDrawing}
-            on:pointerleave={stopDrawing}
-          ></canvas>
-        </div>
-        <button type="button" on:click={clearCanvas}>Clear</button>
+  return <>
+    <div class="canvas-app">
+      <div class="frame">
+        <canvas
+          ref={$canvas}
+          width="900"
+          height="300"
+          on:pointerdown={startDrawing}
+          on:pointermove={draw}
+          on:pointerup={stopDrawing}
+          on:pointerleave={stopDrawing}
+        ></canvas>
       </div>
+      <button type="button" on:click={clearCanvas}>Clear</button>
+    </div>
 
-      <o-style>
-        .canvas-app {
-          display: grid;
-          gap: 10px;
-          margin: 24px auto;
-        }
+    <o-style>
+      .canvas-app {
+        display: grid;
+        gap: 10px;
+        margin: 24px auto;
+      }
 
-        .frame {
-          width: 100%;
-          overflow: hidden;
-          border-radius: .75rem;
-        }
+      .frame {
+        width: 100%;
+        overflow: hidden;
+        border-radius: .75rem;
+      }
 
-        button {
-          justify-self: end;
-        }
+      button {
+        justify-self: end;
+      }
 
-        canvas {
-          border: none;
-          background: #fff;
-          cursor: crosshair;
-        }
-      </o-style>
-    </>
-  );
+      canvas {
+        border: none;
+        background: #fff;
+        cursor: crosshair;
+      }
+    </o-style>
+  </>
 }`

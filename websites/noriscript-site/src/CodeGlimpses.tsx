@@ -88,6 +88,28 @@ export function CodeGlimpses() {
           {TypeGuards()}
         </TourSection>
 
+        <TourSection
+          flow={flowDirection()}
+          mainCode={{ name: 'ns', code: ArgumentAnnotation.nsx }}
+          altCode={{ name: 'ts equivalent', code: ArgumentAnnotation.tsx, lang: 'ts' }}
+          highlightCode={highlightCode}
+          filename={ArgumentAnnotation.filename}
+        >
+          {ArgumentAnnotation()}
+        </TourSection>
+
+        <TourSection
+          flow={flowDirection()}
+          mainCode={{ name: 'ns', code: StatementFences.nsx }}
+          altCode={{ name: 'ts equivalent', code: StatementFences.tsx, lang: 'ts' }}
+          highlightCode={highlightCode}
+          filename={StatementFences.filename}
+        >
+          {StatementFences()}
+        </TourSection>
+
+        
+
       </CodeTour>
 
       {Style(css`
@@ -308,23 +330,19 @@ const gatewayNSX =
     <hr/>
   })}
 </article>
-
-
 `
 
 const gatewayTSX =
   `<article>
   {For(sections, section => {
     const highlight = HighlighterKit(section)
-    return (
-      <>
-        <section>
-          <h2 class={highlight}>{section.title}</h2>
-          <p>{section.body}</p>
-        </section>
-        <hr/>
-      </>
-    )
+    return <>
+      <section>
+        <h2 class={highlight}>{section.title}</h2>
+        <p>{section.body}</p>
+      </section>
+      <hr/>
+    </>
   })}
 </article>
 `
@@ -468,6 +486,80 @@ const styleTSX =
 
 
 
+function ArgumentAnnotation() {
+  return <>
+    <h3>Binding annotations</h3>
+    <code>+<i>annot</i> <i>binding</i></code> | <code>+<i>annot</i>:<i>binding</i></code>
+    <p>
+      —syntax for attaching metadata, such as mutation capabilities, to bindings
+    </p>
+    {/* <p><small>* currently in development, not yet available</small></p> */}
+    {/* <a href='/guide/mutation-safety' class='medium brand'>Learn more</a> */}
+  </>
+}
+
+ArgumentAnnotation.filename = 'EmojiQuest'
+ArgumentAnnotation.nsx =
+  `function EmojiQuest({ powers }) {
+  const powerset = ionic(['🍀', '🍄', '✨'], {
+    addRandomPower() {
+      this.push(chooseRandom(powers))
+    }
+  })
+  <:>
+    <EmojiBoard powers={powerset} />
+    <Powerset mu:powers={powerset} limit={10} />
+  </:>
+}
+
+function Powerset(setup: FromTag<{
+  +mu:powers: Ionic<string[]> & { addRandomPower(): void }
+  limit: number,
+}>) {
+  const { +mu:powers, limit } = setup;
+  <:>
+    <div class='powerset-panel'>
+      <Powers {powers}>
+      <button
+        disabled={(powers.length === limit)@}
+        on:click={() => powers.addRandomPower()}
+      >+</button>
+    </div>
+    <o-link href='/powerset.css' rel='stylesheet' />
+  </:>
+} `
+
+ArgumentAnnotation.tsx =
+  `function EmojiQuest({ powers }) {
+  const powerset = ionic(['🍀', '🍄', '✨'], {
+    addRandomPower() {
+      this.push(chooseRandom(powers))
+    }
+  })
+  return <>
+    <EmojiBoard powers={powerset} />
+    <Powerset mu:powers={powerset} limit={10} />
+  </>
+}
+
+function Powerset(setup: FromTag<{
+  'mu:powers': Ionic<string[]> & { addRandomPower(): void }
+  limit: number,
+}>) {
+  const { mu: { powers }, limit } = setup;
+  return <>
+    <div class='powerset-panel'>
+      <Powers powers={powers}>
+        <button
+          disabled={() => powers.length === limit}
+          on:click={() => powers.addRandomPower()}
+        >+</button>
+    </div>
+    <o-link href='/powerset.css' rel='stylesheet' />
+  </>
+} `
+
+
 function TypeGuards() {
   return <>
     <h3>Accessor variable type guards</h3>
@@ -497,3 +589,47 @@ function logUsername() {
   log('username:' user()!.name)
 }`
 
+
+
+
+
+function StatementFences() {
+  return <>
+    <h3>JSX statements fences</h3>
+    <code>{'<--->'} <i>statement(s)</i> {'<--->'}</code>
+    <p>
+      —syntax for embedding JavaScript statements within a JSX block
+    </p>
+    {/* <a href='' class='medium brand'>Learn more</a> */}
+  </>
+}
+StatementFences.filename = 'UserProfile'
+StatementFences.nsx =
+  `<section>
+  {If(selectedUser@, user :>
+    <--->
+    const { profile } = UserProfileKit(user.id)
+    <--->
+    <aside class="profile-card">
+      <h3>{user.name}</h3>
+      <p>{profile.bio}</p>
+    </aside>
+  )}
+</section>
+
+`
+
+StatementFences.tsx =
+  `<section>
+  {If($selectedUser, user => {
+    const { profile } = UserProfileKit(user.id)
+    return <>
+      <aside class="profile-card">
+        <h3>{user.name}</h3>
+        <p>{profile.bio}</p>
+      </aside>
+    </>
+  })}
+</section>
+
+`

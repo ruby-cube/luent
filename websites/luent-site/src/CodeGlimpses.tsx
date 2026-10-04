@@ -645,8 +645,8 @@ MutationSafety.nsx =
     }
   })
   <:>
-    <EmojiBoard powers={powerset}/>
-    <Powerset mu:powers={powerset} limit={10}/>
+    <EmojiBoard powers={powerset} />
+    <Powerset mu:powers={powerset} limit={10} />
   </:>
 }
 
@@ -659,7 +659,7 @@ function Powerset(setup: FromTag<{
     <div class='powerset-panel'>
       <Powers {powers}>
       <button
-        disabled={() => powers.length === limit}
+        disabled={(powers.length === limit)@}
         on:click={() => powers.addRandomPower()}
       >+</button>
     </div>

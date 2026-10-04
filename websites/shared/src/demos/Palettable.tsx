@@ -868,7 +868,7 @@ Palettable.tsx = `function Palettable() {
 }`
 
 
-Palettable.nsxColorPalette = `function ColorPalette(setup: FromTag<{
+Palettable.nsxColorPalette = `function ColorPalette(setup: FromTag<'div', {
   size?: number;
   onMove: () => void;
   onComplete: () => void;
@@ -962,7 +962,7 @@ Palettable.nsxColorPalette = `function ColorPalette(setup: FromTag<{
 
 
 
-Palettable.tsxColorPalette = `function ColorPalette(setup: FromTag<{
+Palettable.tsxColorPalette = `function ColorPalette(setup: FromTag<'div', {
   size?: number;
   onMove: () => void;
   onComplete: () => void;
