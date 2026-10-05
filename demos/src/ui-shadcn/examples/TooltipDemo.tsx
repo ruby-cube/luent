@@ -56,7 +56,3 @@ export function TooltipDemo() {
   )
 }
 
-// if (__STYLE__) {
-//   mountIsland(TooltipDemo, '#root')
-// }
-

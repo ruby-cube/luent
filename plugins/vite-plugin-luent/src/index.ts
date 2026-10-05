@@ -101,7 +101,7 @@ export default function LuentPlugin(options: LuentPluginOptions = {}): Plugin {
         define: {
           ...(userConfig.define ?? {}),
           __INTERNAL__: false,
-          __TEST__: false,
+          __TEST__: JSON.stringify(process.env.NODE_ENV === 'test'),
           __DEV__: command !== 'build',
           __SSR__: Boolean(isSsrBuild),
         },

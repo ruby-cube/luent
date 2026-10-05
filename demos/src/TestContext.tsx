@@ -182,9 +182,3 @@ export {
 
 const ROOT = mergeKeys(Child.ROOT_MESSAGE, Grandparent.ROOT_MESSAGE)
 
-if (__STYLE__) {
-  mountIsland(() => {
-    provideRoot([ROOT('heya')])
-    return TestRootContext()
-  }, '#root')
-}

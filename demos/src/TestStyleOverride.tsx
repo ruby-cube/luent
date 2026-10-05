@@ -35,7 +35,6 @@ function Child() {
     )
 }
 
-if (__STYLE__) mountIsland(Grandparent, "#root");
 
 
 function getTailwindClassDeclaration(className: string, specifiers: string[]) {

@@ -7,6 +7,3 @@ export function TestCardStyle() {
         <div class='card'>hello world</div>
     )
 }   
-
-if (__STYLE__)
-    mountIsland(TestCardStyle, '#root')

@@ -2,7 +2,7 @@
 <img width="200" alt="luent logo" src="assets/luent-logo-padded-light.png#gh-light-mode-only">
 <img width="200" alt="luent logo" src="assets/luent-logo-padded-dark.png#gh-dark-mode-only">
   
-<p><a href='https://luent.dev/#code-glimpses'>tour</a> &nbsp;-&nbsp; <a href='http://luent.dev/demos/habit-tracker.html'>demo</a> &nbsp;-&nbsp; <a href='http://luent.dev/api/overview.html'>API</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a>
+<!-- <a href='https://luent.dev/#code-glimpses'>tour</a> &nbsp;-&nbsp; <a href='http://luent.dev/demos/habit-tracker.html'>demo</a> &nbsp;-&nbsp; <a href='http://luent.dev/api/overview.html'>API</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a> -->
 </div>
 
 # Luent
@@ -23,11 +23,16 @@ Experimental features:
 
 > **This project is in early development.** Most core client-side functionality is working and relatively stable, but bugs, rough edges, and some amount of experimental churn should be expected.
 
-
 <br>
 
+## Quick Start
+```sh
+npm create luent
+```
+
 ## Code Examples
-Take a tour of Luent's syntax and APIs with these [code glimpses]() and [demos]().
+<!-- Take a tour of Luent's syntax and APIs with these [code glimpses]() and [demos](). -->
+Coming soon.
 
 
 <br>
@@ -44,7 +49,8 @@ This project explores ways to make development of complex, evolving applications
 
 Luent transpiles JSX tags into `jsx()` calls with straightforward mental mapping between JSX syntax and compiled output. It extends the base JSX transform with the following:
 - JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parent nodes may be created before their descendants
-- [JSX flow expressions](http://luent.dev/guide/template-control-flow) (JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead
+- JSX flow expressions (JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead
+<!-- - [JSX flow expressions](http://luent.dev/guide/template-control-flow) (JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead -->
 - JSX flow expression slots (the final argument of a JSX flow expression) are also normalized to JSX array factories
 - JSX fragments are transformed into arrays
 
@@ -101,6 +107,7 @@ Once the API stabilizes, development will increasingly focus on runtime efficien
 
 ### In progress
 - API refinement and stabilization
+- Test coverage
 - NoriScript transpiler and language services
 - Mutation safety
 - Async rendering
@@ -147,3 +154,5 @@ Particular acknowledgement to the people and projects I've especially admired:
 
 ## License
 [MIT license](https://github.com/ruby-cube/luent/blob/main/LICENSE)
+
+Built with ♥

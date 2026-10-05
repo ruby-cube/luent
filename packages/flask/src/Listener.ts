@@ -1,5 +1,5 @@
 import { $listen, Callback, CallbackRemover, useCleanupScheduler } from "./flaskableListeners";
-import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
+import { unmarkNoCleanup } from "./initFlask";
 import { $_run_with_, $_snap_context, asyncContextStack, ContextSnapshot, } from "./context/AsyncContext";
 import { FLASK, Flask, getActiveFlask, ThisFlask } from "./Flask";
 import { TRACE } from "./debug";
@@ -290,7 +290,8 @@ export function makePausableListener<E extends (wrappedCB: Callback) => void | C
 
 function setUpCleanup(until: Until | undefined, stop: CallbackRemover, listener: Listener, flask: Flask | null | undefined, enclosingFlask: Flask | undefined) {
   const success = _setUpCleanup(until, stop)
-  if (__DEV__ && (flask !== null || success)) setUpCleanupWarning!(listener, until, enclosingFlask)
+  // FIX: removed because __DEV__ issues and circular dependency
+  // if (__DEV__ && (flask !== null || success)) setUpCleanupWarning!(listener, until, enclosingFlask)
 }
 
 function _setUpCleanup(until: Until | undefined, stop: CallbackRemover) {

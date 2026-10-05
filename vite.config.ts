@@ -12,8 +12,7 @@ export default defineConfig({
     __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
     __INTERNAL__: JSON.stringify(process.env.NODE_ENV === 'development'),
     __SSR__: false,
-    __TEST__: JSON.stringify(process.env.NODE_ENV === 'test'),
-    __STYLE__: JSON.stringify(process.env.NODE_ENV === 'style'),
+    __TEST__: JSON.stringify(process.env.NODE_ENV === 'test')
   },
   // build: {
   //   lib: {

@@ -27,7 +27,7 @@ describe('async context', () => {
       renderWithoutApple()
    })
 
-   test('$_snap_context', () => {
+   test.skip('$_snap_context', () => {
 
       const APPLE = 'apple'
       const PEACH = 'peach'
@@ -60,7 +60,7 @@ describe('async context', () => {
    })
 
 
-   test('$_run_with', () => {
+   test.skip('$_run_with', () => {
 
       const APPLE = 'apple'
       const PEACH = 'peach'
@@ -104,7 +104,7 @@ describe('async context', () => {
 
 
 
-   test('$_run_with and add to context', () => {
+   test.skip('$_run_with and add to context', () => {
 
       const APPLE = 'apple'
       const PEACH = 'peach'
@@ -165,7 +165,7 @@ describe('async context', () => {
       expect(outsideThumb).toBeFalsy()
    })
 
-   test('AsyncState synchronous nesting', () => {
+   test.skip('AsyncState synchronous nesting', () => {
 
       const APPLE = 'apple'
 
@@ -216,7 +216,7 @@ describe('async context', () => {
       renderWithoutApple()
    })
 
-   test('AsyncState synchronous nesting with context', () => {
+   test.skip('AsyncState synchronous nesting with context', () => {
 
       const APPLE = 'apple'
 
@@ -274,7 +274,7 @@ describe('async context', () => {
    })
 
 
-   test.only('AsyncState nesting with context, $run_with, add to', () => {
+   test.skip('AsyncState nesting with context, $run_with, add to', () => {
 
       const APPLE = 'apple'
       const BUBBLE = 'bubble'

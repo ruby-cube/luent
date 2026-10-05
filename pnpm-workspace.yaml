@@ -7,8 +7,6 @@ packages:
   - demos/*
   - e2e
   - e2e/*
-  - .jungle
-  - .jungle/*
 
 recursiveInstall: false
 

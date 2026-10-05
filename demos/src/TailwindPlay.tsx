@@ -56,8 +56,6 @@ function TailwindPlay() {
     )
 }
 
-if (__STYLE__)
-    mountIsland(TailwindPlay, '#root')
 
 
 // <Card className="h-[610px] gap-2 flex flex-col border-solid border rounded-lg">

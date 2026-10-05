@@ -1,8 +1,0 @@
-const [selectedId, setSelectedId] = createSignal()
-const isSelected = createSelector(selectedId)
-
-<For each={list()}>
-  {(item) => <li classList={{ active: isSelected(item.id) }}>{item.name}</li>}
-</For>
-
-

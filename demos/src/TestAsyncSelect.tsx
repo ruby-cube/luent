@@ -19,12 +19,12 @@ export function TestAsyncSelect() {
 
   const $bebe = ion(0, {
     '-fetch': () => new Promise((res, rej) => {
-      if (Math.random() < 0.3) {
-        setTimeout(() => rej('hiccup'), 4000)
-      }
-      else {
+      // if (Math.random() < 0.3) {
+      //   setTimeout(() => rej('hiccup'), 4000)
+      // }
+      // else {
         setTimeout(() => res('bebe'), 4000)
-      }
+      // }
     })
   })
 
@@ -142,12 +142,12 @@ const db = {
   fetchCities: CachedFetch((selectedState: string) => {
     console.log('&&& fetchCities', selectedState)
     return new Promise<string[]>((res, reject) => {
-      if (Math.random() < 0.3) {
-        setTimeout(() => reject('uhoh'), __TEST__ ? TEST_LATENCY_1 : Math.random() * 50)
-      }
-      else {
+      // if (Math.random() < 0.3) {
+      //   setTimeout(() => reject('uhoh'), __TEST__ ? TEST_LATENCY_1 : Math.random() * 50)
+      // }
+      // else {
         setTimeout(() => res(stateCities[selectedState]), __TEST__ ? TEST_LATENCY_1 : Math.random() * 500)
-      }
+      // }
     })
   })
 }

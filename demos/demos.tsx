@@ -59,19 +59,19 @@ import { TestAsyncMultiply } from "./src/TestAsyncMultiply"
 // import { DayView } from "./src/TimelineApp/Timeline"
 
 export function runDemo() {
-  mountIsland(() => {
-    provideRoot(MICROCLASS_MERGE, twMerge);
+    mountIsland(() => {
+      provideRoot(MICROCLASS_MERGE, twMerge);
 
-    return <>
-      {/* <TestAsyncTabs></TestAsyncTabs> */}
-      {/* <HabitTracker habit="water" goal={8}></HabitTracker> */}
-      {/* <BottomlessBlokkis></BottomlessBlokkis> */}
-      {/* <DayView/> */}
-      {/* <TestStyleComments/> */}
-      {/* <TestColorSort></TestColorSort> */}
-      <TestAsyncSelect/>
-    </>
-    // return <TestInnerHTML/>
-  }, '#root')
+      return <>
+        {/* <TestAsyncTabs></TestAsyncTabs> */}
+        {/* <HabitTracker habit="water" goal={8}></HabitTracker> */}
+        {/* <BottomlessBlokkis></BottomlessBlokkis> */}
+        {/* <DayView/> */}
+        {/* <TestStyleComments/> */}
+        {/* <TestColorSort></TestColorSort> */}
+        <TestAsyncSelect />
+      </>
+      // return <TestInnerHTML/>
+    }, '#root')
 }
 
