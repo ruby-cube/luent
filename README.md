@@ -12,12 +12,11 @@ Luent is a web framework designed around conceptual coherence, expressiveness, a
 Core features:
 - a unified system of fine-grained reactivity
 - state management through familiar native structures
-- control flow expressions to render dynamic views
+- type-explicit reactivity
 
 Experimental features:
-- type-explicit reactivity
-- compile-time mutation-safety checking that prevents accidental, hidden mutations while allowing statically traceable mutable bindings
-- language extension of TypeScript + JSX for improved readability and type safety of signal-based reactivity (see [NoriScript](https://github.com/ruby-cube/luent/blob/main/packages/noriscript#noriscript))
+- compile-time mutation-safety checking
+- [NoriScript](https://github.com/ruby-cube/luent/blob/main/packages/noriscript#noriscript), a language extension of TypeScript + JSX with improved readability and type safety of signal-based reactivity
 
 <br>
 
@@ -32,7 +31,27 @@ npm create luent
 
 ## Code Examples
 <!-- Take a tour of Luent's syntax and APIs with these [code glimpses]() and [demos](). -->
-Coming soon.
+```nsx
+function Counter() {
+  get count = ion(0);
+  <:>
+    <button on:click={(){ count++ }}>
+      {count@}
+    </button>
+  </:>
+}
+```
+```tsx
+function Counter() {
+  const $count = ion(0);
+  return <>
+    <button on:click={() => $count.value++}>
+      {$count}
+    </button>
+  </>
+}
+```
+> Note: The $ prefix is a naming convention for state accessor functions and/or wrapper objects, not a reactivity marker. Reactivity exists independently of this convention.
 
 
 <br>
@@ -51,7 +70,7 @@ Luent transpiles JSX tags into `jsx()` calls with straightforward mental mapping
 - JSX slots (known as `children` in classic JSX) are normalized to JSX array factories so that parent nodes may be created before their descendants
 - JSX flow expressions (JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead
 <!-- - [JSX flow expressions](http://luent.dev/guide/template-control-flow) (JSX call expressions that form a control flow series) are compiled into a single series node. This could be done at runtime, but Luent takes care of this at compile time to reduce runtime overhead -->
-- JSX flow expression slots (the final argument of a JSX flow expression) are also normalized to JSX array factories
+- JSX flow slots (the final argument of a JSX flow expression) are also normalized to JSX array factories
 - JSX fragments are transformed into arrays
 
 This JSX template ...
