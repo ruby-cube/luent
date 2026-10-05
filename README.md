@@ -61,7 +61,7 @@ function Counter() {
 ## Motivation
 Modern frameworks bring powerful innovations to web development, but often introduce cognitive overhead through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition.
 
-This project explores ways to bring more clarity and consistency to the process of web development, essential to human developers and coding agents alike.
+This project explores ways to bring more clarity and consistency to the process of web development, important for human developers and coding agents alike.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
