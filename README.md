@@ -24,10 +24,10 @@ Experimental features:
 
 <br>
 
-## Quick Start
+<!-- ## Quick Start
 ```sh
 npm create luent
-```
+``` -->
 
 ## Example
 <!-- Take a tour of Luent's syntax and APIs with these [code glimpses]() and [demos](). -->
