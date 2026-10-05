@@ -30,11 +30,39 @@ NoriScript proposes to address these caveats with a dash of syntactic sugar.
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 
-## Code Examples
+<!-- ## Code Examples -->
 
-Coming soon.
 <!-- Check out [code glimpses]() and [demos]() on [NoriScript's site](https://noriscript.org).  -->
 
+## Example
+```tsx
+// nsx
+function Counter({ limit = 100 }: { limit: number }) {
+  get count = ion(0);
+  <:>
+    <button 
+      on:click={(){ count++ }}
+      disabled={(count === limit)@}
+    >
+      {count@}
+    </button>
+  </:>
+}
+```
+```tsx
+// tsx equivalent
+function Counter({ limit = 100 }: { limit: number }) {
+  const count = ion(0);
+  return <>
+    <button 
+      on:click={() => count.value++}
+      disabled={() => count() === limit}
+    >
+      {count}
+    </button>
+  </>
+}
+```
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 

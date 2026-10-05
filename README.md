@@ -29,7 +29,7 @@ Experimental features:
 npm create luent
 ```
 
-## Code Examples
+## Example
 <!-- Take a tour of Luent's syntax and APIs with these [code glimpses]() and [demos](). -->
 ```tsx
 // nsx
