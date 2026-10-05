@@ -22,7 +22,7 @@ Reactive UI programming and JSX have both been game changers in web development,
 
 Accessor functions, popularized in the form of signals by Solid.js, show real promise as an explicit, performant conduit to reactivity in JavaScript. Unfortunately, accessors have their own set of caveats, such as opaqueness to TypeScript type guards, the visual clutter of function calls, or confusion caused by functions with data variable names.
 
-Meanwhile, JSX, though elegant in its syntactic rules, can quickly become unwieldy and difficult to read when indentation from fragments and nesting cumulate into indentation hell. Or when co-locating state with its relevant view through visually disruptive function expressions and bulky IIFEs.
+Meanwhile, JSX, though elegant in its syntactic rules, can quickly become unwieldy and difficult to read when expressing complex and stateful dynamic views.
 
 NoriScript proposes to address these caveats with a dash of syntactic sugar.
 
