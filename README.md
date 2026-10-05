@@ -31,7 +31,8 @@ npm create luent
 
 ## Code Examples
 <!-- Take a tour of Luent's syntax and APIs with these [code glimpses]() and [demos](). -->
-```nsx
+```tsx
+// nsx
 function Counter() {
   get count = ion(0);
   <:>
@@ -42,6 +43,7 @@ function Counter() {
 }
 ```
 ```tsx
+// tsx
 function Counter() {
   const $count = ion(0);
   return <>
@@ -171,7 +173,5 @@ Particular acknowledgement to the people and projects I've especially admired:
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-## License
-[MIT license](https://github.com/ruby-cube/luent/blob/main/LICENSE)
+[MIT license](https://github.com/ruby-cube/luent/blob/main/LICENSE) • Built with ♥
 
-Built with ♥
