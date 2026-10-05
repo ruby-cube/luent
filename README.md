@@ -159,7 +159,7 @@ Once the API stabilizes, development will increasingly focus on runtime efficien
 
 
 
-## Prior Art
+## Acknowledgments
 
 This project builds upon ideas pioneered by frameworks that have shaped modern web development. It draws inspiration from the consistency of React, the intuitiveness of Vue, the aesthetics of Svelte, the insightfulness of Solid, and the thoroughness of Angular.
 
