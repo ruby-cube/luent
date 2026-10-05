@@ -22,7 +22,8 @@ export function setAttribute(node: Element | null, key: string, value: any, flas
     if (__INTERNAL__) console.warn('Node is missing. Cannot setAttribute.')
     return;
   }
-  const attribute = key.toLowerCase()
+  const attribute = key
+  // const attribute = key.toLowerCase()
   if (isGetter(value)) {
     trackForRender(value, ({ current, previous }) => {
       // if (current === previous) return;

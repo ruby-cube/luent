@@ -1,6 +1,5 @@
 export { defineStyleScopeElement } from "../component/shadow"
 
-console.log('run portals module')
 /**
  * per-page/route portals
  */

@@ -2,14 +2,15 @@
 <picture>
   <img width="200" src="https://github.com/ruby-cube/luent/blob/cave/packages/noriscript/assets/noriscript-logo-512px-padded.png" alt="noriscript-logo"/>
 </picture>
-<p><a href='https://noriscript.org/accessor-syntax'>learn</a> &nbsp;-&nbsp; <a href='https://noriscript.org/examples'>demos</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a> &nbsp;-&nbsp; <a href='#design-principles'>principles</a></p>
+<!-- <p><a href='https://noriscript.org/accessor-syntax'>learn</a> &nbsp;-&nbsp; <a href='https://noriscript.org/examples'>demos</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a> &nbsp;-&nbsp; <a href='#design-principles'>principles</a></p> -->
 </div>
 
 # NoriScript
 
 NoriScript is an experimental TypeScript + JSX language extension designed to improve the readability, clarity, and type safety of JSX and accessor/signal-based reactive code. Its syntax design is guided by [our language design principles](#design-principles).
 
-> **This project is in early development.** Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. To get a sense of the syntax, explore these [code glimpses](#code-glimpse) and [examples]().
+> **This project is in early development.** Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. 
+<!-- To get a sense of the syntax, explore these [code glimpses](#code-glimpse) and [examples](). -->
 <!-- >
 > We'd love help getting this project off the ground. Learn how to [contribute](). -->
 
@@ -31,7 +32,8 @@ NoriScript proposes to address these caveats with a dash of syntactic sugar.
 
 ## Code Examples
 
-Check out [code glimpses]() and [demos]() on [NoriScript's site](https://noriscript.org). 
+Coming soon.
+<!-- Check out [code glimpses]() and [demos]() on [NoriScript's site](https://noriscript.org).  -->
 
 
 <p align="right"><a href="#readme-top">[top]</a></p>

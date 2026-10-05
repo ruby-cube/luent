@@ -2,7 +2,7 @@
 <img width="200" alt="luent logo" src="assets/luent-logo-padded-light.png#gh-light-mode-only">
 <img width="200" alt="luent logo" src="assets/luent-logo-padded-dark.png#gh-dark-mode-only">
   
-<!-- <a href='https://luent.dev/#code-glimpses'>tour</a> &nbsp;-&nbsp; <a href='http://luent.dev/demos/habit-tracker.html'>demo</a> &nbsp;-&nbsp; <a href='http://luent.dev/api/overview.html'>API</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a> -->
+<!-- <p><a href='https://luent.dev/#code-glimpses'>tour</a> &nbsp;-&nbsp; <a href='http://luent.dev/demos/habit-tracker.html'>demo</a> &nbsp;-&nbsp; <a href='http://luent.dev/api/overview.html'>API</a> &nbsp;-&nbsp; <a href='#motivation'>motivation</a></p> -->
 </div>
 
 # Luent

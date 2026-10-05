@@ -15,7 +15,6 @@ let t; // TODO: import from @babel/types
 
 
 function luentPreTransform({ types }) {
-   console.log('luent pre transform')
    t = types;
 
    return {
