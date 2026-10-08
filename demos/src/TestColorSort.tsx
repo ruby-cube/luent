@@ -1,4 +1,4 @@
-import { As, asJSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, NodeRef, Style, Thru, observe } from "luent";
+import { As, asJSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, NodeRef, Style, Thru, observe, Bindings } from "luent";
 import { Ion, queueTask } from "@luent/quarky";
 import { moveUniqueItems } from "@luent/utils";
 
@@ -219,7 +219,7 @@ function ColorPalette(setup: FromTag<{
   </>
 }
 
-const Gap = (setup: FromTag<{ '...': 'button' }>) =>
+const Gap = (setup: Bindings<'button'>) =>
   <>
     <button
       class='clickable gap'
@@ -253,9 +253,7 @@ const Gap = (setup: FromTag<{ '...': 'button' }>) =>
   </>
 
 
-const Endgap = (setup: FromTag<{
-  '...': 'button'
-}>) =>
+const Endgap = (setup: Bindings<'button'>) =>
   <>
     <button
       class='clickable gap endgap'

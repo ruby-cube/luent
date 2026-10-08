@@ -1,6 +1,6 @@
 import { AnyObject } from "@luent/types"
-import { FromTag, RenderTag, WithRef } from "./bindings-types"
-import { NodeRef } from "../node/NodeRef"
+import { FromTag, RenderTag, Bindings } from "./bindings-types"
+import { NodeRef, RefSource } from "../node/NodeRef"
 import { NodeRefsConfig } from "../node/NodeRefs"
 import { Ion, MutableIon } from "@luent/quarky"
 import { TransitionConfigs } from "../transitions/transitions"
@@ -324,8 +324,7 @@ export function composeBindings(bindings: RawBindings): ComposedBindings {
   return composed
 }
 
-// TODO: fix FromTag?
-export type Xray<T> = (nested: { [key: string]: (setup: WithRef<'li'>) => ComponentKit }) => RawJSXNode
+export type Xray<T extends RefSource> = (nested: { [key: string]: (setup: Bindings<T>) => ComponentKit }) => RawJSXNode
 
 export function getXrayBindings(xray: (nested: { [key: string]: (setup: FromTag) => ComponentKit }) => { setup: AnyObject }) {
   return xray(new Proxy({}, {

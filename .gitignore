@@ -38,9 +38,6 @@ dist-ssr
 /plugins/vscode-noriscript/out/
 /plugins/vscode-noriscript/vendor_node_modules/
 
-# Generated temp output
-/plugins/eslint-plugin-mu/.tmp-run/
-
 # VitePress cache
 **/.vitePress/.luent-islands/
 **/.vitepress/cache

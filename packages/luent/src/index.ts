@@ -154,7 +154,7 @@ export type {
   TagType,
 } from './node/makeJSXNode'
 export type { ContextEntryKey } from './context/ContextKey'
-export type { FromTag, RenderTag, WithRef, IonOr } from './component/bindings-types'
+export type { FromTag, RenderTag, Bindings, IonOr } from './component/bindings-types'
 export type { TagClass } from './element/styles'
 export type { TagName } from './element/setUpElement'
 export type { ViewType } from './conditional/If'

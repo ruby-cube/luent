@@ -1,8 +1,7 @@
-import { css, MICROCLASS_MERGE, provideRoot, Style } from 'luent'
+import { Bindings, css, MICROCLASS_MERGE, provideRoot, Style } from 'luent'
 import { Code, CodeTour, TourSection } from '@luent/websites-shared'
 import { highlightCode } from './highlighter'
 import { twMerge } from 'tailwind-merge'
-import { FromTag } from 'packages/luent/dist'
 
 // let direction = 'code-right'
 function flowDirection() {
@@ -158,7 +157,7 @@ function AccessorVariables() {
   </>
 }
 
-AccessorVariables.Note = (setup: FromTag<{ '...': 'p' }>) => {
+AccessorVariables.Note = (setup: Bindings<'p'>) => {
   const { ...rest } = setup
   return <>
     <p auto-bind={rest}>
@@ -201,7 +200,7 @@ function DerivationExpressions() {
   </>
 }
 
-DerivationExpressions.Note = (setup: FromTag<{ '...': 'p' }>) =>
+DerivationExpressions.Note = (setup: Bindings<'p'>) =>
   <p auto-bind={setup}>
     <strong>Note:</strong> This example assumes a conservative JSX to JavaScript transpilation strategy that maps tag bindings directly to object properties. NoriScript itself transpiles only to TypeScript and JSX. It does not define how TypeScript and JSX are ultimately transpiled to JavaScript.
   </p>

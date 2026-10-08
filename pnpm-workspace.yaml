@@ -8,25 +8,13 @@ packages:
   - e2e
   - e2e/*
 
-recursiveInstall: false
-
 overrides:
   postcss@<8.5.10: '>=8.5.10'
 
 allowBuilds:
-  '@firebase/util': set this to true or false
   '@parcel/watcher': true
   esbuild: true
-  protobufjs: set this to true or false
-
-ignoredBuiltDependencies:
-  - '@firebase/util'
-  - protobufjs
 
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - esbuild
-
-minimumReleaseAgeExclude:
-  - '@astrojs/starlight@0.41.9'
-  - astro@7.2.7

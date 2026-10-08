@@ -111,7 +111,7 @@ type MutableAttribute<D> = {
 
 
 
-export type WithRef<N extends RefSource> = ElementAttributes<N> & { ref?: NodeRef<N> }
+export type Bindings<N extends RefSource> =  { '~bindings'?: ElementAttributes<N> & { ref?: NodeRef<N> } }
 
 // export type FromTag<D = {}> = _FromTag<D>
 
@@ -123,9 +123,10 @@ export type FromTag<D = {}> =
   & WithMu<D>
   // & WithSlot<D>
   & Styles
-  & { '~bindings'?: TagBindings<D> & ForwardedBindings<D> }
+  & { '~bindings'?: TagBindings<D> }
 
-type ForwardedBindings<D> = D extends { '...': infer T } ? T extends RefSource ? WithRef<T> : {} : {}
+// type ForwardedBindings<D> = D extends { '...': infer T } ? T extends RefSource ? Bindings<T> : {} : {}
+
 
 type ElementAttributes<D> =
   D extends keyof JSX.IntrinsicElements ? Omit<JSX.IntrinsicElements[D], 'ref' | keyof LuentHooks<any>> : {} // TODO: use Attributes from index.d.ts

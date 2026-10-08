@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, fromTag, If, WithRef, Xray } from "luent";
+import { component, fromTag, If, Bindings, Xray } from "luent";
 import { ion } from "@luent/quarky";
 
 
@@ -18,7 +18,7 @@ export function TestHookForwarding() {
 
 
 function Comp(setup: FromTag<{
-  'xray:button'?: WithRef<'button'>
+  'xray:button'?: Bindings<'button'>
 }>) {
   const { xray } = setup
   const $active = ion(true)

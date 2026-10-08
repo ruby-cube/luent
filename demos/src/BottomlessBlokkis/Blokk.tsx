@@ -1,4 +1,4 @@
-import { Ion, ion, For, FromTag, WithRef } from "luent";
+import { Ion, ion, For, FromTag, Bindings } from "luent";
 import "./Blokk.css"
 
 export const CELL_SIZE = 20;
@@ -12,8 +12,7 @@ export function Blokk(setup: FromTag<{
   rotation: Ion<number>,
   color?: Ion<string>,
   gap?: number
-  '...': 'div';
-}>) {
+}> & Bindings<'div'>) {
   const { matrix, $rotation, $shiftX, $shiftY, $color = ion('#564747'), gap = 1, ...rest } = setup
 
   const GRID_SIZE = CELL_SIZE * 4 + gap * 3;
@@ -21,8 +20,7 @@ export function Blokk(setup: FromTag<{
   const $translate = () => `translate(${$shiftX() * CELL_SIZE}px, ${$shiftY() * CELL_SIZE}px)`
   const $rotate = () => `rotate(${degrees[$rotation()]}deg)`
 
-  return (
-
+  return <>
     <div class='blokk-base' style={() => `
         --background-color: ${$color()};
         --cell-size: ${CELL_SIZE}px;
@@ -40,5 +38,5 @@ export function Blokk(setup: FromTag<{
         ))
       )}
     </div>
-  )
+  </>
 }

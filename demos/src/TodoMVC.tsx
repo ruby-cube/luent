@@ -207,7 +207,7 @@ function TodoList(setup: FromTag<{
               <input
                 class="edit"
                 type="text"
-                mu:value={pionic(todo).title}
+                mu:value={$$(todo).title}
                 at:attach={node => node.focus()}
                 on:blur={() => doneEdit(todo)}
                 on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}

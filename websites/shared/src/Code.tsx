@@ -1,4 +1,4 @@
-import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, awaitLayout, listen, awaitTick, queueTask, awaiting, awaitRender } from "luent";
+import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, awaitLayout, listen, awaitTick, queueTask, awaiting, awaitRender, Bindings } from "luent";
 import { codeHtml, trusted } from "./code-utils";
 import { TOOLTIP_CONFIG, TooltipKit } from "@luent/luent-ui";
 import { HoverInfo } from "./HoverInfo";
@@ -333,13 +333,12 @@ export function CodeToggle(setup: FromTag<{
   tab: Ion<'main' | 'alt'> & { toggle(): void },
   main: string,
   alt: string
-  '...': 'button'
-}>) {
+}> & Bindings<'button'>) {
   const { $tab, main, alt, ...rest } = setup;
   let mainWidth = 0;
 
-  const $mainNode = NodeRef('span') as unknown as NodeRef<HTMLSpanElement>
-  const $knob = NodeRef('span') as unknown as NodeRef<HTMLSpanElement>
+  const $mainNode = NodeRef('span')
+  const $knob = NodeRef('span')
   const $toggling = ion(false)
 
   function transitionToggle(node: HTMLElement | undefined) {

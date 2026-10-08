@@ -1,4 +1,4 @@
-import { Ion, queueTask, As, asJSX, css, For, fromContext, FromTag, If, ion, ionic, Style, Thru, observe, awaitTick } from "luent";
+import { Ion, queueTask, As, asJSX, css, For, fromContext, FromTag, If, ion, ionic, Style, Thru, observe, awaitTick, Bindings } from "luent";
 import { moveUniqueItems } from "@luent/utils";
 
 export function Palettable() {
@@ -242,7 +242,7 @@ function ColorPalette(setup: FromTag<{
   </>
 }
 
-const Gap = (setup: FromTag<{ '...': 'button' }>) =>
+const Gap = (setup: Bindings<'button'>) =>
   <>
     <button
       class='clickable gap'
@@ -282,7 +282,7 @@ const Gap = (setup: FromTag<{ '...': 'button' }>) =>
   </>
 
 
-const Endgap = (setup: FromTag<{ '...': 'button' }>) =>
+const Endgap = (setup: Bindings<'button'>) =>
   <>
     <button
       class='clickable gap endgap'

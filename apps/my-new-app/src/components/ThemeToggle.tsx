@@ -1,6 +1,6 @@
-import { css, Style, type FromTag } from "luent";
+import { css, Style, Bindings } from "luent";
 
-export function ThemeToggle(setup: FromTag<{ '...': 'button' }>) {
+export function ThemeToggle(setup: Bindings<'button'>) {
   return <>
     <button auto-bind={setup} class="toggle" type="button" role="switch" aria-checked="false" aria-label="Toggle color scheme">
       <span class="t-icon t-sun">

@@ -1,4 +1,4 @@
-import { component, WithRef } from "luent"
+import { Bindings } from "luent"
 
 export function Grandparent() {
 
@@ -8,7 +8,7 @@ export function Grandparent() {
    )
 }
 
-function Parent(setup: WithRef<typeof Child>) {
+function Parent(setup: Bindings<typeof Child>) {
 
    return (
 
@@ -16,7 +16,7 @@ function Parent(setup: WithRef<typeof Child>) {
    )
 }
 
-function Child(setup: WithRef<'div'>) {
+function Child(setup: Bindings<'div'>) {
 
    return (
 

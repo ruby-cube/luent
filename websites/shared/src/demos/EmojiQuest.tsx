@@ -94,11 +94,10 @@ function Powerset(setup: FromTag<{
   limit: number,
   class?: Ion<TagClass>
 }>) {
-  const { mu, limit, $class } = setup;
-  const { powerset } = mu
+  const { mu: { powerset }, limit, $class } = setup;
 
-  const count = $$(powerset).length
-  const remaining = ion(() => limit - count())
+  const $count = $$(powerset).length
+  const remaining = ion(() => limit - $count())
 
   return <>
     <div class={['powerset-panel', $class]}>
@@ -111,15 +110,15 @@ function Powerset(setup: FromTag<{
       <div class='panel-footer'>
         <button
           class='add-power-button'
-          disabled={() => count() === limit}
-          on:click={() => mu.powerset.addRandomPower()}
+          disabled={() => $count() === limit}
+          on:click={() => powerset.addRandomPower()}
         >
           +
         </button>
 
         <div class='stats'>
           <span class='stats-label'>Total</span>
-          <span class='stats-value'>{count}/{limit}</span>
+          <span class='stats-value'>{$count}/{limit}</span>
         </div>
       </div>
       {If(remaining,

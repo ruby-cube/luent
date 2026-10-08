@@ -1,5 +1,5 @@
 
-import { Ion, queueTask, As, JSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, Style, Thru, observe, Else } from "luent";
+import { Ion, queueTask, As, JSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, Style, Thru, observe, Else, Bindings } from "luent";
 import { moveUniqueItems } from "@luent/utils";
 
 export function DayView(setup: FromTag<{
@@ -262,7 +262,7 @@ function ColorPalette(setup: FromTag<{
   </>
 }
 
-const Gap = (setup: FromTag<{ '...': 'button' }>) =>
+const Gap = (setup: Bindings<'button'>) =>
   <>
     <button
       class='clickable gap'
@@ -302,7 +302,7 @@ const Gap = (setup: FromTag<{ '...': 'button' }>) =>
   </>
 
 
-const Endgap = (setup: FromTag<{ '...': 'button' }>) =>
+const Endgap = (setup: Bindings<'button'>) =>
   <>
     <button
       class='clickable gap endgap'
