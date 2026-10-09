@@ -1,6 +1,6 @@
 ```tsx
 import { template, For, If, Else, FromTag, listen, isMutableIon } from "luent"
-import { observe, ionicTick, Ion, Ionic, EACH, as, ion, ionic } from "@luent/quarky"
+import { observe, ionicTick, Ion, Ionic, EACH, as, ion, ionic } from "@luently/quarky"
 
 interface Todo {
    id: number

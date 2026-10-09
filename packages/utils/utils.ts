@@ -1,4 +1,4 @@
-import { AnyObject, Class } from "@luent/types";
+import { AnyObject, Class } from "@luently/types";
 // import _ from "lodash"
 
 export function areEqualSets(setA: Set<unknown>, setB: Set<unknown>) {

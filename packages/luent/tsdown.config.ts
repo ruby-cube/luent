@@ -14,7 +14,7 @@ export default {
     __INTERNAL__: 'false'
   },
   deps: {
-    // Bundle local workspace packages so npm consumers do not need private @luent/* packages.
-    alwaysBundle: [/^@luent\//]
+    // Bundle local workspace packages so npm consumers do not need private @luently/* packages.
+    alwaysBundle: [/^@luently\//]
   }
 }

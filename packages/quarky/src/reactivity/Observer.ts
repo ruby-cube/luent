@@ -1,8 +1,8 @@
-import { $listen, Flask, getActiveFlask, getFlask, PausableListener, SustainedListenerOptions } from "@luent/flask";
+import { $listen, Flask, getActiveFlask, getFlask, PausableListener, SustainedListenerOptions } from "@luently/flask";
 import { Reaction } from "./Reaction";
 import { asSubstance, IonSubstance, isSubstance, Substance } from "./Substance";
-import { AnyObject, Glass } from "@luent/types";
-import { __DEV__unwrap } from "@luent/utils";
+import { AnyObject, Glass } from "@luently/types";
+import { __DEV__unwrap } from "@luently/utils";
 import { SimpleState } from "./State";
 import { $currentCycle, getDefaultPhase, Phase, PRELUDE, SYNC } from "./RenderCycle";
 import { dev, logAtoms } from "../debug/dev";

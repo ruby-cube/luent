@@ -23,7 +23,7 @@ describe('NoriScript transform with offsets', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª, assertµ } from "@luent/noriscript";\n` +
+         `import { assertª, assertµ } from "@luently/noriscript";\n` +
          `const foo = assertª(ref(0));\n` +
          `observe((() => {\n` + `\tconst a = 0;\n\treturn a;\n}\n));\n` + // TODO: remove parentheses if not IIDE
          `const count = assertª(ref(0));\n` +
@@ -49,7 +49,7 @@ describe('NoriScript transform with offsets', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª, assertµ } from "@luent/noriscript";\n` +
+         `import { assertª, assertµ } from "@luently/noriscript";\n` +
          `const foo = assertª(ref(0));\n` +
          `observe((async () => {\n` + `\tconst res = await a;\n\treturn res;\n}\n));\n` + // TODO: remove parentheses if not IIDE
          `const count = assertª(ref(0));\n` +
@@ -76,7 +76,7 @@ describe('NoriScript transform with offsets', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª, assertµ } from "@luent/noriscript";\n` +
+         `import { assertª, assertµ } from "@luently/noriscript";\n` +
          `const foo = assertª(ref(0));\n` +
          `observe((() => {\n` + `\tconst a = 0;\n\treturn a;\n}\n)());\n` + // TODO: remove parentheses if not IIDE
          `const count = assertª(ref(0));\n` +
@@ -103,7 +103,7 @@ describe('NoriScript transform with offsets', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª, assertµ } from "@luent/noriscript";\n` +
+         `import { assertª, assertµ } from "@luently/noriscript";\n` +
          `const foo = assertª(ref(0));\n` +
          `observe((async () => {\n` + `\tconst res = await a;\n\treturn res;\n}\n)());\n` + // TODO: remove parentheses if not IIDE
          `const count = assertª(ref(0));\n` +

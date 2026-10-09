@@ -1,4 +1,4 @@
-import { __DEV__unwrap, noop } from "@luent/utils";
+import { __DEV__unwrap, noop } from "@luently/utils";
 import { TrackedAtom } from "./Atom";
 import { Phase } from "./RenderCycle";
 

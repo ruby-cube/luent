@@ -1,4 +1,4 @@
-import { isFunction } from "@luent/utils";
+import { isFunction } from "@luently/utils";
 import { NodeRef } from "../node/NodeRef";
 
 export function matchEventTarget(this: Event, ...args: [...(string | ((x: HTMLElement) => boolean) | NodeRef)[]]) {

@@ -1,5 +1,5 @@
-import { AnyObject } from "@luent/types";
-import { isPlainObject, normalizeToArray } from "@luent/utils";
+import { AnyObject } from "@luently/types";
+import { isPlainObject, normalizeToArray } from "@luently/utils";
 import { writeJSXNode } from "../server/writeJSXNode";
 import { makeJSXNode, RawJSXNode } from "../node/makeJSXNode";
 import { TagName } from "../element/setUpElement";

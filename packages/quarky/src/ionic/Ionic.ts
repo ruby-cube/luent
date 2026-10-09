@@ -1,8 +1,8 @@
-import { AnyObject, Glass } from "@luent/types";
+import { AnyObject, Glass } from "@luently/types";
 import { createIonicModel, isIonicProxy, MethodHook } from "./IonicModel";
 import { quarkOf } from "../abstract/Quark";
 import type{ QuarkyIonicProxy } from "./ModelQuark";
-import { isObject } from "@luent/utils";
+import { isObject } from "@luently/utils";
 import { ion, Ion } from "../ion/Ion";
 
 

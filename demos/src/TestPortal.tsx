@@ -1,5 +1,5 @@
 import { component, If, Portal, template } from "luent";
-import { Ion } from "@luent/quarky";
+import { Ion } from "@luently/quarky";
 
 export function TestPortal() {
    const $show = ion(false)

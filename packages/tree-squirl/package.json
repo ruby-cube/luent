@@ -1,5 +1,5 @@
 {
-  "name": "@luent/tree-squirl",
+  "name": "@luently/tree-squirl",
   "version": "0.0.0",
   "private": true,
   "description": "A lightweight AST traversal utility",
@@ -13,11 +13,11 @@
     "build:types": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
-    "@luent/utils": "workspace:*",
+    "@luently/utils": "workspace:*",
     "oxc-parser": "^0.124.0"
   },
   "devDependencies": {
-    "@luent/types": "workspace:*"
+    "@luently/types": "workspace:*"
   },
   "author": "Ruby Yi Wang",
   "license": "MIT"

@@ -32,40 +32,47 @@ export function TestAsyncTabs() {
   }, 1000)
 
   return <>
-    <ul class="inline">
-      {For(allTabs, m => m, tab => (
-        <li class={() => $tab() === tab && 'selected'} on:click={e => { openTab(tab) }}>
-          {tabNames[tab]}
-        </li>
-      ))}
-    </ul>
-    <hr></hr>
-
-    {Await(view => <>
-      <ul class="inline">
-        {For(openTabs, m => m, tab => (
-          <li class={() => $tab() === tab && 'selected'} on:click={e => { !e.from('span') && ($tab.value = tab) }}>
-            {tabNames[tab]}
-            <span style="padding: 1em" on:click={() => closeTab(tab)}>x</span>
-          </li>
-        ))}
-      </ul>
-      <div class={() => `tab ${view.ifPending('pending')}`}>
-        <o:preserve>
-          {As($tab, view =>
-            <div before:attach={() => tabViews[$tab()] = view}>
-              <Tab page={tabNames[$tab()]} count={$count} />
-            </div>
-          )}
-          {Default(
-            <div>No tabs open</div>
-          )}
-        </o:preserve>
-      </div>
-    </>)}
-    {Meanwhile(
-      <>loading...</>
-    )}
+    <div class="async-tabs-layout">
+      <aside class="all-tabs-sidebar">
+        <h4>Pages</h4>
+        <ul class="all-tabs-list">
+          {For(allTabs, m => m, tab => (
+            <li class={() => $tab() === tab && 'selected'} on:click={() => { openTab(tab) }}>
+              {tabNames[tab]}
+            </li>
+          ))}
+        </ul>
+      </aside>
+      <main>
+      {Await((view: any) => <>
+        <section class="tab-panel">
+          <ul class="inline open-tabs-inline">
+            {For(openTabs, m => m, tab => (
+              <li class={() => $tab() === tab && 'selected'} on:click={e => { !e.from('span') && ($tab.value = tab) }}>
+                {tabNames[tab]}
+                <span style="padding: 1em" on:click={() => closeTab(tab)}>x</span>
+              </li>
+            ))}
+          </ul>
+          <div class={() => `tab ${view.ifPending('pending')}`}>
+            <o:preserve>
+              {As($tab, (view: any) =>
+                <div before:attach={() => tabViews[$tab()] = view}>
+                  <Tab page={tabNames[$tab()]} count={$count} />
+                </div>
+              )}
+              {Default(
+                <div>No tabs open</div>
+              )}
+            </o:preserve>
+          </div>
+        </section>
+      </>)}
+      {Meanwhile(
+        <p class='loader'>loading...</p>
+      )}
+      </main>
+    </div>
   </>
 };
 
@@ -99,12 +106,13 @@ function Tab(input: FromTag<{
   });
 
   return <>
-    <div class="tab-content">
+    <div class="tab-content" animate-in>
       <p style="font-size: xx-large">{CONTENT[page]}</p>
-      This content is for page "{page}" after {() => $time()?.toFixed()}ms.
-      <h3>{$count}</h3>
-      <h3>{$localCount}</h3>
-      <button on:click={e => $localCount.increment()}>+</button>
+      <p>
+      Page <b>{page}</b> loaded after <b>{() => $time()?.toFixed()}ms</b>. Time elapsed since initial load: <b>{$count}s</b>.
+      </p>
+      Local persisted state (resets when tab is closed): 
+      <button on:click={e => $localCount.increment()}>{$localCount}</button>
     </div>
   </>
 };

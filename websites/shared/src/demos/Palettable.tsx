@@ -1,5 +1,5 @@
-import { Ion, queueTask, As, asJSX, css, For, fromContext, FromTag, If, ion, ionic, Style, Thru, observe, awaitTick, Bindings } from "luent";
-import { moveUniqueItems } from "@luent/utils";
+import { Ion, queueTask, As, asJSX, css, For, FromTag, If, ion, ionic, Style, Thru, observe, Bindings } from "luent";
+import { moveUniqueItems } from "@luently/utils";
 
 export function Palettable() {
   const $round = ion(1, {
@@ -117,7 +117,7 @@ function ColorPalette(setup: FromTag<{
   onMove: () => void;
   onComplete: () => void;
 }>) {
-  const { size = getDefaultSize(), onMove, onComplete, ...rest } = setup
+  const { size = getDefaultSize(), emitMove, emitComplete, ...rest } = setup
 
   const { colors, $sorted } = ColorsKit(size)
 
@@ -142,7 +142,7 @@ function ColorPalette(setup: FromTag<{
     if (!selected.size) return;
     colors.moveColors(selected, index)
     selected.clear()
-    onMove()
+    emitMove()
   }
 
   const { $dragging, makeDraggable, DropZones } = DraggableKit<Color>({
@@ -155,7 +155,7 @@ function ColorPalette(setup: FromTag<{
 
   const $gapDisabled = ion(() => $dragging() || selected.size === 0)
 
-  const { makeMagnifyable } = CelebrationKit($sorted, onComplete)
+  const { makeMagnifyable } = CelebrationKit({ $sorted, onComplete: emitComplete })
 
   return <>
     <o--host on:click={e => e.from('.clickable') || deselectAll()} />
@@ -383,14 +383,14 @@ function DraggableKit<T>(config: {
   $selected: Ion<T[]>,
   axis?: 'horizontal' | 'vertical' // TODO:
 }) {
-  const { n, onDrag, onDrop, isSelected, $selected, axis = 'horizontal' } = config
+  const { n, onDrag: emitDrag, onDrop: emitDrop, isSelected, $selected, axis = 'horizontal' } = config
 
   let selectedItem: T | null = null;
   let selectedIndex: number | null = null;
   let dropIndex: number | null = null;
   let dropZone: Element | null = null;
 
-   const phoneScreen = detectPhoneScreen()
+  const phoneScreen = detectPhoneScreen()
 
   const $dragging = ion(false)
   const $stacked = ion(false) // whether tag-alongs should be offset from the lead swatch
@@ -416,7 +416,7 @@ function DraggableKit<T>(config: {
       selectedItem = item;
       selectedIndex = index;
       $dragging.value = true
-      onDrag(item);
+      emitDrag(item);
 
       if ($selected().length > 1) {
         $stacked.value = true
@@ -463,7 +463,7 @@ function DraggableKit<T>(config: {
         $shiftX.value = 0;
         $shiftY.value = 0;
         $stacked.value = false
-        onDrop(dropIndex === null ? selectedIndex! : dropIndex)
+        emitDrop(dropIndex === null ? selectedIndex! : dropIndex)
         // delaying prevents a swatch that is dropped in its original position from being reselected.
         queueTask(() => { $dragging.value = false });
         target.removeEventListener('pointermove', drag)
@@ -472,7 +472,7 @@ function DraggableKit<T>(config: {
       target.removeEventListener('pointerup', rePointerUp)
     }
   }
- 
+
 
   // Tag-along
   /**
@@ -715,8 +715,8 @@ function goalHue(baseHue: number) {
 
 
 
-function CelebrationKit($sorted: Ion<boolean>, onComplete: () => void) {
-
+function CelebrationKit(setup: { $sorted: Ion<boolean>, onComplete: () => void }) {
+  const { $sorted, onComplete: emitComplete } = setup
   observe($sorted, () => {
     if ($sorted()) {
       setTimeout(celebrate, 250) // 250 to ensure item transitions are complete
@@ -732,7 +732,7 @@ function CelebrationKit($sorted: Ion<boolean>, onComplete: () => void) {
       if ($magnifiedIndex() === 7) {
         clearInterval(id)
         $magnifiedIndex.value = undefined
-        onComplete()
+        emitComplete()
       }
     }, 84)
   }
@@ -783,7 +783,7 @@ Palettable.nsx = `function Palettable() {
         <ColorPalette
           animate-in='slide-in'
           onMove={moves@.increment}
-          onComplete={(){ $solved.value = true }}
+          onComplete={(){ solved = true }}
         ></ColorPalette>
         {If(done@,
           <button transition-in on:click={round@.increment}>
@@ -868,12 +868,12 @@ Palettable.tsx = `function Palettable() {
 }`
 
 
-Palettable.nsxColorPalette = `function ColorPalette(setup: FromTag<'div', {
+Palettable.nsxColorPalette = `function ColorPalette(setup: FromTag<{
   size?: number;
   onMove: () => void;
   onComplete: () => void;
-}>) {
-  const { size = 6, onMove, onComplete, ...rest } = setup
+}> & Bindings<'div'>) {
+  const { size = 6, emitMove, emitComplete, ...rest } = setup
 
   const { colors, sorted@ } = ColorsKit(size)
 
@@ -894,7 +894,7 @@ Palettable.nsxColorPalette = `function ColorPalette(setup: FromTag<'div', {
     if (!selected.size) return;
     colors.moveColors(selected, index)
     selected.clear()
-    onMove()
+    emitMove()
   }
 
   const { dragging@, makeDraggable, DropZones } = DraggableKit<Color>({
@@ -907,7 +907,7 @@ Palettable.nsxColorPalette = `function ColorPalette(setup: FromTag<'div', {
 
   get gapDisabled = ion(() => dragging || selected.size === 0)
 
-  const { makeMagnifyable } = CelebrationKit(sorted@, onComplete)
+  const { makeMagnifyable } = CelebrationKit({ sorted@, onComplete: emitComplete })
 
   <:>
     <o--host on:click={(e){ e.from('.clickable') || selected.clear() }} />
@@ -962,12 +962,12 @@ Palettable.nsxColorPalette = `function ColorPalette(setup: FromTag<'div', {
 
 
 
-Palettable.tsxColorPalette = `function ColorPalette(setup: FromTag<'div', {
+Palettable.tsxColorPalette = `function ColorPalette(setup: FromTag<{
   size?: number;
   onMove: () => void;
   onComplete: () => void;
-}>) {
-  const { size = 6, onMove, onComplete, ...rest } = setup
+}> & Bindings<'div'>) {
+  const { size = 6, emitMove, emitComplete, ...rest } = setup
 
   const { colors, $sorted } = ColorsKit(size)
 
@@ -988,7 +988,7 @@ Palettable.tsxColorPalette = `function ColorPalette(setup: FromTag<'div', {
     if (!selected.size) return;
     colors.moveColors(selected, index)
     selected.clear()
-    onMove()
+    emitMove()
   }
 
   const { $dragging, makeDraggable, DropZones } = DraggableKit<Color>({
@@ -1001,7 +1001,7 @@ Palettable.tsxColorPalette = `function ColorPalette(setup: FromTag<'div', {
 
   const $gapDisabled = ion(() => $dragging() || selected.size === 0)
 
-  const { makeMagnifyable } = CelebrationKit($sorted, onComplete)
+  const { makeMagnifyable } = CelebrationKit({ $sorted, onComplete: emitComplete })
 
   return <>
     <o--host on:click={e => e.from('.clickable') || selected.clear()} />
@@ -1053,7 +1053,7 @@ Palettable.tsxColorPalette = `function ColorPalette(setup: FromTag<'div', {
   </>
 }`
 
-Palettable.nsxGap = `function Gap(setup: FromTag<'button'>) {
+Palettable.nsxGap = `function Gap(setup: Bindings<'button'>) {
   <:>
     <button
       class='clickable gap'
@@ -1091,7 +1091,7 @@ function Arrow() {
   </:>
 }`
 
-Palettable.tsxGap = `function Gap(setup: FromTag<'button'>) {
+Palettable.tsxGap = `function Gap(setup: Bindings<'button'>) {
   return <>
     <button
       class='clickable gap'
@@ -1138,7 +1138,7 @@ Palettable.nsxDraggableKit = `function DraggableKit<T>(config: {
   isSelected: (item: T) => boolean,
   selected: Ion<T[]>
 }) {
-  const { n, onDrag, onDrop, isSelected, selected@ } = config
+  const { n, onDrag: emitDrag, onDrop: emitDrop, isSelected, selected@ } = config
 
   let selectedItem: T | null = null;
   let selectedIndex: number | null = null;
@@ -1169,7 +1169,7 @@ Palettable.nsxDraggableKit = `function DraggableKit<T>(config: {
       selectedItem = item;
       selectedIndex = index;
       dragging = true
-      onDrag(item);
+      emitDrag(item);
 
       if (selected.length > 1) {
         taggingAlong = true;
@@ -1213,7 +1213,7 @@ Palettable.nsxDraggableKit = `function DraggableKit<T>(config: {
         target.releasePointerCapture(e.pointerId)
         shiftX = 0;
         shiftY = 0;
-        onDrop(dropIndex === null ? selectedIndex! : dropIndex)
+        emitDrop(dropIndex === null ? selectedIndex! : dropIndex)
         // delaying prevents a swatch that is dropped in its original position from being reselected.
         queueTask(() => dragging = false);
         target.removeEventListener('pointermove', drag)
@@ -1314,7 +1314,7 @@ Palettable.tsxDraggableKit = `function DraggableKit<T>(config: {
   isSelected: (item: T) => boolean,
   $selected: Ion<T[]>
 }) {
-  const { n, onDrag, onDrop, isSelected, $selected } = config
+  const { n, onDrag: emitDrag, onDrop: emitDrop, isSelected, $selected } = config
 
   let selectedItem: T | null = null;
   let selectedIndex: number | null = null;
@@ -1345,7 +1345,7 @@ Palettable.tsxDraggableKit = `function DraggableKit<T>(config: {
       selectedItem = item;
       selectedIndex = index;
       $dragging.value = true
-      onDrag(item);
+      emitDrag(item);
 
       if ($selected().length > 1) {
         $taggingAlong.value = true;
@@ -1389,7 +1389,7 @@ Palettable.tsxDraggableKit = `function DraggableKit<T>(config: {
         target.releasePointerCapture(e.pointerId)
         $shiftX.value = 0;
         $shiftY.value = 0;
-        onDrop(dropIndex === null ? selectedIndex! : dropIndex)
+        emitDrop(dropIndex === null ? selectedIndex! : dropIndex)
         // delaying prevents a swatch that is dropped in its original position from being reselected.
         queueTask(() => $dragging.value = false);
         target.removeEventListener('pointermove', drag)
@@ -1714,7 +1714,8 @@ function shuffle<T>(array: T[]): T[] {
 }`
 
 Palettable.nsxCelebrationKit = `
-function CelebrationKit(sorted@: Ion<boolean>, onComplete: () => void) {
+function CelebrationKit(setup: { sorted@: Ion<boolean>, onComplete: () => void }) {
+  const { sorted@, onComplete: emitComplete } = setup;
 
   observe(sorted@, () => {
     if (sorted) {
@@ -1731,7 +1732,7 @@ function CelebrationKit(sorted@: Ion<boolean>, onComplete: () => void) {
       if (magnifiedIndex === 7) {
         clearInterval(id)
         magnifiedIndex = undefined
-        onComplete()
+        emitComplete()
       }
     }, 84)
   }
@@ -1762,7 +1763,8 @@ function CelebrationKit(sorted@: Ion<boolean>, onComplete: () => void) {
 `
 
 Palettable.tsxCelebrationKit = `
-function CelebrationKit($sorted: Ion<boolean>, onComplete: () => void) {
+function CelebrationKit(setup: { $sorted: Ion<boolean>, onComplete: () => void }) {
+  const { $sorted, onComplete: emitComplete } = setup;
 
   observe($sorted, () => {
     if ($sorted()) {
@@ -1779,7 +1781,7 @@ function CelebrationKit($sorted: Ion<boolean>, onComplete: () => void) {
       if ($magnifiedIndex() === 7) {
         clearInterval(id)
         $magnifiedIndex.value = undefined
-        onComplete()
+        emitComplete()
       }
     }, 84)
   }

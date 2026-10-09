@@ -1,5 +1,5 @@
-import { $_run_with_, $_snap_context } from "@luent/flask"
-import { getActiveUpdate, popUpdate, pushUpdate } from "@luent/quarky"
+import { $_run_with_, $_snap_context } from "@luently/flask"
+import { getActiveUpdate, popUpdate, pushUpdate } from "@luently/quarky"
 
 export function $_preserve_context() {
   const update = getActiveUpdate()

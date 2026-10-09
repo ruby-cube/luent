@@ -8,11 +8,11 @@
 //    <div>{err}</div>
 // )}
 
-import { ASYNC_QUARK, AsyncIon, isAsyncIon, popAwaiting, pushAwaiting, SuspenseIon, SUSPENSE_QUARK, AsyncQuark, createAtomicIon, ion, Ion, isIon, MutableIon, PRELUDE, observe, awaitsPrelude, getAwaiting, SYNC } from "@luent/quarky";
+import { ASYNC_QUARK, AsyncIon, isAsyncIon, popAwaiting, pushAwaiting, SuspenseIon, SUSPENSE_QUARK, AsyncQuark, createAtomicIon, ion, Ion, isIon, MutableIon, PRELUDE, observe, awaitsPrelude, getAwaiting, SYNC } from "@luently/quarky";
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
-import { isFunction, normalizeToArray, toError, UNDEFINED } from "@luent/utils";
+import { isFunction, normalizeToArray, toError, UNDEFINED } from "@luently/utils";
 
 // export function Suspense(input: FromTag<AwaitConfig>) {
 //    const { await: _awaited, $as: suspense, provide, meanwhile: renderPlaceholder, catch: renderError, loading: renderLoading, Slot } = input

@@ -1,5 +1,5 @@
 {
-  "name": "@luent/noriscript",
+  "name": "@luently/noriscript",
   "private": false,
   "version": "0.0.0",
   "description": "",
@@ -35,15 +35,15 @@
   },
   "dependencies": {
     "@jridgewell/gen-mapping": "^0.3.13",
-    "@luent/tree-squirl": "workspace:*",
-    "@luent/utils": "workspace:*",
+    "@luently/tree-squirl": "workspace:*",
+    "@luently/utils": "workspace:*",
     "@types/estree": "^1.0.8",
     "@types/estree-jsx": "^1.0.5",
     "@volar/language-core": "~2.4.0",
     "oxc-parser": "^0.124.0"
   },
   "devDependencies": {
-    "@luent/types": "workspace:*",
+    "@luently/types": "workspace:*",
     "tsdown": "^0.21.9",
     "typescript": "^6.0.3"
   },

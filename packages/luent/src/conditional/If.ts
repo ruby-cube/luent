@@ -1,9 +1,9 @@
 import { getGroupActivationType, RawJSXNode, normalizeToRenderFunction, RenderFunction, resetGroupActivationType, GroupActivationType } from "../node/makeJSXNode";
-import { Booleanny } from "@luent/types";
-import { getAwaiting, Ion, isGetter, isInertIon, toValue } from "@luent/quarky";
+import { Booleanny } from "@luently/types";
+import { getAwaiting, Ion, isGetter, isInertIon, toValue } from "@luently/quarky";
 import { ConditionalKit, IfElseKit, renderShowHideSeries, toDynamicConditionalKits } from "./IfElse";
-import { getFlask } from "@luent/flask";
-import { isFunction } from "@luent/utils";
+import { getFlask } from "@luently/flask";
+import { isFunction } from "@luently/utils";
 import { getTransition, setTransition } from "../transitions/Transition";
 
 // let currentNodePodIndex: number | undefined = undefined

@@ -1,5 +1,5 @@
 import { component, css, For, template, Style } from "luent";
-import { ionic, ion } from "@luent/quarky";
+import { ionic, ion } from "@luently/quarky";
 
 export function TestRetracking() {
    

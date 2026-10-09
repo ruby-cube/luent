@@ -56,9 +56,9 @@ export {
   Promised,
   getAwaiting
 
-} from '@luent/quarky'
+} from '@luently/quarky'
 export { isMutableIon } from './element/mutables'
-export type { Nested, Ion, Ionic, MutableIon } from '@luent/quarky'
+export type { Nested, Ion, Ionic, MutableIon } from '@luently/quarky'
 
 export { NodeRef, asJSX } from './node/NodeRef'
 // export * from './node/NodeSetup'
@@ -154,7 +154,7 @@ export type {
   TagType,
 } from './node/makeJSXNode'
 export type { ContextEntryKey } from './context/ContextKey'
-export type { FromTag, RenderTag, Bindings, IonOr } from './component/bindings-types'
+export type { FromTag, RenderTag, Bindings, IonOr, HandleEvent } from './component/bindings-types'
 export type { TagClass } from './element/styles'
 export type { TagName } from './element/setUpElement'
 export type { ViewType } from './conditional/If'
@@ -170,8 +170,8 @@ export type KeyboardEvent<T = Element> = JSX.KeyboardEvent<T>
 export type MouseEvent = JSX.MouseEvent
 export type ModifierKey = JSX.ModifierKey
 
-export { JSXComponent as expose, toª as to$, ªªof as $$ } from '@luent/noriscript'
-export type { ComponentKit } from '@luent/noriscript'
+export { JSXComponent as expose, toª as to$, ªªof as $$ } from '@luently/noriscript'
+export type { ComponentKit } from '@luently/noriscript'
 
 export { $_preserve_context } from './async/context'
 

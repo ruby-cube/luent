@@ -1,10 +1,10 @@
-import { AnyObject } from "@luent/types";
+import { AnyObject } from "@luently/types";
 import { QUARK } from "../abstract/Quark";
 import { trigger, Atom, TrackedAtom } from "../reactivity/Atom";
 import { TraceableMutable } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
 import { track } from "../reactivity/Compound";
-import { isPlainObject } from "@luent/utils";
+import { isPlainObject } from "@luently/utils";
 import { SimpleState } from "../reactivity/State";
 import { traceMutation } from "../debug/dev";
 

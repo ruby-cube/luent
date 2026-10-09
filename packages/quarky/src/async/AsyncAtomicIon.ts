@@ -1,4 +1,4 @@
-import { AnyObject } from "@luent/types";
+import { AnyObject } from "@luently/types";
 import { createAtomicIon } from "../ion/AtomicIon";
 import { Ion } from "../ion/Ion";
 

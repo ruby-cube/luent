@@ -1,5 +1,5 @@
 {
-  "name": "@luent/quarky",
+  "name": "@luently/quarky",
   "version": "0.0.0",
   "private": true,
   "description": "",
@@ -23,11 +23,11 @@
     "build:types": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
-    "@luent/flask": "workspace:*",
-    "@luent/utils": "workspace:*"
+    "@luently/flask": "workspace:*",
+    "@luently/utils": "workspace:*"
   },
   "devDependencies": {
-    "@luent/types": "workspace:*"
+    "@luently/types": "workspace:*"
   },
   "author": "Ruby Yi Wang",
   "license": "MIT"

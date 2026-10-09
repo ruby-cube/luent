@@ -1,6 +1,6 @@
-import { $_run_with_, $_snap_context, $_wrap_with_context } from "@luent/flask";
-import { Ion } from "@luent/quarky";
-import { isFunction } from "@luent/utils";
+import { $_run_with_, $_snap_context, $_wrap_with_context } from "@luently/flask";
+import { Ion } from "@luently/quarky";
+import { isFunction } from "@luently/utils";
 
 export function awaiting<T>(promise: Promise<T> | Ion<T> & { pending: Promise<T> | null }, onFulfilled?: (<TResult1 = any>(value: T) => TResult1 | PromiseLike<TResult1> | void) | undefined | null) {
   const _promise = isFunction(promise) && 'pending' in promise ? promise.pending : promise

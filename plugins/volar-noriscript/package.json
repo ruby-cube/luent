@@ -1,5 +1,5 @@
 {
-   "name": "@luent/noriscript-language-server",
+   "name": "@luently/noriscript-language-server",
    "version": "0.0.1",
    "main": "out/index.js",
    "license": "MIT",
@@ -19,7 +19,7 @@
       "volar-service-html": "0.0.71",
       "volar-service-typescript": "0.0.71",
       "vscode-uri": "^3.0.8",
-      "@luent/noriscript": "workspace:*",
+      "@luently/noriscript": "workspace:*",
       "@types/estree": "^1.0.8",
       "@types/estree-jsx": "^1.0.5",
       "oxc-parser": "^0.130.0"

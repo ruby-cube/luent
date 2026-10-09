@@ -1,7 +1,7 @@
 body {
-  background-color: #eee;
+  margin: 0;
+  padding: 0;
 }
-
 #app {
   border-radius: 3px;
   border: 1px solid #e5e5e5;
@@ -17,11 +17,120 @@ body {
   min-height: 400px;
 }
 
+.tab-content button {
+  border: 1px solid rgba(55, 53, 47, 0.16);
+  background-color: #fff;
+  color: #37352f;
+  border-radius: 6px;
+  min-width: 42px;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
+}
+
+.tab-content button:hover {
+  background-color: rgba(55, 53, 47, 0.06);
+  border-color: rgba(55, 53, 47, 0.28);
+}
+
+.tab-content button:active {
+  background-color: rgba(55, 53, 47, 0.1);
+  transform: translateY(1px);
+}
+
 .pending {
-  /* transition: opacity 0.3s; */
-  /* transition-delay: 0.1s; */
-  /* transition-timing-function: ease-in-out; */
-  opacity: .5;
+  transition: opacity 0.5s;
+  transition-timing-function: ease-in-out;
+  opacity: 0;
+}
+
+.async-tabs-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  font-family: sans-serif;
+}
+
+.async-tabs-layout button {
+  font-family: inherit;
+}
+
+.all-tabs-sidebar {
+  border-right: 1px solid #efefef;
+  padding: 12px;
+  background-color: #eee;
+  height: 100vh;
+  margin: 0px;
+
+}
+
+.all-tabs-sidebar h4 {
+  margin: 0 0 8px;
+  font-family: sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #787774;
+  font-weight: 600;
+}
+
+.all-tabs-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+  font-size: 16px;
+}
+
+.all-tabs-list li {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: #5f5e5b;
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.all-tabs-list li:hover {
+  background-color: rgba(55, 53, 47, 0.08);
+  color: #37352f;
+}
+
+.all-tabs-list li.selected {
+  background-color: rgba(55, 53, 47, 0.12);
+  color: #37352f;
+  font-weight: 600;
+}
+
+.tab-panel {
+  min-width: 0;
+}
+
+
+
+.open-tabs-inline {
+  margin-bottom: 8px;
+}
+
+@media (max-width: 860px) {
+  .async-tabs-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .all-tabs-sidebar {
+    border-right: none;
+    border-bottom: 1px solid #efefef;
+    padding-right: 0;
+    padding-bottom: 10px;
+  }
 }
 
 ul.inline {
@@ -48,7 +157,7 @@ ul.inline li {
 }
 
 ul.inline li.selected {
-  border-bottom: 2px solid #337ab7;
+  border-bottom: 2px solid #339ab7;
   color: #444;
 }
 

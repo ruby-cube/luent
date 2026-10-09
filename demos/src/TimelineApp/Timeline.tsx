@@ -1,6 +1,6 @@
 
 import { Ion, queueTask, As, JSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, Style, Thru, observe, Else, Bindings } from "luent";
-import { moveUniqueItems } from "@luent/utils";
+import { moveUniqueItems } from "@luently/utils";
 
 export function DayView(setup: FromTag<{
   date: Date
@@ -93,14 +93,14 @@ function WeekNav(setup: FromTag<{
   start: Date;
   onClickDate: (day: DayOfWeek) => void
 }>) {
-  const { start, $activeDate, onClickDate } = setup
+  const { start, $activeDate, emitClickDate } = setup
 
   return <>
     <div class='week'>
       {Thru(7, (_: number, day: DayOfWeek) =>
         <div class='day'>
           <div>{formatDayOfWeek(day)}</div>
-          <div on:click={() => onClickDate(day)}>
+          <div on:click={() => emitClickDate(day)}>
             {formatDateDay(start, day)}
           </div>
         </div>
@@ -147,7 +147,7 @@ function ColorPalette(setup: FromTag<{
   onMove: () => void;
   onComplete: () => void;
 }>) {
-  const { onMove, onComplete, ...rest } = setup
+  const { emitMove, emitComplete, ...rest } = setup
 
   const { colors, $sorted } = ColorsKit(size)
 
@@ -172,7 +172,7 @@ function ColorPalette(setup: FromTag<{
     if (!selected.size) return;
     colors.moveColors(selected, index)
     selected.clear()
-    onMove()
+    emitMove()
   }
 
   const { $dragging, makeDraggable, DropZones } = DraggableKit<Color>({

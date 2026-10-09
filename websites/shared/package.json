@@ -1,5 +1,5 @@
 {
-  "name": "@luent/websites-shared",
+  "name": "@luently/websites-shared",
   "private": true,
   "description": "",
   "type": "module",
@@ -8,12 +8,12 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.3.0",
     "vite-plugin-luent": "workspace:*",
-    "@luent/utils": "workspace:*"
+    "@luently/utils": "workspace:*"
   },
   "devDependencies": {
     "luent": "workspace:*",
-    "@luent/luent-ui": "workspace:*",
-    "@luent/quarky": "workspace:*"
+    "@luently/luent-ui": "workspace:*",
+    "@luently/quarky": "workspace:*"
   },
   "peerDependencies": {
     "vitepress": "2.0.0-alpha.17"

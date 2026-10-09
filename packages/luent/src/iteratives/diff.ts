@@ -1,7 +1,7 @@
-import { AnyObject } from "@luent/types";
+import { AnyObject } from "@luently/types";
 import { longestCommonSubstring } from "./lcs";
 import { UniqueItem } from "./For";
-import { toRaw } from "@luent/quarky";
+import { toRaw } from "@luently/quarky";
 
 
 // TODO: implementation for sets, objects, and maps

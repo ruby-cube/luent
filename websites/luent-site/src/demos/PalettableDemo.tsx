@@ -1,4 +1,4 @@
-import { Code, DemoContainer, Palettable } from '@luent/websites-shared'
+import { Code, DemoContainer, Palettable } from '@luently/websites-shared'
 import { highlightCode } from "../highlighter"
 import { css, Else, ElseIf, FromTag, If, RenderTag, Style, ion, MutableIon} from 'luent'
 

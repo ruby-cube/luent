@@ -1,4 +1,4 @@
-import { ion } from "@luent/quarky";
+import { ion } from "@luently/quarky";
 
 function escapeHTML(code: string) {
   return code
@@ -14,7 +14,7 @@ function codeHtml(code: string) {
 const nsx =
   `
 import { component, css, Style } from 'luent'
-import { ion } from '@luent/quarky'
+import { ion } from '@luently/quarky'
 
 export function Counter() {
   get count = ion(0);

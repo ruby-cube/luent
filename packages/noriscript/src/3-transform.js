@@ -1,4 +1,4 @@
-import { traverse, traverseAll } from '@luent/tree-squirl';
+import { traverse, traverseAll } from '@luently/tree-squirl';
 function requireFrom(obj, key) {
     const value = obj[key];
     if (value === undefined)
@@ -979,7 +979,7 @@ function hasImport(name, declaration) {
     }
     return false;
 }
-const RUESCRIPT_IMPORT_SOURCE = '@luent/noriscript';
+const RUESCRIPT_IMPORT_SOURCE = '@luently/noriscript';
 function CovertImportDeclaration(source) {
     return {
         type: 'ImportDeclaration',

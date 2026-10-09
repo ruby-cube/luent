@@ -1,5 +1,5 @@
 {
-  "name": "@luent/demos",
+  "name": "@luently/demos",
   "private": true,
   "description": "",
   "scripts": {
@@ -12,10 +12,10 @@
     "@floating-ui/dom": "^1.7.6",
     "class-variance-authority": "^0.7.1",
     "luent": "workspace:*",
-    "@luent/luent-ui": "workspace:*",
-    "@luent/noriscript": "workspace:*",
-    "@luent/quarky": "workspace:*",
-    "@luent/utils": "workspace:*",
+    "@luently/luent-ui": "workspace:*",
+    "@luently/noriscript": "workspace:*",
+    "@luently/quarky": "workspace:*",
+    "@luently/utils": "workspace:*",
     "lodash-es": "^4.18.1",
     "lucide": "^1.16.0",
     "marked": "^18.0.3",
@@ -37,7 +37,7 @@
     "@types/babel__core": "^7.20.5",
     "@types/babel__traverse": "^7.20.6",
     "@types/node": "^25.2.3",
-    "@luent/types": "workspace:*",
+    "@luently/types": "workspace:*",
     "vite-plugin-luent": "workspace:*",
     "vite": "^8.1.3"
   },

@@ -1,10 +1,10 @@
 
 // declare type PromiseConstructorLike = new <T>(executor: (resolve: (value: T | Promise<T>) => void, reject: (reason?: any) => void) => void) => Promise<T>;
 
-import { isFunction, isPlainObject } from "@luent/utils"
+import { isFunction, isPlainObject } from "@luently/utils"
 import { instantUpdate } from "../reactivity/Update"
 import { Ion } from "../ion/Ion"
-import { $_snap_context } from "@luent/flask"
+import { $_snap_context } from "@luently/flask"
 
 // TODO:
 // [ ] wrap with context

@@ -1,8 +1,8 @@
 import { ContextNode, getClosestContext } from "./context-stack";
 import { NodeContext, RootContext, toContextEntries } from "./Context";
 import { ContextEntryKey, isMuKey, toContextKey } from "./ContextKey";
-import { Ion, toIon } from "@luent/quarky";
-import { isFunction } from "@luent/utils";
+import { Ion, toIon } from "@luently/quarky";
+import { isFunction } from "@luently/utils";
 
 // TODO: trace provider
 // fromContext.trace('dog')(DOG)

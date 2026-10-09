@@ -1,4 +1,4 @@
-import { transpileNextScript } from '@luent/noriscript/transpile';
+import { transpileNextScript } from '@luently/noriscript/transpile';
 import { CodeMapping, LanguagePlugin, VirtualCode } from '@volar/language-core';
 import type * as ts from 'typescript';
 import { URI } from 'vscode-uri';

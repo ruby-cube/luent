@@ -71,7 +71,7 @@ async function buildServer() {
     },
     outfile: join(outDir, 'noriscript-language-server.mjs'),
     alias: {
-      '@luent/noriscript/transpile': resolve(packageRoot, '..', '..', 'packages', 'noriscript', 'dist', 'transpile.mjs'),
+      '@luently/noriscript/transpile': resolve(packageRoot, '..', '..', 'packages', 'noriscript', 'dist', 'transpile.mjs'),
       '@volar/language-core': resolvePackageRoot('@volar/language-core'),
       '@volar/language-server/node': resolveImport('@volar/language-server/node'),
       'volar-service-css': resolveImport('volar-service-css'),

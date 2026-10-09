@@ -1,6 +1,6 @@
 import { component, mountIsland, css, template } from "luent";
 import "./TestStyleOverride-classes.css"
-import { AnyObject } from "@luent/types";
+import { AnyObject } from "@luently/types";
 
 // transpiler
 let id = 0;

@@ -1,8 +1,8 @@
-import { __DEV__checkIfTracked, Ion, toValue, isGetter, trackForRender, awaitRender, RUN_EAGERLY, queueInternalRender } from "@luent/quarky";
+import { __DEV__checkIfTracked, Ion, toValue, isGetter, trackForRender, awaitRender, RUN_EAGERLY, queueInternalRender } from "@luently/quarky";
 import { IonOr } from "../component/bindings-types";
 import { DOMParent } from "./VineNode";
-import { getFlask } from "@luent/flask";
-import { isObject } from "@luent/utils";
+import { getFlask } from "@luently/flask";
+import { isObject } from "@luently/utils";
 
 export function isInnerHTMLKit(entity: any): entity is InnerHTMLKit {
   return isObject(entity) && 'html' in entity

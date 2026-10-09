@@ -7,20 +7,20 @@ const inDir = resolve(packageRoot, 'dist/types')
 const outDir = resolve(packageRoot, 'dist')
 
 const remap = new Map([
-  ['@luent/flask', resolve(outDir, '_deps/flask/index.d.ts')],
-  ['@luent/quarky', resolve(outDir, '_deps/quarky/index.d.ts')],
-  ['@luent/quarky/core', resolve(outDir, '_deps/quarky/core/index.d.ts')],
-  ['@luent/noriscript', resolve(outDir, '_deps/noriscript/index.d.ts')],
-  ['@luent/types', resolve(outDir, '_deps/types/index.d.ts')],
-  ['@luent/utils', resolve(outDir, '_deps/utils/index.d.ts')]
+  ['@luently/flask', resolve(outDir, '_deps/flask/index.d.ts')],
+  ['@luently/quarky', resolve(outDir, '_deps/quarky/index.d.ts')],
+  ['@luently/quarky/core', resolve(outDir, '_deps/quarky/core/index.d.ts')],
+  ['@luently/noriscript', resolve(outDir, '_deps/noriscript/index.d.ts')],
+  ['@luently/types', resolve(outDir, '_deps/types/index.d.ts')],
+  ['@luently/utils', resolve(outDir, '_deps/utils/index.d.ts')]
 ])
 
 const depSourceRoots = new Map([
-  ['@luent/flask', resolve(repoRoot, 'packages/flask/dist/types')],
-  ['@luent/quarky', resolve(repoRoot, 'packages/quarky/dist/types')],
-  ['@luent/noriscript', resolve(repoRoot, 'packages/noriscript/dist/types')],
-  ['@luent/types', resolve(repoRoot, 'packages/types/dist/types')],
-  ['@luent/utils', resolve(repoRoot, 'packages/utils/dist/types')]
+  ['@luently/flask', resolve(repoRoot, 'packages/flask/dist/types')],
+  ['@luently/quarky', resolve(repoRoot, 'packages/quarky/dist/types')],
+  ['@luently/noriscript', resolve(repoRoot, 'packages/noriscript/dist/types')],
+  ['@luently/types', resolve(repoRoot, 'packages/types/dist/types')],
+  ['@luently/utils', resolve(repoRoot, 'packages/utils/dist/types')]
 ])
 
 await mkdir(outDir, { recursive: true })
@@ -38,7 +38,7 @@ await writeFile(
 )
 
 for (const [pkgName, srcRoot] of depSourceRoots.entries()) {
-  await copyTree(srcRoot, resolve(outDir, '_deps', pkgName.replace('@luent/', '')), text => text)
+  await copyTree(srcRoot, resolve(outDir, '_deps', pkgName.replace('@luently/', '')), text => text)
 }
 
 await rm(inDir, { recursive: true, force: true })

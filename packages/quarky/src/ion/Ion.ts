@@ -1,8 +1,8 @@
-import { isFunction, isObject } from "@luent/utils";
+import { isFunction, isObject } from "@luently/utils";
 import { createAtomicIon } from "./AtomicIon";
 import { createMemoizedDerivation } from "./DerivationIon";
 import { createHybridIon } from "./HybridIon";
-import { AnyObject } from "@luent/types";
+import { AnyObject } from "@luently/types";
 import { $Async, AsyncIon, createAsyncIon } from "../async/AsyncIon";
 import { isIon } from "./utils";
 import { ionic } from "../ionic/Ionic";

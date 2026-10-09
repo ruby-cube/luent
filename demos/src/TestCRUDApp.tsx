@@ -1,5 +1,5 @@
 import { component, template, For, Style, css } from "luent"
-import { ionic, ion, PRELUDE, observe } from "@luent/quarky"
+import { ionic, ion, PRELUDE, observe } from "@luently/quarky"
 
 // Adapted from Vue's CRUDApp demo
 

@@ -39,7 +39,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureªª } from "@luent/noriscript";\n` +
+         `import { destructureªª } from "@luently/noriscript";\n` +
          `const { count, bar } = destructureªª(obj, {\n` +
          `\tcount: 1,\n` +
          `\tbar: 1\n` +
@@ -66,7 +66,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureªª } from "@luent/noriscript";\n` +
+         `import { destructureªª } from "@luently/noriscript";\n` +
          `const { num: count, bar } = destructureªª(obj, {\n` +
          `\tnum: 1,\n` +
          `\tbar: 1\n` +
@@ -93,7 +93,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { assertª, destructureªª } from "@luent/noriscript";\n` +
+         `import { assertª, destructureªª } from "@luently/noriscript";\n` +
          `const { count, bar = assertª(() => 0) } = destructureªª(obj, {\n` +
          `\tcount: 1,\n` +
          `\tbar: 1\n` +
@@ -120,7 +120,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureªª } from "@luent/noriscript";\n` +
+         `import { destructureªª } from "@luently/noriscript";\n` +
          `const { count, bar: { foo } } = destructureªª(obj, {\n` +
          `\tcount: 1,\n` +
          `\tbar: {\n` +
@@ -149,7 +149,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureªª } from "@luent/noriscript";\n` +
+         `import { destructureªª } from "@luently/noriscript";\n` +
          `const [count, bar] = destructureªª(array, [1, 1]);\n` +
          `console.log(count());\n` +
          `console.log(count);\n`
@@ -173,7 +173,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { assertª, destructureªª } from "@luent/noriscript";\n` +
+         `import { assertª, destructureªª } from "@luently/noriscript";\n` +
          `const [count, bar = assertª(() => 0)] = destructureªª(array, [1, 1]);\n` +
          `console.log(count());\n` +
          `console.log(count);\n`
@@ -198,7 +198,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureªª } from "@luent/noriscript";\n` +
+         `import { destructureªª } from "@luently/noriscript";\n` +
          `const [count, [b, c]] = destructureªª(array, [1, [1, 1]]);\n` +
          `console.log(count());\n` +
          `console.log(count);\n`
@@ -222,7 +222,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureªª } from "@luent/noriscript";\n` +
+         `import { destructureªª } from "@luently/noriscript";\n` +
          `const { count, bar } = destructureªª(obj, {\n` +
          `\tcount: 1,\n` +
          `\tbar: 0\n` +
@@ -249,7 +249,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureªª } from "@luent/noriscript";\n` +
+         `import { destructureªª } from "@luently/noriscript";\n` +
          `const { num: count, bar } = destructureªª(obj, {\n` +
          `\tnum: 1,\n` +
          `\tbar: 0\n` +
@@ -276,7 +276,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureªª, assertª } from "@luent/noriscript";\n` +
+         `import { destructureªª, assertª } from "@luently/noriscript";\n` +
          `const { num: count = assertª(() => 0), bar } = destructureªª(obj, {\n` +
          `\tnum: 1,\n` +
          `\tbar: 0\n` +
@@ -303,7 +303,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureªª } from "@luent/noriscript";\n` +
+         `import { destructureªª } from "@luently/noriscript";\n` +
          `const [count, bar] = destructureªª(arr, [1, 0]);\n` +
          `console.log(count());\n` +
          `console.log(count);\n`
@@ -327,7 +327,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureªª, assertª } from "@luent/noriscript";\n` +
+         `import { destructureªª, assertª } from "@luently/noriscript";\n` +
          `const [count = assertª(() => 0), bar] = destructureªª(arr, [1, 0]);\n` +
          `console.log(count());\n` +
          `console.log(count);\n`
@@ -352,7 +352,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureªª } from "@luent/noriscript";\n` +
+         `import { destructureªª } from "@luently/noriscript";\n` +
          `const { foo: { count }, bar } = destructureªª(obj, {\n` +
          `\tfoo: {\n` +
          `\t\tcount: 1\n` +
@@ -381,7 +381,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureªª, assertª } from "@luent/noriscript";\n` +
+         `import { destructureªª, assertª } from "@luently/noriscript";\n` +
          `const { count = assertª(() => 0), bar } = destructureªª(obj, {\n` +
          `\tcount: 1,\n` +
          `\tbar: 0\n` +
@@ -410,7 +410,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureªª } from "@luent/noriscript";\n` +
+         `import { destructureªª } from "@luently/noriscript";\n` +
          `function Foo(dpª0) {\n` +
          `\tlet { count, bar } = destructureªª(dpª0, {\n` +
          `\t\tcount: 1,\n` +
@@ -441,7 +441,7 @@ describe('transform', () => {
       const generated = printTSX(tsxTree)
 
       expect(generated.code).toBe(
-         `import { destructureªª } from "@luent/noriscript";\n` +
+         `import { destructureªª } from "@luently/noriscript";\n` +
          `function Foo(dpª0) {\n` +
          `\tlet [count, bar] = destructureªª(dpª0, [1, 0]);\n` +
          `\tconsole.log(count());\n` +

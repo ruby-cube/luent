@@ -1,12 +1,12 @@
 {
-  "name": "@luent/noriscript-site",
+  "name": "@luently/noriscript-site",
   "private": true,
   "description": "",
   "type": "module",
   "devDependencies": {
     "luent": "workspace:*",
-    "@luent/quarky": "workspace:*",
-    "@luent/websites-shared": "workspace:*",
+    "@luently/quarky": "workspace:*",
+    "@luently/websites-shared": "workspace:*",
     "concurrently": "^10.0.3",
     "shiki": "^4.1.0",
     "vue": "^3.5.0",

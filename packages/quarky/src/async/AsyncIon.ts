@@ -1,5 +1,5 @@
-import { isFunction, isObject, toError } from "@luent/utils";
-import { AsyncState } from "@luent/flask";
+import { isFunction, isObject, toError } from "@luently/utils";
+import { AsyncState } from "@luently/flask";
 import { addToSuspense, SuspenseIon } from "./Suspense";
 import { Ion, MutableIon } from "../ion/Ion";
 import { AsyncNode } from "./ooo";

@@ -1,5 +1,5 @@
 {
-  "name": "@luent/utils",
+  "name": "@luently/utils",
   "version": "0.0.0",
   "private": true,
   "description": "",
@@ -14,7 +14,7 @@
     "build:types": "tsc -p tsconfig.build.json"
   },
   "devDependencies": {
-    "@luent/types": "workspace:*",
+    "@luently/types": "workspace:*",
     "@types/node": "latest",
     "typescript": "^6.0.3",
     "vite": "^8.1.3"

@@ -1,7 +1,7 @@
-import { createStack, debug } from "@luent/utils";
+import { createStack, debug } from "@luently/utils";
 import { observe } from "../reactivity/Observer";
 import { QUARK } from "../abstract/Quark";
-import { UnionToIntersection } from "@luent/types";
+import { UnionToIntersection } from "@luently/types";
 import { untracked } from "../reactivity/Compound";
 import { getActiveUpdate } from "../reactivity/Update";
 import { PRELUDE, queueTask } from "../reactivity/RenderCycle";

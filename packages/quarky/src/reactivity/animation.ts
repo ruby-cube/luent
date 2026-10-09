@@ -1,4 +1,4 @@
-import { $_run_with_, $_snap_context, $_wrap_with_context } from "@luent/flask";
+import { $_run_with_, $_snap_context, $_wrap_with_context } from "@luently/flask";
 import { initialLoad, instantUpdate } from "./Update";
 
 

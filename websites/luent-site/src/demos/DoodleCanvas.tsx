@@ -1,4 +1,4 @@
-import { Code, DemoContainer, DoodleCanvas } from '@luent/websites-shared'
+import { Code, DemoContainer, DoodleCanvas } from '@luently/websites-shared'
 import { highlightCode } from "../highlighter"
 import { ion } from 'luent'
 

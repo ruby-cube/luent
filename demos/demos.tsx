@@ -56,6 +56,7 @@ import { TestDynamicTag } from "./src/TestDynamicTag"
 import { TestTaskObserver } from "./src/TestTaskObserver"
 import { TestNestedAwait } from "./src/TestNestedAwait"
 import { TestAsyncMultiply } from "./src/TestAsyncMultiply"
+import { TestEmitEvents } from "./src/TestEmitEvents"
 // import { DayView } from "./src/TimelineApp/Timeline"
 
 export function runDemo() {
@@ -63,13 +64,13 @@ export function runDemo() {
       provideRoot(MICROCLASS_MERGE, twMerge);
 
       return <>
-        {/* <TestAsyncTabs></TestAsyncTabs> */}
+        <TestAsyncTabs></TestAsyncTabs>
         {/* <HabitTracker habit="water" goal={8}></HabitTracker> */}
         {/* <BottomlessBlokkis></BottomlessBlokkis> */}
         {/* <DayView/> */}
         {/* <TestStyleComments/> */}
         {/* <TestColorSort></TestColorSort> */}
-        <TestAsyncSelect />
+        {/* <TodoMVC /> */}
       </>
       // return <TestInnerHTML/>
     }, '#root')

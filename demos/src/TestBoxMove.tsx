@@ -1,5 +1,5 @@
 import { mountIsland } from "luent"
-import { ionic } from "@luent/quarky"
+import { ionic } from "@luently/quarky"
 
 /* 
 Tests:

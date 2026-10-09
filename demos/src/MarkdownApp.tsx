@@ -1,7 +1,6 @@
 import { marked } from 'marked'
-import { ion } from '@luent/quarky'
+import { ion } from '@luently/quarky'
 import './style.css'
-// import { Part } from './MarkdownApp_a'
 
 // adapted from Vue.js markdown app example
 
@@ -12,9 +11,8 @@ export function TestMarkdownApp() {
 
   return <>
     <div class='editor'>
-      <textarea class='input' mu:value={$markdown}/>
+      <textarea class='input' slot-type='mu:text'>{$markdown}</textarea>
       <div class='output'>{{ html: $html }}</div>
-      {/* <Part></Part> */}
     </div>
     <o-link href='/src/MarkdownApp.css' rel='stylesheet' />
   </>

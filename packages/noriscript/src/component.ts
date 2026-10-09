@@ -1,4 +1,4 @@
-import { isObject, normalizeToArray } from "@luent/utils";
+import { isObject, normalizeToArray } from "@luently/utils";
 
 export interface ComponentKit<T = undefined> {
   component: T

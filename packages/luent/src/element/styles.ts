@@ -1,8 +1,8 @@
-import { AnyObject, Booleanny } from "@luent/types";
+import { AnyObject, Booleanny } from "@luently/types";
 import { IonOr } from "../component/bindings-types";
-import { Flask, getFlask } from "@luent/flask";
-import { Ion, isGetter, awaitRender, RUN_EAGERLY, trackForRender, queueInternalRender } from "@luent/quarky";
-import { camelToKebabCase, isFunction, isObject, isString } from "@luent/utils";
+import { Flask, getFlask } from "@luently/flask";
+import { Ion, isGetter, awaitRender, RUN_EAGERLY, trackForRender, queueInternalRender } from "@luently/quarky";
+import { camelToKebabCase, isFunction, isObject, isString } from "@luently/utils";
 import { ContextKey } from "../context/ContextKey";
 import { fromRoot } from "../context/provide";
 

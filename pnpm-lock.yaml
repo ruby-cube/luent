@@ -60,16 +60,16 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.7.6
         version: 1.8.0
-      '@luent/luent-ui':
+      '@luently/luent-ui':
         specifier: workspace:*
         version: link:../packages/luent-ui
-      '@luent/noriscript':
+      '@luently/noriscript':
         specifier: workspace:*
         version: link:../packages/noriscript
-      '@luent/quarky':
+      '@luently/quarky':
         specifier: workspace:*
         version: link:../packages/quarky
-      '@luent/utils':
+      '@luently/utils':
         specifier: workspace:*
         version: link:../packages/utils
       class-variance-authority:
@@ -124,7 +124,7 @@ importers:
       '@babel/types':
         specifier: ^7.26.3
         version: 7.29.0
-      '@luent/types':
+      '@luently/types':
         specifier: workspace:*
         version: link:../packages/types
       '@tailwindcss/vite':
@@ -151,13 +151,13 @@ importers:
       '@babel/traverse':
         specifier: ^7.26.4
         version: 7.29.8
-      '@luent/flask':
+      '@luently/flask':
         specifier: workspace:*
         version: link:../packages/flask
-      '@luent/quarky':
+      '@luently/quarky':
         specifier: workspace:*
         version: link:../packages/quarky
-      '@luent/utils':
+      '@luently/utils':
         specifier: workspace:*
         version: link:../packages/utils
       lodash-es:
@@ -197,7 +197,7 @@ importers:
       '@babel/types':
         specifier: ^7.26.3
         version: 7.29.0
-      '@luent/types':
+      '@luently/types':
         specifier: workspace:*
         version: link:../packages/types
       '@types/babel__core':
@@ -227,29 +227,29 @@ importers:
 
   packages/flask:
     dependencies:
-      '@luent/utils':
+      '@luently/utils':
         specifier: workspace:*
         version: link:../utils
     devDependencies:
-      '@luent/types':
+      '@luently/types':
         specifier: workspace:*
         version: link:../types
 
   packages/luent:
     devDependencies:
-      '@luent/flask':
+      '@luently/flask':
         specifier: workspace:*
         version: link:../flask
-      '@luent/noriscript':
+      '@luently/noriscript':
         specifier: workspace:*
         version: link:../noriscript
-      '@luent/quarky':
+      '@luently/quarky':
         specifier: workspace:*
         version: link:../quarky
-      '@luent/types':
+      '@luently/types':
         specifier: workspace:*
         version: link:../types
-      '@luent/utils':
+      '@luently/utils':
         specifier: workspace:*
         version: link:../utils
       csstype:
@@ -267,10 +267,10 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.7.6
         version: 1.8.0
-      '@luent/quarky':
+      '@luently/quarky':
         specifier: workspace:*
         version: link:../quarky
-      '@luent/types':
+      '@luently/types':
         specifier: workspace:*
         version: link:../types
       '@tailwindcss/vite':
@@ -301,10 +301,10 @@ importers:
       '@jridgewell/gen-mapping':
         specifier: ^0.3.13
         version: 0.3.13
-      '@luent/tree-squirl':
+      '@luently/tree-squirl':
         specifier: workspace:*
         version: link:../tree-squirl
-      '@luent/utils':
+      '@luently/utils':
         specifier: workspace:*
         version: link:../utils
       '@types/estree':
@@ -320,7 +320,7 @@ importers:
         specifier: ^0.124.0
         version: 0.124.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)
     devDependencies:
-      '@luent/types':
+      '@luently/types':
         specifier: workspace:*
         version: link:../types
       tsdown:
@@ -332,27 +332,27 @@ importers:
 
   packages/quarky:
     dependencies:
-      '@luent/flask':
+      '@luently/flask':
         specifier: workspace:*
         version: link:../flask
-      '@luent/utils':
+      '@luently/utils':
         specifier: workspace:*
         version: link:../utils
     devDependencies:
-      '@luent/types':
+      '@luently/types':
         specifier: workspace:*
         version: link:../types
 
   packages/tree-squirl:
     dependencies:
-      '@luent/utils':
+      '@luently/utils':
         specifier: workspace:*
         version: link:../utils
       oxc-parser:
         specifier: ^0.124.0
         version: 0.124.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)
     devDependencies:
-      '@luent/types':
+      '@luently/types':
         specifier: workspace:*
         version: link:../types
 
@@ -370,7 +370,7 @@ importers:
 
   packages/utils:
     devDependencies:
-      '@luent/types':
+      '@luently/types':
         specifier: workspace:*
         version: link:../types
       '@types/node':
@@ -397,7 +397,7 @@ importers:
       '@babel/plugin-syntax-typescript':
         specifier: ^7.25.9
         version: 7.29.7(@babel/core@8.0.1)
-      '@luent/babel-plugin-luent':
+      '@luently/babel-plugin-luent':
         specifier: workspace:*
         version: link:../babel-plugin-luent
       fast-glob:
@@ -413,7 +413,7 @@ importers:
 
   plugins/volar-noriscript:
     dependencies:
-      '@luent/noriscript':
+      '@luently/noriscript':
         specifier: workspace:*
         version: link:../../packages/noriscript
       '@types/estree':
@@ -452,7 +452,7 @@ importers:
 
   plugins/vscode-noriscript:
     dependencies:
-      '@luent/noriscript':
+      '@luently/noriscript':
         specifier: workspace:*
         version: link:../../packages/noriscript
       '@types/vscode':
@@ -509,13 +509,13 @@ importers:
         specifier: workspace:*
         version: link:../../plugins/vite-plugin-luent
     devDependencies:
-      '@luent/luent-ui':
+      '@luently/luent-ui':
         specifier: workspace:*
         version: link:../../packages/luent-ui
-      '@luent/quarky':
+      '@luently/quarky':
         specifier: workspace:*
         version: link:../../packages/quarky
-      '@luent/websites-shared':
+      '@luently/websites-shared':
         specifier: workspace:*
         version: link:../shared
       concurrently:
@@ -546,10 +546,10 @@ importers:
         specifier: workspace:*
         version: link:../../plugins/vite-plugin-luent
     devDependencies:
-      '@luent/quarky':
+      '@luently/quarky':
         specifier: workspace:*
         version: link:../../packages/quarky
-      '@luent/websites-shared':
+      '@luently/websites-shared':
         specifier: workspace:*
         version: link:../shared
       concurrently:
@@ -573,7 +573,7 @@ importers:
 
   websites/shared:
     dependencies:
-      '@luent/utils':
+      '@luently/utils':
         specifier: workspace:*
         version: link:../../packages/utils
       '@tailwindcss/vite':
@@ -586,10 +586,10 @@ importers:
         specifier: 2.0.0-alpha.17
         version: 2.0.0-alpha.17(@types/node@26.6.4)(jiti@2.7.0)(less@4.8.0)(lightningcss@1.33.0)(postcss@8.5.23)(sass@1.102.0)(stylus@0.62.0)(typescript@7.0.2)
     devDependencies:
-      '@luent/luent-ui':
+      '@luently/luent-ui':
         specifier: workspace:*
         version: link:../../packages/luent-ui
-      '@luent/quarky':
+      '@luently/quarky':
         specifier: workspace:*
         version: link:../../packages/quarky
       luent:
@@ -8268,7 +8268,7 @@ snapshots:
     dependencies:
       '@babel/core': 8.0.1
       '@babel/plugin-syntax-typescript': 7.29.7(@babel/core@8.0.1)
-      '@luent/babel-plugin-luent': link:plugins/babel-plugin-luent
+      '@luently/babel-plugin-luent': link:plugins/babel-plugin-luent
       fast-glob: 3.3.3
       vite: 8.2.1(@types/node@26.6.4)(esbuild@0.28.1)(jiti@2.7.0)(less@4.8.0)(sass@1.102.0)(stylus@0.62.0)
 

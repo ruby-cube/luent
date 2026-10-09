@@ -1,5 +1,5 @@
 import { Bindings, css, MICROCLASS_MERGE, provideRoot, Style } from 'luent'
-import { Code, CodeTour, TourSection } from '@luent/websites-shared'
+import { Code, CodeTour, TourSection } from '@luently/websites-shared'
 import { highlightCode } from './highlighter'
 import { twMerge } from 'tailwind-merge'
 

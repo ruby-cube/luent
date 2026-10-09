@@ -1,11 +1,11 @@
-import { getAwaiting, Ion} from "@luent/quarky";
+import { getAwaiting, Ion} from "@luently/quarky";
 import { getGroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { JSXNode, processJSXOutput, toAsyncRender, VineNode } from "../node/VineNode";
 import { IfElseKit } from "./IfElse";
 import { ViewType, RenderConditional } from "./If";
-import { __DEV__buildAsyncPath, TRACE } from "@luent/flask";
+import { __DEV__buildAsyncPath, TRACE } from "@luently/flask";
 import { DEFAULT, MatchKit, renderStaticMatchCase, toCasesMap } from "./MatchCase";
-import { isFunction } from "@luent/utils";
+import { isFunction } from "@luently/utils";
 
 //    {Match($tab, openTabs, tab => (
 //       <div view={tabViews}>

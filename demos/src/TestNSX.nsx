@@ -1,4 +1,4 @@
-import { ion } from '@luent/quarky'
+import { ion } from '@luently/quarky'
 let b = 9
 b = ''
 

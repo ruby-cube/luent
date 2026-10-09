@@ -1,4 +1,4 @@
-import { AnyObject } from "@luent/types";
+import { AnyObject } from "@luently/types";
 
 export function getSpreadableMethods(object: Object) {
    const proto = Object.getPrototypeOf(object);

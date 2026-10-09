@@ -43,7 +43,7 @@
       "react-dom/*": [
         "./packages/luent/src/jsx-runtime/*"
       ],
-      "@luent/utils": [
+      "@luently/utils": [
         "./packages/utils/index.ts"
       ],
       "luent": [
@@ -55,28 +55,28 @@
       "luent/jsx-dev-runtime": [
         "packages/luent/src/jsx-runtime/index.ts"
       ],
-      "@luent/websites-shared": [
+      "@luently/websites-shared": [
         "./websites/shared/src/index.ts"
       ],
-      "@luent/quarky": [
+      "@luently/quarky": [
         "./packages/quarky/src/index.ts"
       ],
-      "@luent/tree-squirl": [
+      "@luently/tree-squirl": [
         "./packages/tree-squirl/src/index.ts"
       ],
-      "@luent/quarky/core": [
+      "@luently/quarky/core": [
         "./packages/quarky/src/core/index.ts"
       ],
-      "@luent/noriscript": [
+      "@luently/noriscript": [
         "./packages/noriscript/src/index.ts"
       ],
-      "@luent/noriscript/transpile": [
+      "@luently/noriscript/transpile": [
         "./packages/noriscript/src/transpile.ts"
       ],
-      "@luent/flask": [
+      "@luently/flask": [
         "packages/flask/src/index.ts"
       ],
-      "@luent/types": [
+      "@luently/types": [
         "./packages/types/index.ts"
       ],
       "vite-plugin-luent": [

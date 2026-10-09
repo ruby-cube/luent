@@ -1,8 +1,8 @@
-import { createMemoizedDerivation, Ion, PRELUDE, awaitRender, SYNC, toRaw, toValue, observe, trackForRender, queueInternalRender } from "@luent/quarky";
-import { AnyObject } from "@luent/types";
+import { createMemoizedDerivation, Ion, PRELUDE, awaitRender, SYNC, toRaw, toValue, observe, trackForRender, queueInternalRender } from "@luently/quarky";
+import { AnyObject } from "@luently/types";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { DOMNode, JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, VineNode } from "../node/VineNode";
-import { Flask, getActiveFlask, getFlask } from "@luent/flask";
+import { Flask, getActiveFlask, getFlask } from "@luently/flask";
 import { markInitialRender, unmarkInitialRender } from "../transitions/transitions";
 
 export type Nullish = null | undefined

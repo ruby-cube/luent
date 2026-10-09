@@ -29,10 +29,10 @@
       "luent": [
         "./packages/luent/src/index.ts"
       ],
-      "@luent/quarky": [
+      "@luently/quarky": [
         "./packages/quarky/src/index.ts"
       ],
-      "@luent/websites-shared": [
+      "@luently/websites-shared": [
         "./websites/shared/src/index.ts"
       ],
     }

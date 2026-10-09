@@ -1,8 +1,8 @@
-import { getActiveUpdate, awaitLayout, awaitRender, queueTask, toValue } from "@luent/quarky";
+import { getActiveUpdate, awaitLayout, awaitRender, queueTask, toValue } from "@luently/quarky";
 import { toClassNames } from "./transitions";
 import { atListChanged } from "../iteratives/For";
 import { IonOr } from "../component/bindings-types";
-import { getFlask } from "@luent/flask";
+import { getFlask } from "@luently/flask";
 import { atAttach, beforeDetach } from "../flask/flask-hooks";
 
 export function setUpPositionTransition(node: HTMLElement, transitionClasses: IonOr<string>) {

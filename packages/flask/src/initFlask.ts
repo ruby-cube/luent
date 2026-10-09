@@ -1,4 +1,4 @@
-import { debug, useIncrementalID } from "@luent/utils";
+import { debug, useIncrementalID } from "@luently/utils";
 import { Listener, Until } from "./Listener";
 import { Flask } from "./Flask";
 

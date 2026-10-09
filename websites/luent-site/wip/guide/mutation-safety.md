@@ -93,10 +93,10 @@ function IncrementButton(setup: FromTag<{
   count: Ion<number>;
   onClick: (e: MouseEvent) => void; // event
 }>) {
-  const { $count, onClick } = setup;
+  const { $count, emitClick } = setup;
 
   return <>
-    <button on:click={onClick}>{$count}</button>
+    <button on:click={emitClick}>{$count}</button>
   </>
 }
 ```

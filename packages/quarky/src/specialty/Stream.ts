@@ -1,4 +1,4 @@
-import { AnyObject } from "@luent/types"
+import { AnyObject } from "@luently/types"
 
 export type Stream = {
    start(): Promise<void>

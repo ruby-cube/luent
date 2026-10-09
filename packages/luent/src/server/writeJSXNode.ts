@@ -2,7 +2,7 @@ import { InferSlot } from "../component/Component";
 import { TagName } from "../element/setUpElement";
 import { ComponentConfig, ElementConfig, makeView, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { writeComponent, writeElement, processJSXOutput } from "./writeHTML";
-import { isFunction, normalizeToArray } from "@luent/utils";
+import { isFunction, normalizeToArray } from "@luently/utils";
 import { writeShadowRoot } from "../component/shadow";
 import { writeToPortal } from "./portals";
 import { RenderTag } from "../component/bindings-types";

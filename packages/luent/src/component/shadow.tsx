@@ -1,6 +1,6 @@
 // let shadow: ShadowRoot | undefined;
 
-import { AsyncState } from "@luent/flask";
+import { AsyncState } from "@luently/flask";
 import { FromTag, RenderTag } from "./bindings-types";
 import { DOMParent, processJSXOutput, VineNode } from "../node/VineNode";
 

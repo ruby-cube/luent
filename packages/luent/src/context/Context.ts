@@ -1,8 +1,8 @@
 import { ContextNode, getClosestContext, popContext, pushContext } from "./context-stack";
 import { ContextEntryKey, toContextKey } from "./ContextKey";
 import { FromTag, RenderTag } from "../component/bindings-types";
-import { debug, normalizeToArray } from "@luent/utils";
-import {  unnestComponent } from "@luent/noriscript";
+import { debug, normalizeToArray } from "@luently/utils";
+import {  unnestComponent } from "@luently/noriscript";
 import { component } from "..";
 
 export interface NodeContext {

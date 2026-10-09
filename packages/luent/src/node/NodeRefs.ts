@@ -1,6 +1,6 @@
-import { getActiveFlask, getFlask } from "@luent/flask";
-import { INTERNAL, Ion, PRELUDE, toValue, observe } from "@luent/quarky";
-import { isFunction } from "@luent/utils";
+import { getActiveFlask, getFlask } from "@luently/flask";
+import { INTERNAL, Ion, PRELUDE, toValue, observe } from "@luently/quarky";
+import { isFunction } from "@luently/utils";
 
 
 type Nodes = any[] | Nodes[]

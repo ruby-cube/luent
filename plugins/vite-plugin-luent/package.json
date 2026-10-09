@@ -49,7 +49,7 @@
   "dependencies": {
     "@babel/core": "^8.0.1",
     "@babel/plugin-syntax-typescript": "^7.25.9",
-    "@luent/babel-plugin-luent": "workspace:*",
+    "@luently/babel-plugin-luent": "workspace:*",
     "fast-glob": "^3.3.3"
   },
   "devDependencies": {

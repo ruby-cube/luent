@@ -1,7 +1,7 @@
 import { For, listen, NodeRef, Style, css, $$ } from "luent";
-import { moveUniqueItems, useRandomColorGenerator } from "@luent/utils";
+import { moveUniqueItems, useRandomColorGenerator } from "@luently/utils";
 import './style.css'
-import { ion, awaitRender, queueTask, EACH, ionic } from "@luent/quarky";
+import { ion, awaitRender, queueTask, EACH, ionic } from "@luently/quarky";
 
 class ListItem {
   constructor(

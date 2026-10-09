@@ -1,4 +1,4 @@
-import { debug } from "@luent/utils";
+import { debug } from "@luently/utils";
 import { Traceable } from "../debug/Traceable";
 import { Atom, TrackedAtom } from "../reactivity/Atom";
 import { ModelQuark } from "./ModelQuark";

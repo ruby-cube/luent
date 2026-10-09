@@ -1,11 +1,11 @@
-import { AnyObject } from "@luent/types"
+import { AnyObject } from "@luently/types"
 import { FromTag, RenderTag, Bindings } from "./bindings-types"
 import { NodeRef, RefSource } from "../node/NodeRef"
 import { NodeRefsConfig } from "../node/NodeRefs"
-import { Ion, MutableIon } from "@luent/quarky"
+import { Ion, MutableIon } from "@luently/quarky"
 import { TransitionConfigs } from "../transitions/transitions"
 import { TagClass, TagStyle } from "../element/styles"
-import { ComponentKit } from "@luent/noriscript"
+import { ComponentKit } from "@luently/noriscript"
 import { RawJSXNode } from "../node/makeJSXNode"
 import { $from } from "../utils/destructure"
 
@@ -95,7 +95,12 @@ export function toSetup(bindings: RawBindings): SetupBindings {
 
       case 'xlmns': // TODO: other namespaces?
       case undefined: // normal attributes/bindings
-        setup[key] = bindings[rawKey]
+        if (isEventKey(key)) {
+          setup[toEmitterKey(key)] = bindings[rawKey]
+        }
+        else {
+          setup[key] = bindings[rawKey]
+        }
         break;
 
       default:
@@ -107,6 +112,22 @@ export function toSetup(bindings: RawBindings): SetupBindings {
   if (setup.mu) setup.mu = $from(setup.mu)
   return setup
 }
+
+const ON_PREFIX = 'on'
+const ON_LENGTH = ON_PREFIX.length
+
+function isEventKey(value: PropertyKey): value is string {
+  if (typeof value !== 'string') return false;
+  const eventStart = value[ON_LENGTH]
+  return value.startsWith(ON_PREFIX) && eventStart.toUpperCase() === eventStart
+}
+
+function toEmitterKey(key: string) {
+  const event = key.slice(2)
+  return 'emit' + event
+}
+
+
 
 
 function analyzeKey(rawKey: string) {

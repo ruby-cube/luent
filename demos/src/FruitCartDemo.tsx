@@ -1,5 +1,5 @@
 import { component, For } from "luent"
-import { ion, ionic } from "@luent/quarky"
+import { ion, ionic } from "@luently/quarky"
 
 export function FruitCartDemo() {
   const $count = ion(0)

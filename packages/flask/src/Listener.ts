@@ -3,8 +3,8 @@ import { unmarkNoCleanup } from "./initFlask";
 import { $_run_with_, $_snap_context, asyncContextStack, ContextSnapshot, } from "./context/AsyncContext";
 import { FLASK, Flask, getActiveFlask, ThisFlask } from "./Flask";
 import { TRACE } from "./debug";
-import { noop, __DEV__unwrap } from "@luent/utils";
-import { AnyObject } from "@luent/types";
+import { noop, __DEV__unwrap } from "@luently/utils";
+import { AnyObject } from "@luently/types";
 
 type A = { [K in keyof AbortSignal]: AbortSignal[K] }['removeEventListener']
 

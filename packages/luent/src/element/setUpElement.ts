@@ -1,4 +1,4 @@
-import { isObject, normalizeToArray } from "@luent/utils";
+import { isObject, normalizeToArray } from "@luently/utils";
 import { ElementConfig, RawJSXNode } from "../node/makeJSXNode";
 import { initializeRef, isAnyNodeRef, isNodesRef } from "../node/NodeRef";
 import { setUpHooks } from "../flask/template-hooks";

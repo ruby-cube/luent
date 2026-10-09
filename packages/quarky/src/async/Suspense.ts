@@ -1,4 +1,4 @@
-import { getActiveFlask } from "@luent/flask"
+import { getActiveFlask } from "@luently/flask"
 import { Ion, MutableIon } from "../ion/Ion"
 import { $Async, ASYNC_QUARK, AsyncIon, AsyncQuark, getAwaiting } from "./AsyncIon"
 import { createAtomicIon } from "../ion/AtomicIon"

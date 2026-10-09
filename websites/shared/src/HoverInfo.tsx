@@ -1,7 +1,7 @@
 import { FromTag, NodeRef, RenderTag, Style, css } from "luent"
-import { TooltipContent, TooltipRoot, IonicTooltip, Alignment, Placement } from "@luent/luent-ui"
+import { TooltipContent, TooltipRoot, IonicTooltip, Alignment, Placement } from "@luently/luent-ui"
 
-export { TooltipKit } from "@luent/luent-ui"
+export { TooltipKit } from "@luently/luent-ui"
 
 export function HoverInfo(setup: FromTag<{
   ref?: NodeRef<'div'>;

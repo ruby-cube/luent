@@ -1,14 +1,13 @@
-import { AnyObject } from "@luent/types";
+import { AnyObject } from "@luently/types";
 import { ComponentConfig } from "../node/makeJSXNode";
-import { isObject, normalizeToArray } from "@luent/utils";
+import { isObject, normalizeToArray } from "@luently/utils";
 import { initializeRef } from "../node/NodeRef";
 import { JSXNode } from "../node/VineNode";
 import { setUpNodeRefs } from "../node/NodeRefs";
 import { setUpHooks } from "../flask/template-hooks";
-import { JSXComponentAs } from "@luent/noriscript";
-import type { ComponentKit } from "@luent/noriscript";
+import { JSXComponentAs } from "@luently/noriscript";
+import type { ComponentKit } from "@luently/noriscript";
 import { composeHooks, composeRef, toSetup } from "./bindings";
-import { $from } from "../utils/destructure";
 import { RenderTag } from "./bindings-types";
 
 
@@ -37,7 +36,7 @@ export function makeComponent(
 
   const setup = toSetup(fromTag)
   const componentHooks = composeHooks(setup)
-  const output = Component($from(setup)) // TODO: handle forwarded named slots
+  const output = Component(normalize(setup)) // TODO: handle forwarded named slots
 
   if (output instanceof Promise)
     throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
@@ -69,3 +68,53 @@ export function makeComponent(
 
 
 
+
+function isGetterKey(key: PropertyKey): key is `$${string}` {
+  if (typeof key !== 'string') return false;
+  return key.startsWith('$')
+}
+
+export function normalize<T extends object>(target: T) {
+  if (typeof target !== 'object') throw new TypeError('target must be destructurable')
+  return (new Proxy(target, {
+    get(target, key, receiver) {
+      
+      if (isGetterKey(key)) {
+        const valueKey = key.slice(1) as keyof T
+        if (valueKey in target && target[valueKey] !== undefined) {
+          const value = target[valueKey]
+          if (isAccessor(value))
+            return value
+          return () => value
+        }
+        return undefined
+      }
+
+      if (isEmitterKey(key)) {
+        const handler = target[key as keyof T]
+        if (!handler) return noop;
+        return handler;
+      }
+      return Reflect.get(target, key, receiver)
+    },
+    set() {
+      return false;
+    }
+  }))
+}
+
+function noop() {}
+
+const EMIT = 'emit'
+const EMIT_LENGTH = EMIT.length
+
+
+function isEmitterKey(value: PropertyKey): value is string {
+  if (typeof value !== 'string') return false;
+  const eventStart = value[EMIT_LENGTH]
+  return value.startsWith(EMIT) && eventStart.toUpperCase() === eventStart
+}
+
+function isAccessor(value: unknown) {
+  return typeof value === 'function' && value.length === 0
+}

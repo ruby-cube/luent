@@ -1,7 +1,7 @@
 import { transformWithOxc } from 'vite'
 import type { ConfigEnv, Plugin, UserConfig } from 'vite'
 import * as babel from '@babel/core'
-import { luentPreTransform as BabelLuentPlugin } from '@luent/babel-plugin-luent'
+import { luentPreTransform as BabelLuentPlugin } from '@luently/babel-plugin-luent'
 
 interface LuentPluginOptions {
   useWorkspace?: boolean
@@ -132,7 +132,7 @@ export default function LuentPlugin(options: LuentPluginOptions = {}): Plugin {
     //     return null
     //   }
 
-    //   const { transpileNextScript } = await import('@luent/noriscript/transpile')
+    //   const { transpileNextScript } = await import('@luently/noriscript/transpile')
 
     //   const code = await readFile(fileName, 'utf8')
     //   const { transpiled } = transpileNextScript(fileName, code)
@@ -233,7 +233,7 @@ function composeList(item: string, existing: string[]): string[] {
 function composeNoExternal(
   existing: true | string | RegExp | (string | RegExp)[] | undefined
 ): true | (string | RegExp)[] {
-  const workspacePackages = /^(luent|@luent\/)/
+  const workspacePackages = /^(luent|@luently\/)/
 
   if (existing === true) {
     return true

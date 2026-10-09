@@ -1,4 +1,4 @@
-import { ªªof } from "@luent/noriscript";
+import { ªªof } from "@luently/noriscript";
 
 type $From<T> = T & AccessorsOf<T>
 

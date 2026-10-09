@@ -1,5 +1,5 @@
-import { ExcludePrimitives, Glass, OnlyPrimitives, Primitive } from "@luent/types";
-import { Ion, Ionic } from "@luent/quarky";
+import { ExcludePrimitives, Glass, OnlyPrimitives, Primitive } from "@luently/types";
+import { Ion, Ionic } from "@luently/quarky";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { NodeRef, RefSource } from "../node/NodeRef";
 import { LuentHooks } from "../flask/template-hooks";
@@ -39,7 +39,7 @@ type HasEvent<C> = keyof C extends never ? false : Exclude<keyof C, Exclude<keyo
 
 type WithDOMEvent<C> = { emit: { [K in keyof C as K extends `on:${infer E}` ? E : never]: C[K] } & { [K in keyof DOMEvents<HTMLElement> as K extends `on:${infer E}` ? E : never]: DOMEvents<HTMLElement>[K] } }
 
-type WithEvents<C> = { [K in keyof C as K extends `on${infer Head}${string}` ? Head extends Uppercase<Head> ? K : never : never]: C[K] }
+type WithEvents<C> = { [K in keyof C as K extends `on${infer Head}${infer S}` ? Head extends Uppercase<Head> ? `emit${Head}${S}` : never : never]: C[K] }
 type TagEvents<C> = { [K in keyof C as K extends `on${infer Head}${string}` ? Head extends Uppercase<Head> ? K : never : never]?: C[K] }
 
 type HasMu<C> = keyof C extends never ? false : Exclude<keyof C, Exclude<keyof C, `mu:${string}` | `mu?:${string}`>> extends never ? false : true
@@ -111,7 +111,7 @@ type MutableAttribute<D> = {
 
 
 
-export type Bindings<N extends RefSource> =  { '~bindings'?: ElementAttributes<N> & { ref?: NodeRef<N> } }
+export type Bindings<N extends RefSource> = { '~bindings'?: ElementAttributes<N> & { ref?: NodeRef<N> } }
 
 // export type FromTag<D = {}> = _FromTag<D>
 
@@ -146,8 +146,9 @@ type WithMu<D> = HasMu<D> extends true ? {
 
 
 type PlainInput<D> = {
-  [K in keyof D as K extends `...` | `mu:${string}` | `can:${string}` | `on:${string}`/*  | 'provide' */ ? never
-  : K]: D[K]
+  [K in keyof D as K extends `...` | `mu:${string}` | `can:${string}` | `on:${string}` ? never
+  : K extends `on${infer Head}${string}` ? Head extends Uppercase<Head> ? never
+  : K : K]: D[K]
 }
 
 

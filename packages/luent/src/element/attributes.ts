@@ -1,7 +1,7 @@
-import { Flask, getFlask } from "@luent/flask";
-import { isGetter, awaitRender, RUN_EAGERLY, toValue, trackForRender, queueInternalRender } from "@luent/quarky";
+import { Flask, getFlask } from "@luently/flask";
+import { isGetter, awaitRender, RUN_EAGERLY, toValue, trackForRender, queueInternalRender } from "@luently/quarky";
 import { IonOr } from "../component/bindings-types";
-import { AnyObject } from "@luent/types";
+import { AnyObject } from "@luently/types";
 
 
 export function setUpAttributes(node: Element | null, attributes: { [key: string]: IonOr<any> }) {

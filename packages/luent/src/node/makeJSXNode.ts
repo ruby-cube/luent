@@ -1,15 +1,15 @@
-import { Ion, isIon, isGetter, SuspenseIon, AsyncIon, SUSPENSE_QUARK, ASYNC_QUARK } from "@luent/quarky";
+import { Ion, isIon, isGetter, SuspenseIon, AsyncIon, SUSPENSE_QUARK, ASYNC_QUARK } from "@luently/quarky";
 import { InferSlot, makeComponent } from "../component/Component";
 import { TagName, setUpElement } from "../element/setUpElement";
 import { NodeRef, INTERNAL } from "./NodeRef";
-import { AnyObject, Booleanny, Falsey } from "@luent/types";
+import { AnyObject, Booleanny, Falsey } from "@luently/types";
 import { Portal } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
 import { Context, Provided, callWithContext, createContextNode, wrapWithContext } from "../context/Context";
 import { ViewType } from "../conditional/If";
 import { IonOr, RenderTag } from "../component/bindings-types";
 import { DOMNode, DOMParent, VineNode } from "./VineNode";
-import { ComponentKit } from "@luent/noriscript";
+import { ComponentKit } from "@luently/noriscript";
 import { createShadowRoot } from "../component/shadow";
 import { provideTransition } from "../transitions/Transition";
 import { fromContext } from "../context/provide";

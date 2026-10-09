@@ -1,6 +1,6 @@
 import { As } from "../conditional/As"
 import { createIfSeries, If } from "../conditional/If"
-import { Ion, ion, SuspenseIon, awaitsPrelude, $Async, Observer, tick, addToSuspense, ASYNC_QUARK, pushAwaiting, popAwaiting, getAwaiting } from "@luent/quarky"
+import { Ion, ion, SuspenseIon, awaitsPrelude, $Async, Observer, tick, addToSuspense, ASYNC_QUARK, pushAwaiting, popAwaiting, getAwaiting } from "@luently/quarky"
 
 export function Awaits<T>(promise: Promise<T> | Ion<Promise<T>> | Ion<T> & $Async<T>, render: (result: T) => any) {
   console.log('AWAITS')

@@ -1,5 +1,5 @@
 import { $from, $$, component, Else, For, If } from "luent";
-import { ion, ionic, observe } from "@luent/quarky";
+import { ion, ionic, observe } from "@luently/quarky";
 
 let id = 0
 function genUID() {

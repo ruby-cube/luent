@@ -1,4 +1,4 @@
-import { $listen, PausableListener, CallbackRemover, defineCustomCleanupScheduler, SustainedListenerOptions, ScheduleStop } from '@luent/flask';
+import { $listen, PausableListener, CallbackRemover, defineCustomCleanupScheduler, SustainedListenerOptions, ScheduleStop } from '@luently/flask';
 import { withUpdate } from '../element/events';
 
 

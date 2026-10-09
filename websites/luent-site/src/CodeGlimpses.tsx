@@ -1,6 +1,6 @@
 import { atUnmount, css, Else, For, If, ion, Ion, NodeRef, Style } from 'luent'
-import { Tooltip, TOOLTIP_CONFIG, TooltipContent, TooltipKit, TooltipRoot } from '@luent/luent-ui'
-import { $CodeTab, Code, CodeTour, TourSection } from '@luent/websites-shared'
+import { Tooltip, TOOLTIP_CONFIG, TooltipContent, TooltipKit, TooltipRoot } from '@luently/luent-ui'
+import { $CodeTab, Code, CodeTour, TourSection } from '@luently/websites-shared'
 import { highlightCode } from './highlighter'
 import { pad, TourNav } from './TourNav'
 

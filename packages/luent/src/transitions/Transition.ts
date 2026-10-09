@@ -1,8 +1,8 @@
-import { JSXComponent } from "@luent/noriscript"
+import { JSXComponent } from "@luently/noriscript"
 import { RenderTag } from "../component/bindings-types"
 import { ContextKey } from "../context/ContextKey"
 import { TransitionConfigs } from "./transitions"
-import { AnyObject } from "@luent/types"
+import { AnyObject } from "@luently/types"
 
 let transitionConfig: TransitionConfigs | undefined
 

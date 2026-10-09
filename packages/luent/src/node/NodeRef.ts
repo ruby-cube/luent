@@ -1,7 +1,7 @@
 import { TagName } from "../element/setUpElement"
-import { toValue } from "@luent/quarky"
-import { getActiveFlask } from "@luent/flask"
-import { AnyObject } from "@luent/types"
+import { toValue } from "@luently/quarky"
+import { getActiveFlask } from "@luently/flask"
+import { AnyObject } from "@luently/types"
 import { makeJSXNode } from "./makeJSXNode"
 import { Bindings, RenderTag } from "../component/bindings-types"
 
@@ -11,7 +11,7 @@ import { Bindings, RenderTag } from "../component/bindings-types"
 * @param node 
 * @returns 
 */
-export function asJSX<T extends RefSource>(node: T): T extends RenderTag ? T : (setup: Bindings<T extends HTMLElement ? T['tagName'] : T>) => JSX.Element { // FIX: fix type
+export function asJSX<T extends RefSource | HTMLElement>(node: T): T extends RenderTag ? T : (setup: Bindings<T extends HTMLElement ? T['tagName'] : T>) => JSX.Element { // FIX: fix type
   if (typeof node === 'string') {
     return ((setup: Bindings<T>) => {
       return makeJSXNode(node, setup.Slot, { 'auto-bind': setup })

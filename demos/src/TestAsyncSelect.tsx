@@ -1,7 +1,7 @@
-import { toPromise } from "@luent/quarky";
+import { toPromise } from "@luently/quarky";
 import { Await, Awaits, For, Meanwhile, mountIsland, SYNC, observe, ion, awaitTick, Ion, awaitsPrelude, $_preserve_context, If, Catch, RenderTag, Try } from "luent";
-// import { addToSuspense, getActiveUpdate, getAwaiting, popUpdate, pushUpdate } from "@luent/quarky";
-// import { $_run_with_, $_snap_context, getFlask } from "@luent/flask";
+// import { addToSuspense, getActiveUpdate, getAwaiting, popUpdate, pushUpdate } from "@luently/quarky";
+// import { $_run_with_, $_snap_context, getFlask } from "@luently/flask";
 
 // based on Solid.js/Remix demo
 

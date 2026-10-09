@@ -1,4 +1,4 @@
-import { isFunction, isObject } from "@luent/utils";
+import { isFunction, isObject } from "@luently/utils";
 
 export const QUARK = Symbol('quark')
 

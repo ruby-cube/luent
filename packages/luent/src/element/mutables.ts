@@ -1,6 +1,6 @@
-import { isGetter, isIon, MutableIon, awaitRender, queueTask, RUN_EAGERLY, swiftUpdate, toValue, trackForRender, Ion, observe } from "@luent/quarky";
+import { isGetter, isIon, MutableIon, awaitRender, queueTask, RUN_EAGERLY, swiftUpdate, toValue, trackForRender, Ion, observe } from "@luently/quarky";
 import { IonOr } from "../component/bindings-types";
-import { AnyObject } from "@luent/types";
+import { AnyObject } from "@luently/types";
 
 // | Property                    | Elements                            | Typical event      | Notes                                     |
 // | --------------------------- | ----------------------------------- | ------------------ | ----------------------------------------- |

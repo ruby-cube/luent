@@ -1,4 +1,4 @@
-import { AnyObject } from "@luent/types";
+import { AnyObject } from "@luently/types";
 
 const macOSPlatforms = new Set(['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K']);
 const windowsPlatforms = new Set(['Win32', 'Win64', 'Windows', 'WinCE']);

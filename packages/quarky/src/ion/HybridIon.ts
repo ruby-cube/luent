@@ -1,6 +1,6 @@
 import { Ion, MutableIon } from "./Ion"
 import { observe } from "../reactivity/Observer"
-import { AnyObject } from "@luent/types"
+import { AnyObject } from "@luently/types"
 import { SYNC } from "../reactivity/RenderCycle"
 import { createAtomicIon } from "./AtomicIon"
 

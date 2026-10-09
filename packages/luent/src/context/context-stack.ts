@@ -1,4 +1,4 @@
-import { AsyncState } from "@luent/flask";
+import { AsyncState } from "@luently/flask";
 import { NodeContext, RootContext } from "./Context";
 
 export type ContextNode = NodeContext | RootContext

@@ -1,5 +1,5 @@
-import { $_run_with_, $_snap_context, $_wrap_with_context, getFlask } from "@luent/flask";
-import { awaitRender, awaitTick } from "@luent/quarky";
+import { $_run_with_, $_snap_context, $_wrap_with_context, getFlask } from "@luently/flask";
+import { awaitRender, awaitTick } from "@luently/quarky";
 
 
 export function beforeMount(task: () => void) {

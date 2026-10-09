@@ -1,7 +1,7 @@
-import { debug, isFunction, normalizeToArray } from "@luent/utils";
+import { debug, isFunction, normalizeToArray } from "@luently/utils";
 import { afterMount, afterDemount, afterUnmount, afterAttach, afterRemount, afterDetach, beforeMount, atMount, beforeDemount, atDemount, beforeUnmount, atUnmount, beforeAttach, atAttach, beforeRemount, atRemount, beforeDetach, atDetach } from "./flask-hooks";
-import { AnyObject } from "@luent/types";
-import { toValue } from "@luent/quarky";
+import { AnyObject } from "@luently/types";
+import { toValue } from "@luently/quarky";
 
 type LifecycleTask<T = any> = (element: T, initialOrFinal?: boolean) => void;
 

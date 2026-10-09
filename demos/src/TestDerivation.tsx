@@ -1,5 +1,5 @@
 import { $$, component, For, template } from "luent";
-import { ionic, SYNC, observe } from "@luent/quarky";
+import { ionic, SYNC, observe } from "@luently/quarky";
 
 
 

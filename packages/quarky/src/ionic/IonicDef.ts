@@ -1,5 +1,5 @@
-import { AnyObject } from "@luent/types"
-import { debug, isObject } from "@luent/utils"
+import { AnyObject } from "@luently/types"
+import { debug, isObject } from "@luently/utils"
 import { ProxyKey } from "./ModelQuark"
 
 export type Constructor = new (...args: any[]) => any

@@ -1,5 +1,5 @@
 import { component, template, FromTag, If, Else, For, fromGround, ContextKey, provideGround, $$ } from "luent";
-import { as, ionic, EACH, ion, Ionic, Nested, } from "@luent/quarky";
+import { as, ionic, EACH, ion, Ionic, Nested, } from "@luently/quarky";
 import "./style.css"
 import "./TestTreeApp.css"
 

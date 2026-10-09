@@ -1,6 +1,6 @@
 import { Function, ArrowFunctionExpression, AssignmentExpression, Node as ASTNode, CallExpression, Directive, Expression, ExpressionStatement, IfStatement, ImportDeclaration, ImportDeclarationSpecifier, ImportSpecifier, NullLiteral, Program, VariableDeclaration, VariableDeclarator, IdentifierName, BindingIdentifier, IdentifierReference, LabelIdentifier, AssignmentTarget, SimpleAssignmentTarget, UpdateExpression, TSThisParameter, TSIndexSignatureName, ObjectPropertyKind, JSXAttribute, BindingPattern, StringLiteral, TSTypeAnnotation, ObjectPattern, ArrayPattern, NumericLiteral, ObjectExpression, ObjectProperty, ArrayExpression, ArrayExpressionElement, BindingProperty, BindingRestElement, FunctionType, ParamPattern, FunctionBody, BlockStatement, TSTypeParameterInstantiation, Statement, SequenceExpression, Decorator, AssignmentOperator, DoWhileStatement, WhileStatement, ConditionalExpression, JSXChild, JSXFragment, JSXAttributeValue, JSXExpression } from 'oxc-parser'
 import { Edit, Edits } from "./1-preprocess.ts";
-import { Cursor, traverse, traverseAll } from '@luent/tree-squirl';
+import { Cursor, traverse, traverseAll } from '@luently/tree-squirl';
 
 
 // (1) reverse offset pass
@@ -1112,7 +1112,7 @@ function hasImport(name: string, declaration: ImportDeclaration) {
   return false;
 }
 
-const RUESCRIPT_IMPORT_SOURCE = '@luent/noriscript'
+const RUESCRIPT_IMPORT_SOURCE = '@luently/noriscript'
 
 function CovertImportDeclaration(source: string): ImportDeclaration {
   return {

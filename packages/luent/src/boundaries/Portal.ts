@@ -1,10 +1,10 @@
 import { RawJSXNode, RenderFunction } from "../node/makeJSXNode";
-import { isFunction, isObject, normalizeToArray } from "@luent/utils";
+import { isFunction, isObject, normalizeToArray } from "@luently/utils";
 import { atAttach, beforeDetach, atRemount, atDetach, atDemount, atUnmount } from "../flask/flask-hooks";
 import { mountDOMNodes, setUpNodeVine, removeDOMNodes, processJSXOutput, JSXNode, VineNode } from "../node/VineNode";
-import { getFlask } from "@luent/flask";
-import { queueInternalRender, awaitRender } from "@luent/quarky";
-import { AnyObject } from "@luent/types";
+import { getFlask } from "@luently/flask";
+import { queueInternalRender, awaitRender } from "@luently/quarky";
+import { AnyObject } from "@luently/types";
 import { setUpElement } from "../element/setUpElement";
 
 export type MorphConfig = {}

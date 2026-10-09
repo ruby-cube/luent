@@ -1,6 +1,6 @@
 import { component, mountIsland, css, Style, template } from "luent";
 import "./TestStyleOverride-classes.css"
-import { AnyObject } from "@luent/types";
+import { AnyObject } from "@luently/types";
 
 function Grandparent() {
     return (

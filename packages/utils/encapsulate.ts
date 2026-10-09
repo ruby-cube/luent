@@ -1,4 +1,4 @@
-import { AnyObject } from "@luent/types";
+import { AnyObject } from "@luently/types";
 
 const ENCAPSULATED = Symbol('encapsulated')
 

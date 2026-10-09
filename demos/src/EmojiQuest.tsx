@@ -1,5 +1,5 @@
 import { $$, component, css, Else, For, FromTag, If, RenderTag, Style, TagClass } from "luent";
-import { ion, Ion, Ionic, ionic } from "@luent/quarky";
+import { ion, Ion, Ionic, ionic } from "@luently/quarky";
 
 
 

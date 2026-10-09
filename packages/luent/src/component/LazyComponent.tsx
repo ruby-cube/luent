@@ -1,8 +1,8 @@
 import { RenderTag } from "./Component";
 import { Else, ElseIf, If } from "../conditional/If";
-import { noop } from "@luent/utils";
-import { createAtomicIon, ion } from "@luent/quarky";
-import { AnyObject } from "@luent/types";
+import { noop } from "@luently/utils";
+import { createAtomicIon, ion } from "@luently/quarky";
+import { AnyObject } from "@luently/types";
 
 const lazyComponents: Map<() => Promise<RenderTag>, RenderTag> = new Map()
 

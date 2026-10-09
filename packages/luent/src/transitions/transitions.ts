@@ -1,9 +1,9 @@
-import { awaitRender, queueTask, toValue } from "@luent/quarky"
+import { awaitRender, queueTask, toValue } from "@luently/quarky"
 import { IonOr } from "../component/bindings-types"
 import { atAttach, atUnmount, beforeDetach } from "../flask/flask-hooks"
 import { setUpPositionTransition, setUpTransit } from "./transit"
-import { createStack } from "@luent/utils"
-import { Flask, getFlask } from "@luent/flask"
+import { createStack } from "@luently/utils"
+import { Flask, getFlask } from "@luently/flask"
 import { inShadow } from "../component/shadow"
 import { css, Style } from "../component/Style"
 

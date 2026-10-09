@@ -1,8 +1,8 @@
-import {createMemoizedDerivation, getAwaiting, Ion, isGetter, isInertIon, toValue } from "@luent/quarky";
+import {createMemoizedDerivation, getAwaiting, Ion, isGetter, isInertIon, toValue } from "@luently/quarky";
 import { GroupActivationType, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { ConditionalKit } from "./IfElse";
 import { ViewType, createIfSeries, RenderConditional } from "./If";
-import { isFunction } from "@luent/utils";
+import { isFunction } from "@luently/utils";
 import { FromTag, RenderTag } from "../component/bindings-types";
 import { DEFAULT } from "./MatchCase";
 

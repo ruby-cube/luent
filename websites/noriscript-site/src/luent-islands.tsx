@@ -4,8 +4,8 @@ export { extractPortals, injectPortals } from 'luent/server'
 import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot } from 'luent'
 import { EmojiQuestDemo } from "./demos/EmojiQuestDemo";
 import { DoodleCanvasDemo } from "./demos/DoodleCanvasDemo";
-export * from "@luent/websites-shared";
-import { Code, extractParams, MountIslands, parseNSXBlock, WriteIslands } from "@luent/websites-shared";
+export * from "@luently/websites-shared";
+import { Code, extractParams, MountIslands, parseNSXBlock, WriteIslands } from "@luently/websites-shared";
 import { twMerge } from "tailwind-merge";
 import { highlightCode } from "./highlighter";
 

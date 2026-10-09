@@ -1,6 +1,6 @@
 import { Ion, ion, atMount, atUnmount, Await, css, Else, If, Meanwhile, NodeRef, Style, FromTag, afterAttach, awaitLayout, listen, awaitTick, queueTask, awaiting, awaitRender, Bindings } from "luent";
 import { codeHtml, trusted } from "./code-utils";
-import { TOOLTIP_CONFIG, TooltipKit } from "@luent/luent-ui";
+import { TOOLTIP_CONFIG, TooltipKit } from "@luently/luent-ui";
 import { HoverInfo } from "./HoverInfo";
 
 // TODO: Fix hacky SSG solutions
@@ -56,8 +56,8 @@ export function Code(setup: FromTag<{
   } = setup;
 
   const $stickyBtn = NodeRef('button')
-  const $container = NodeRef('div') as unknown as NodeRef<HTMLDivElement>
-  const $nav = NodeRef('nav') as unknown as NodeRef<HTMLElement>
+  const $container = NodeRef('div')
+  const $nav = NodeRef('nav')
   const $showSticky = ion(false)
 
   return <>
@@ -73,15 +73,15 @@ export function Code(setup: FromTag<{
           alt={alt.name}
           style={{
             visibility: () => $showSticky() ? 'hidden' : 'visible',
-            pointerEvents: () => $showSticky() ? 'none' : 'auto'
+            'pointer-events': () => $showSticky() ? 'none' : 'auto'
           }}
           aria-hidden={() => $showSticky() ? 'true' : 'false'}
         />
       </nav>
       {If(showSticky, () => {
         atMount(() => {
-          const stickyButton = $stickyBtn() as unknown as HTMLDivElement
-          const stickyContainer = $container() as unknown as HTMLDivElement
+          const stickyButton = $stickyBtn()
+          const stickyContainer = $container()
           const nav = $nav() as unknown as HTMLElement
           if (!stickyButton || !stickyContainer || !nav) return;
 
@@ -125,7 +125,7 @@ export function Code(setup: FromTag<{
           function syncStickyVisibility() {
             awaitLayout(() => {
               const navRect = nav.getBoundingClientRect()
-              const containerRect = stickyContainer.getBoundingClientRect()
+              const containerRect = stickyContainer!.getBoundingClientRect()
               const topOffset = stickyTopOffset()
               const shouldShow = navRect.bottom <= topOffset
                 && containerRect.bottom > topOffset + CONTAINER_BOTTOM_OFFSET_PX

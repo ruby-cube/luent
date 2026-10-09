@@ -1,4 +1,4 @@
-import { AnyObject, Mutable, MutableObject } from "@luent/types";
+import { AnyObject, Mutable, MutableObject } from "@luently/types";
 
 export type KeyPath = string[];
 export type KeyPathString = string;

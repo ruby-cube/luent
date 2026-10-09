@@ -1,5 +1,5 @@
-import { AnyObject, ReadonlyKeys } from "@luent/types";
-import { isObject } from "@luent/utils";
+import { AnyObject, ReadonlyKeys } from "@luently/types";
+import { isObject } from "@luently/utils";
 export * from './component'
 
 //  - [ ] destructureªª

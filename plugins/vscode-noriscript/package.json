@@ -61,7 +61,7 @@
       "vscode.typescript-language-features"
    ],
    "dependencies": {
-      "@luent/noriscript": "workspace:*",
+      "@luently/noriscript": "workspace:*",
       "@vscode/l10n": "0.0.18",
       "@types/vscode": "^1.115.0",
       "@volar/language-core": "~2.4.28",

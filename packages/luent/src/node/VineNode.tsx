@@ -1,9 +1,9 @@
-import { debug, isFunction, isObject, normalizeToArray } from "@luent/utils";
-import { __DEV__checkIfTracked, Ion, isGetter, PRELUDE, awaitRender, untracked, observe, trackForRender, queueInternalRender } from "@luent/quarky";
-import { isComponentKit } from "@luent/noriscript";
+import { debug, isFunction, isObject, normalizeToArray } from "@luently/utils";
+import { __DEV__checkIfTracked, Ion, isGetter, PRELUDE, awaitRender, untracked, observe, trackForRender, queueInternalRender } from "@luently/quarky";
+import { isComponentKit } from "@luently/noriscript";
 import { RawJSXNode, RenderFunction } from "./makeJSXNode";
-import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@luent/flask";
-import { TRACE } from "@luent/flask";
+import { $_run_with_, ContextSnapshot, FLASK, Flask } from "@luently/flask";
+import { TRACE } from "@luently/flask";
 import { RenderTag } from "../component/bindings-types";
 
 export type JSXNode = DOMNode | VineNode

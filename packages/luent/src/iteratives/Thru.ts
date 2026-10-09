@@ -1,8 +1,8 @@
-import { Ion, isGetter, awaitRender, trackForRender, toValue, queueInternalRender } from "@luent/quarky";
+import { Ion, isGetter, awaitRender, trackForRender, toValue, queueInternalRender } from "@luently/quarky";
 import { IonOr } from "../component/bindings-types";
 import { RawJSXNode } from "../node/makeJSXNode";
 import { JSXNode, mountDOMNodes, mountFragment, processJSXOutput, removeDOMNodes, toAsyncRender, VineNode } from "../node/VineNode";
-import { Flask, getFlask } from "@luent/flask";
+import { Flask, getFlask } from "@luently/flask";
 import { toAsyncRenderItem } from "./ItemList";
 import { markInitialRender, unmarkInitialRender } from "../transitions/transitions";
 

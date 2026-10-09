@@ -1,8 +1,8 @@
 import "./global";
 
 import * as CSS from "csstype";
-import * as Quarky from "@luent/quarky";
-import { AnyObject, Booleanny } from "@luent/types";
+import * as Quarky from "@luently/quarky";
+import { AnyObject, Booleanny } from "@luently/types";
 import { PortalNodeInput } from "../../boundaries/Portal";
 import { TransitionBindings, TransitionConfigs } from "../../transitions/transitions";
 import { matchEventTarget } from "../../events/target";

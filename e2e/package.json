@@ -1,5 +1,5 @@
 {
-  "name": "@luent/e2e",
+  "name": "@luently/e2e",
   "private": true,
   "description": "",
   "type": "module",
@@ -9,10 +9,10 @@
   },
   "dependencies": {
     "@babel/traverse": "^7.26.4",
-    "@luent/flask": "workspace:*",
+    "@luently/flask": "workspace:*",
     "luent": "workspace:*",
-    "@luent/quarky": "workspace:*",
-    "@luent/utils": "workspace:*",
+    "@luently/quarky": "workspace:*",
+    "@luently/utils": "workspace:*",
     "lodash-es": "^4.18.1",
     "marked": "^18.0.3"
   },
@@ -26,7 +26,7 @@
     "@babel/preset-react": "^7.26.3",
     "@babel/preset-typescript": "^7.26.0",
     "@babel/types": "^7.26.3",
-    "@luent/types": "workspace:*",
+    "@luently/types": "workspace:*",
     "vite-plugin-luent": "workspace:*",
     "@types/babel__core": "^7.20.5",
     "@types/babel__traverse": "^7.20.6",

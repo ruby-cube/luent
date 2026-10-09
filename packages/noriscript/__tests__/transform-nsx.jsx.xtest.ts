@@ -31,7 +31,7 @@ describe('NoriScript JSX transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { JSXComponent } from "@luent/noriscript";\n` +
+         `import { JSXComponent } from "@luently/noriscript";\n` +
          `JSXComponent(<><div>hi</div></>);\n`
       )
    })
@@ -45,7 +45,7 @@ describe('NoriScript JSX transforms', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { JSXComponentAs } from "@luent/noriscript";\n` +
+         `import { JSXComponentAs } from "@luently/noriscript";\n` +
          `JSXComponentAs({\n\topen\n}, <><div>hi</div></>);\n`
       )
    })
@@ -92,7 +92,7 @@ describe('NoriScript JSX transforms', () => {
       // expect(transformed).toBe(true)
       // const generated = printTSX(tsxTree)
       // expect(generated.code).toBe(
-      //    `import { assertª, assertµ } from "@luent/noriscript";\n` +
+      //    `import { assertª, assertµ } from "@luently/noriscript";\n` +
       //    `const foo = assertª(ref(0));\n` +
       //    `observe((() => {\n` + `\tconst a = 0;\n\treturn a;\n}\n));\n` + // TODO: remove parentheses if not IIDE
       //    `const count = assertª(ref(0));\n` +

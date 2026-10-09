@@ -1,8 +1,8 @@
 import { encodePortals, defineStyleScopeElement } from "luent/server";
 import { type MarkdownOptions } from "VitePress"
 import { encodeStyleTags } from "./style-rules";
-import { AnyObject } from "@luent/types";
-import { escapeHTML, unescapeHTML } from "@luent/utils";
+import { AnyObject } from "@luently/types";
+import { escapeHTML, unescapeHTML } from "@luently/utils";
 
 export type WriteIslands = { [key: string]: (inner: string) => void }
 type Island = { inner: string, node: HTMLElement }

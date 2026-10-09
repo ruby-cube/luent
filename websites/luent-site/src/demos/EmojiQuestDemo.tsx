@@ -1,4 +1,4 @@
-import { $CodeTab, Code, DemoContainer, EmojiQuest } from '@luent/websites-shared'
+import { $CodeTab, Code, DemoContainer, EmojiQuest } from '@luently/websites-shared'
 import { highlightCode } from "../highlighter"
 
 export function EmojiQuestDemo() {

@@ -1,19 +1,19 @@
-import { isFunction, isObject, isString, normalizeToArray } from "@luent/utils";
+import { isFunction, isObject, isString, normalizeToArray } from "@luently/utils";
 import { composeBindings, toSetup } from "../component/bindings";
 import { RenderTag } from "../component/bindings-types";
 import { ComponentConfig, ElementConfig, RawJSXNode, RenderFunction } from "../node/makeJSXNode";
 import { $from } from "../utils/destructure";
 import { toString } from '../node/VineNode'
-import { isComponentKit } from "@luent/noriscript";
-import { instantUpdate, Ion, isGetter, toValue } from "@luent/quarky";
+import { isComponentKit } from "@luently/noriscript";
+import { instantUpdate, Ion, isGetter, toValue } from "@luently/quarky";
 import { isBooleanAttribute } from "../element/attributes";
 import { ReactiveClasses, TagClass, TagStyle } from "../element/styles";
-import { AnyObject, Booleanny, Falsey } from "@luent/types";
-import { Flask, flaskStack } from "@luent/flask";
+import { AnyObject, Booleanny, Falsey } from "@luently/types";
+import { Flask, flaskStack } from "@luently/flask";
 import { InnerHTMLKit, isInnerHTMLKit } from "../node/InnerHTML";
 import { createRootContext } from "../context/provide";
 import { popContext, pushContext } from "../context/context-stack";
-import { escapeHTML } from "@luent/utils"
+import { escapeHTML } from "@luently/utils"
 
 const selfclosing = {
   "area": true,

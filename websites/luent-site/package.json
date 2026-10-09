@@ -1,12 +1,12 @@
 {
-  "name": "@luent/luent-site",
+  "name": "@luently/luent-site",
   "private": true,
   "description": "",
   "type": "module",
   "devDependencies": {
-    "@luent/luent-ui": "workspace:*",
-    "@luent/quarky": "workspace:*",
-    "@luent/websites-shared": "workspace:*",
+    "@luently/luent-ui": "workspace:*",
+    "@luently/quarky": "workspace:*",
+    "@luently/websites-shared": "workspace:*",
     "concurrently": "^10.0.3",
     "luent": "workspace:*",
     "shiki": "^4.1.0",

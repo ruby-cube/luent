@@ -1,5 +1,5 @@
 import { If, mountIsland, Style, css } from "luent";
-import { Ion, ion } from "@luent/quarky";
+import { Ion, ion } from "@luently/quarky";
 import "./style.css"
 
 

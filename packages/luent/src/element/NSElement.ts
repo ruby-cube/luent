@@ -1,5 +1,5 @@
-import { AsyncState } from "@luent/flask";
-import { AnyObject } from "@luent/types";
+import { AsyncState } from "@luently/flask";
+import { AnyObject } from "@luently/types";
 
 
 // export const mathElements = {

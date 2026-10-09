@@ -1,6 +1,6 @@
 import { component, template } from "luent";
 import { Thru } from "../../../packages/luent/src/iteratives/Thru";
-import { ion } from "@luent/quarky";
+import { ion } from "@luently/quarky";
 
 export function TestThru() {
    const $count = ion(1, {

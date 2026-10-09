@@ -1,4 +1,4 @@
-import { ion, ionic } from "@luent/quarky"
+import { ion, ionic } from "@luently/quarky"
 
 const $count = ion(0)
 

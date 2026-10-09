@@ -1,5 +1,5 @@
 import { component, listen, template } from "luent";
-import { ion, observe } from "@luent/quarky";
+import { ion, observe } from "@luently/quarky";
 
 export function TestOnceEager() {
    const $count = ion(0, {

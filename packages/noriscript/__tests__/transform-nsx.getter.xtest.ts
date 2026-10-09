@@ -18,7 +18,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@luent/noriscript";\n` +
+         `import { assertª } from "@luently/noriscript";\n` +
          `const count = assertª(ref(0));\n`
       )
    })
@@ -36,7 +36,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@luent/noriscript";\n` +
+         `import { assertª } from "@luently/noriscript";\n` +
          `const count: Ref<number> = assertª(ref(0));\n`
       )
    })
@@ -55,7 +55,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@luent/noriscript";\n` +
+         `import { assertª } from "@luently/noriscript";\n` +
          `const count = assertª(ref(0));\n` +
          `console.log(count());\n`
       )
@@ -75,7 +75,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@luent/noriscript";\n` +
+         `import { assertª } from "@luently/noriscript";\n` +
          `const count = assertª(ref(0));\n` +
          `a = count().name;\n`
       )
@@ -95,7 +95,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@luent/noriscript";\n` +
+         `import { assertª } from "@luently/noriscript";\n` +
          `const frog = assertª(ref({\n\tname: 'kermit'\n}));\n` +
          `console.log(frog().name);\n`
       )
@@ -115,7 +115,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@luent/noriscript";\n` +
+         `import { assertª } from "@luently/noriscript";\n` +
          `const frog = assertª(ref({\n\tname: 'kermit'\n}));\n` +
          `if (a)\n\tfrog();\n`
       )
@@ -135,7 +135,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@luent/noriscript";\n` +
+         `import { assertª } from "@luently/noriscript";\n` +
          `const frog = assertª(ref({\n\tname: 'kermit'\n}));\n` +
          `console.log(frog()?.name ?? 'frog');\n`
       )
@@ -155,7 +155,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@luent/noriscript";\n` +
+         `import { assertª } from "@luently/noriscript";\n` +
          `const count = assertª(ref(0));\n` +
          `const doubleCount = assertª(ref(() => count() * 2));\n`
       )
@@ -176,7 +176,7 @@ describe('transform', () => {
    //    const { ast: tsxTree, transformed } = transformNSX(ast.program, edits)
    //    const generated = printTSX(tsxTree)
    //    expect(generated.code).toBe(
-   //       `import { assertª } from "@luent/noriscript";\n` +
+   //       `import { assertª } from "@luently/noriscript";\n` +
    //       `const count = assertª(ref(0));\n` +
    //       `count?.();\n` +
    //       `console.log(count?.());\n` 
@@ -197,7 +197,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª, assertµ } from "@luent/noriscript";\n` +
+         `import { assertª, assertµ } from "@luently/noriscript";\n` +
          `const count = assertª(ref(0));\n` +
          `assertµ(count).value = 2;\n`
       )
@@ -217,7 +217,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª, assertµ } from "@luent/noriscript";\n` +
+         `import { assertª, assertµ } from "@luently/noriscript";\n` +
          `const count = assertª(ref(0));\n` +
          `assertµ(count).value++;\n`
       )
@@ -237,7 +237,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@luent/noriscript";\n` +
+         `import { assertª } from "@luently/noriscript";\n` +
          `const count = assertª(ref(0));\n` +
          `console.log(count);\n`
       )
@@ -257,7 +257,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@luent/noriscript";\n` +
+         `import { assertª } from "@luently/noriscript";\n` +
          `const count = assertª(ref(0));\n` +
          `observe(() => (count() * 2));\n`
       )
@@ -277,7 +277,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@luent/noriscript";\n` +
+         `import { assertª } from "@luently/noriscript";\n` +
          `const count = assertª(ref(0));\n` +
          `observe(() => ((console.log('hi'), count() * 2)));\n`
       )
@@ -297,7 +297,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@luent/noriscript";\n` +
+         `import { assertª } from "@luently/noriscript";\n` +
          `const count = assertª(ref(0));\n` +
          `observe(() => (count() * 2 as number));\n`
       )
@@ -318,7 +318,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@luent/noriscript";\n` +
+         `import { assertª } from "@luently/noriscript";\n` +
          `const count = assertª(ref(0));\n` +
          `observe(async () => (await count()));\n`
       )
@@ -338,7 +338,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª } from "@luent/noriscript";\n` +
+         `import { assertª } from "@luently/noriscript";\n` +
          `const count = assertª(ref(0));\n` +
          `observe((() => (count() * 2))());\n`
       )
@@ -382,7 +382,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª, absorbsª, absorbª } from "@luent/noriscript";\n` +
+         `import { assertª, absorbsª, absorbª } from "@luently/noriscript";\n` +
          `const obj = absorbsª({\n` +
          `\tcount: absorbª(assertª(ref(0))),\n` +
          `\ta,\n` +
@@ -405,7 +405,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { ªªof } from "@luent/noriscript";\n` +
+         `import { ªªof } from "@luently/noriscript";\n` +
          `console.log(ªªof(obj).count);\n`
       )
    })
@@ -422,7 +422,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { ªªof } from "@luent/noriscript";\n` +
+         `import { ªªof } from "@luently/noriscript";\n` +
          `console.log(ªªof(obj)[count]);\n`
       )
    })
@@ -439,7 +439,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { ªªof } from "@luent/noriscript";\n` +
+         `import { ªªof } from "@luently/noriscript";\n` +
          `console.log(ªªof(obj, "?")[count]);\n`
       )
    })
@@ -456,7 +456,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { ªªof } from "@luent/noriscript";\n` +
+         `import { ªªof } from "@luently/noriscript";\n` +
          `console.log(ªªof(obj, "!")[count]);\n`
       )
    })
@@ -473,7 +473,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { ªªof } from "@luent/noriscript";\n` +
+         `import { ªªof } from "@luently/noriscript";\n` +
          `console.log(ªªof(obj, "?").count);\n`
       )
    })
@@ -490,7 +490,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { ªªof } from "@luent/noriscript";\n` +
+         `import { ªªof } from "@luently/noriscript";\n` +
          `console.log(ªªof(obj, "!").count);\n`
       )
    })
@@ -510,7 +510,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { toª } from "@luent/noriscript";\n` +
+         `import { toª } from "@luently/noriscript";\n` +
          `const count = ref(0);\n` +
          `console.log(toª(count));\n`
       )
@@ -530,7 +530,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { toª } from "@luent/noriscript";\n` +
+         `import { toª } from "@luently/noriscript";\n` +
          `let count = ref(0);\n` +
          `console.log(toª(count!));\n`
       )
@@ -550,7 +550,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { toª } from "@luent/noriscript";\n` +
+         `import { toª } from "@luently/noriscript";\n` +
          `let count = ref(0);\n` +
          `console.log(toª(count, "?"));\n`
       )
@@ -571,7 +571,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { toª } from "@luent/noriscript";\n` +
+         `import { toª } from "@luently/noriscript";\n` +
          `const run = () => 'hi';\n` +
          `console.log(toª(run()));\n`
       )
@@ -591,7 +591,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { toª } from "@luent/noriscript";\n` +
+         `import { toª } from "@luently/noriscript";\n` +
          `const run = () => 'hi';\n` +
          `console.log(toª(run(), "?"));\n`
       )
@@ -612,7 +612,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { toª } from "@luent/noriscript";\n` +
+         `import { toª } from "@luently/noriscript";\n` +
          `const run = () => 'hi';\n` +
          `console.log(toª(run()!));\n`
       )
@@ -633,7 +633,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { toª } from "@luent/noriscript";\n` +
+         `import { toª } from "@luently/noriscript";\n` +
          `const run = () => 'hi';\n` +
          `console.log(toª(run()) as Get<string>);\n`
       )
@@ -657,7 +657,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { toª } from "@luent/noriscript";\n` +
+         `import { toª } from "@luently/noriscript";\n` +
          `function foo(bar) {\n` +
          `\tbar = toª(bar);\n` +
          `\tconsole.log(bar());\n` +
@@ -684,7 +684,7 @@ describe('transform', () => {
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
       expect(generated.code).toBe(
-         `import { assertª, toª } from "@luent/noriscript";\n` +
+         `import { assertª, toª } from "@luently/noriscript";\n` +
          `function foo(bar = assertª(0)) {\n` +
          `\tbar = toª(bar);\n` +
          `\tconsole.log(bar());\n` +
@@ -700,7 +700,7 @@ describe('transform', () => {
       const { ast: tsxTree, transformed } = transformNSX(ast.program, edits)
       expect(transformed).toBe(true)
       const generated = printTSX(tsxTree)
-      expect(generated.code).toBe('import { assertª } from "@luent/noriscript";\nfunction ref(a: number) {\n}\n\nfunction frog() {\n\tconst count = assertª(ref(0));\n\treturn;\n}\n\nconst count = 0;\n')
+      expect(generated.code).toBe('import { assertª } from "@luently/noriscript";\nfunction ref(a: number) {\n}\n\nfunction frog() {\n\tconst count = assertª(ref(0));\n\treturn;\n}\n\nconst count = 0;\n')
    })
 
 })

@@ -1,5 +1,5 @@
 {
-  "name": "@luent/luent-ui",
+  "name": "@luently/luent-ui",
   "private": true,
   "description": "",
   "type": "module",
@@ -15,9 +15,9 @@
   "peerDependencies": {
     "luent": "workspace:*",
     "@tailwindcss/vite": "^4.2.1",
-    "@luent/types": "workspace:*",
+    "@luently/types": "workspace:*",
     "vite-plugin-luent": "workspace:*",
-    "@luent/quarky": "workspace:*",
+    "@luently/quarky": "workspace:*",
     "tailwindcss": "^4.2.1",
     "tailwind-merge": "^3.5.0"
   },

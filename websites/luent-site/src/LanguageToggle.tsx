@@ -1,4 +1,4 @@
-import { $CodeTab, CodeToggle } from "@luent/websites-shared"
+import { $CodeTab, CodeToggle } from "@luently/websites-shared"
 import { css, Style, observe } from "luent"
 
 export function LanguageToggle() {

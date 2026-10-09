@@ -6,18 +6,12 @@
 ## Navigating the Monorepo
 The Luent monorepo currently contains four key packages:
 - luent - the core framework package
-- @luent/quarky - the reactivity system
-- @luent/flask - the batch cleanup and lifecycle manager
-- @luent/noriscript - the TypeScript + JSX language extension
+- @luently/quarky - the reactivity system
+- @luently/flask - the batch cleanup and lifecycle manager
+- @luently/noriscript - the TypeScript + JSX language extension
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
-## Monorepo Install Behavior
-`pnpm install` only installs the current package by default. To bootstrap the entire workspace from the root folder, run:
-
-```bash
-pnpm run i:stable
-```
 
 ## Design Principles
 Luent is being developed under these guiding principles, which encapsulate the project's values and how tradeoffs are navigated:

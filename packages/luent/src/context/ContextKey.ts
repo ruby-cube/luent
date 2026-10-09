@@ -1,4 +1,4 @@
-import { isFunction } from "@luent/utils";
+import { isFunction } from "@luently/utils";
 
 export function MU_<K extends ContextEntryKey | string>(key: K): ContextEntryKey<K extends ContextEntryKey<infer T> ? T : unknown> {
   const contextKey = toContextKey(key)

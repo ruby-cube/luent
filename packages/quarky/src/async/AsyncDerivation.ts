@@ -1,5 +1,5 @@
 import { observe } from "../reactivity/Observer"
-import { AnyObject } from "@luent/types"
+import { AnyObject } from "@luently/types"
 import { MutableIon } from "../ion/Ion"
 import { createAtomicIon } from "../ion/AtomicIon"
 import { createMemoizedDerivation } from "../ion/DerivationIon"

@@ -1,5 +1,5 @@
 import { component, If } from "luent";
-import { ion, PRELUDE, observe } from "@luent/quarky";
+import { ion, PRELUDE, observe } from "@luently/quarky";
 
 export function TestNullIon() {
    const $frog = ion(null)

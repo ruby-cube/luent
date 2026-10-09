@@ -1,6 +1,6 @@
 import { As, asJSX, ContextKey, css, For, fromContext, FromTag, If, ion, ionic, NodeRef, Style, Thru, observe, Bindings } from "luent";
-import { Ion, queueTask } from "@luent/quarky";
-import { moveUniqueItems } from "@luent/utils";
+import { Ion, queueTask } from "@luently/quarky";
+import { moveUniqueItems } from "@luently/utils";
 
 export function TestColorSort() {
   const $round = ion(0, {
@@ -108,7 +108,7 @@ function ColorPalette(setup: FromTag<{
   onMove: () => void;
   onComplete: () => void;
 }>) {
-  const { size = 6, onMove, onComplete, ...rest } = setup
+  const { size = 6, emitMove, emitComplete, ...rest } = setup
 
   const { colors, $sorted } = ColorsKit(size)
 
@@ -133,7 +133,7 @@ function ColorPalette(setup: FromTag<{
     if (!selected.size) return;
     colors.moveColors(selected, index)
     selected.clear()
-    onMove()
+    emitMove()
   }
 
   const { $dragging, makeDraggable } = DraggableKit<Color>({
@@ -146,7 +146,7 @@ function ColorPalette(setup: FromTag<{
 
   const $disableGap = ion(() => $dragging() || selected.size === 0)
 
-  const { makeMagnifyable } = CelebrationKit($sorted, onComplete)
+  const { makeMagnifyable } = CelebrationKit($sorted, emitComplete)
 
   return <>
     <o--portal to={fromContext(HOST) ?? window}
@@ -313,12 +313,12 @@ const Arrow = () =>
 
 function DraggableKit<T>(config: {
   n: number,
-  onDrag: (item: T) => void,
-  onDrop: (dropIndex: number) => void,
+  onDrag?: (item: T) => void,
+  onDrop?: (dropIndex: number) => void,
   isSelected: (item: T) => boolean,
   $selected: Ion<T[]>
 }) {
-  const { n, onDrag, onDrop, isSelected, $selected } = config
+  const { n, onDrag: emitDrag, onDrop: emitDrop, isSelected, $selected } = config
 
   let selectedItem: T | null = null;
   let selectedIndex: number | null = null;
@@ -349,7 +349,7 @@ function DraggableKit<T>(config: {
       selectedItem = item;
       selectedIndex = index;
       $dragging.value = true
-      onDrag(item);
+      emitDrag?.(item);
 
       if ($selected().length > 1) {
         $taggingAlong.value = true;
@@ -395,7 +395,7 @@ function DraggableKit<T>(config: {
         target.releasePointerCapture(e.pointerId)
         $shiftX.value = 0;
         $shiftY.value = 0;
-        onDrop(dropIndex === null ? selectedIndex! : dropIndex)
+        emitDrop?.(dropIndex === null ? selectedIndex! : dropIndex)
         // delaying prevents a swatch that is dropped in its original position from being reselected.
         queueTask(() => { $dragging.value = false });
         target.removeEventListener('pointermove', drag)

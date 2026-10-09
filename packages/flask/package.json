@@ -1,5 +1,5 @@
 {
-    "name": "@luent/flask",
+    "name": "@luently/flask",
     "version": "0.0.0",
     "private": true,
     "description": "",
@@ -18,10 +18,10 @@
       "build:types": "tsc -p tsconfig.build.json"
     },
     "dependencies": {
-      "@luent/utils": "workspace:*"
+      "@luently/utils": "workspace:*"
     },
     "devDependencies": {
-      "@luent/types": "workspace:*"
+      "@luently/types": "workspace:*"
     },
     "author": "Ruby Yi Wang",
     "license": "MIT"

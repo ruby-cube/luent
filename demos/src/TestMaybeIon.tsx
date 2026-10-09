@@ -1,5 +1,5 @@
 import { FromTag, Ion } from "luent";
-import { ion } from "@luent/quarky";
+import { ion } from "@luently/quarky";
 
 function TestMaybeIon() {
    const $msg = ion('hi')

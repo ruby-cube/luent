@@ -1,5 +1,5 @@
 import { ContextKey, fromContext, listen, ionic, Ionic, queueTask } from "luent"
-import { AnyObject } from "@luent/types"
+import { AnyObject } from "@luently/types"
 import { DATA_ATTRIBUTE_POPOVER, getPopoverID, Popover } from "../popover/Popover.kit"
 
 

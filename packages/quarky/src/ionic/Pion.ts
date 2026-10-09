@@ -3,7 +3,7 @@ import { traceMutation } from "../debug/dev"
 import { trigger } from "../reactivity/Atom"
 import { QUARK } from "../abstract/Quark"
 import { ModelQuark } from "./ModelQuark"
-import { isObject } from "@luent/utils"
+import { isObject } from "@luently/utils"
 import { AtomicIonQuark, getState, IonHooks, setState, withGetHook, withSetHook } from "../ion/AtomicIon"
 
 

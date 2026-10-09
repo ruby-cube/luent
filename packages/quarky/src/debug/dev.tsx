@@ -3,7 +3,7 @@ import { Traceable, TraceableEntity, TraceableMutable } from "./Traceable";
 import { __DEV__getTrace, getAsyncPath, traceAsyncPath } from "../../../flask/src/debug";
 import { Compound, Particle } from "../reactivity/Compound";
 import { observe } from "../reactivity/Observer";
-import { isFunction, isObject } from "@luent/utils";
+import { isFunction, isObject } from "@luently/utils";
 import { createMemoizedDerivation, DerivationIonQuark } from "../ion/DerivationIon";
 import { Stateful } from "../abstract/Stateful";
 import { PRELUDE } from "../reactivity/RenderCycle";

@@ -1,4 +1,4 @@
-import { $_run_with_, $_snap_context, $_wrap_with_context } from "@luent/flask";
+import { $_run_with_, $_snap_context, $_wrap_with_context } from "@luently/flask";
 import { Reactions } from "./Atom";
 import { Reaction } from "./Reaction";
 import { $activeUpdate, getActiveUpdate, popUpdate, pushUpdate, Update } from "./Update";

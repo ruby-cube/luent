@@ -1,5 +1,5 @@
-import { Ion } from "@luent/quarky";
-import { isFunction } from "@luent/utils"
+import { Ion } from "@luently/quarky";
+import { isFunction } from "@luently/utils"
 
 type DynamicStylePropertyKit = {
   key: string;

@@ -18,7 +18,7 @@ export default defineConfig({
   //   lib: {
   //     // Could also be a dictionary or array of multiple entry points
   //     entry: resolve(import.meta.url, 'src/index.ts'),
-  //     name: '@luent',
+  //     name: '@luently',
   //     // the proper extensions will be added
   //     fileName: 'rue',
   //   },

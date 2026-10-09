@@ -1,5 +1,5 @@
 import { IonOr } from 'luent'
-import { escapeHTML } from '@luent/utils'
+import { escapeHTML } from '@luently/utils'
 
 export function trusted(html: IonOr<string>) {
   return {

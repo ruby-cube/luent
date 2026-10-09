@@ -1,6 +1,6 @@
-import { $listen, getFlask, SustainedListenerOptions } from "@luent/flask";
+import { $listen, getFlask, SustainedListenerOptions } from "@luently/flask";
 import { getPhase, scheduleEagerReaction, ObserverDebugOptions } from "./Observer";
-import { Glass } from "@luent/types";
+import { Glass } from "@luently/types";
 import { Reaction } from "./Reaction";
 import { linkReactionToAtom } from "./Substance";
 import { Traceable, TraceableEntity } from "../debug/Traceable";

@@ -7,7 +7,7 @@ import { JSDOM } from 'jsdom'
 import { Context, createContext } from '../Context';
 import { ContextKey } from '../ContextKey';
 import { Ion, Ionized, IonOr, v } from '../../component/bindings-types';
-import { ion, ionize, isIon, isIonicProxy } from '@luent/quarky';
+import { ion, ionize, isIon, isIonicProxy } from '@luently/quarky';
 
 
 // Common setup to reset the environment before each test

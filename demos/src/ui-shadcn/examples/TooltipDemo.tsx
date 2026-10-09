@@ -1,5 +1,5 @@
 import { Button } from "../Button"
-import { Tooltip, TOOLTIP_CONFIG, TooltipKit } from "@luent/luent-ui"
+import { Tooltip, TOOLTIP_CONFIG, TooltipKit } from "@luently/luent-ui"
 
 // Basic:
 // [X] anchoring

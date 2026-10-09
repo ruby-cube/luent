@@ -1,4 +1,4 @@
-<div align="center">
+<div id="readme-top" style="text-align: center;">
 <img width="200" alt="luent logo" src="assets/luent-logo-padded-light.png#gh-light-mode-only">
 <img width="200" alt="luent logo" src="assets/luent-logo-padded-dark.png#gh-dark-mode-only">
   

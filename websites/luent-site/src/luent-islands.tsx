@@ -1,10 +1,10 @@
 import { CodeGlimpses } from "./CodeGlimpses";
 export { encodePortals, injectPortals, extractPortals } from 'luent/server'
 import { mountIsland, MICROCLASS_MERGE, writeIsland, provideRoot, awaitTick } from 'luent'
-export * from "@luent/websites-shared";
+export * from "@luently/websites-shared";
 import { twMerge } from 'tailwind-merge';
 import { highlightCode } from "./highlighter";
-import { Code, extractParams, isMounted, MountIslands, parseNSXBlock, WriteIslands } from "@luent/websites-shared";
+import { Code, extractParams, isMounted, MountIslands, parseNSXBlock, WriteIslands } from "@luently/websites-shared";
 import { LanguageToggle } from "./LanguageToggle";
 import { HabitTrackerDemo } from "./demos/HabitTrackerDemo";
 import { EmojiQuestDemo } from "./demos/EmojiQuestDemo";

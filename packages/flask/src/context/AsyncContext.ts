@@ -1,4 +1,4 @@
-import { AnyObject } from "@luent/types"
+import { AnyObject } from "@luently/types"
 
 export type ContextSnapshot = Record<Key, StackNode<any> | undefined>
 

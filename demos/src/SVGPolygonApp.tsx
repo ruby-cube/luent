@@ -1,5 +1,5 @@
 import { component, template, For, FromTag, Style, css, $$, } from "luent"
-import { as, ion, ionic, EACH, Ion, Ionic } from "@luent/quarky"
+import { as, ion, ionic, EACH, Ion, Ionic } from "@luently/quarky"
 
 // Demo from Vue.js
 // features

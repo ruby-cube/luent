@@ -1,7 +1,7 @@
 
 import { component, template, Else, For, FromTag, If } from 'luent'
-import { ionic, Ion, ion } from '@luent/quarky'
-import { AnyObject } from '@luent/types'
+import { ionic, Ion, ion } from '@luently/quarky'
+import { AnyObject } from '@luently/types'
 import "./style.css"
 import "./SortableTable.css"
 

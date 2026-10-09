@@ -1,12 +1,12 @@
 import { Reaction } from "../reactivity/Reaction";
 import { FunctionSubstance } from "../reactivity/Substance";
 import { QUARK } from "../abstract/Quark";
-import { AnyObject } from "@luent/types";
+import { AnyObject } from "@luently/types";
 import { Traceable } from "../debug/Traceable";
 import { $activeUpdate } from "../reactivity/Update";
 import { track } from "../reactivity/Compound";
 import { queueCommit, SimpleState } from "../reactivity/State";
-import { isPlainObject } from "@luent/utils";
+import { isPlainObject } from "@luently/utils";
 import { Stateful } from "../abstract/Stateful";
 import { SYNC } from "../reactivity/RenderCycle";
 

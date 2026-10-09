@@ -1,4 +1,4 @@
-import { AnyObject } from "@luent/types"
+import { AnyObject } from "@luently/types"
 import { Update, $activeUpdate, getActiveUpdate } from "./Update"
 
 

@@ -1,4 +1,4 @@
-import { Flask, getActiveFlask, ThisFlask } from "@luent/flask";
+import { Flask, getActiveFlask, ThisFlask } from "@luently/flask";
 
 export function getActiveViewFlask() {
    return findViewFlask(getActiveFlask());
