@@ -8,11 +8,11 @@ export default defineConfig({
   ...createSharedViteConfig(),
   build: {
     lib: {
-      entry: resolve(__dirname, './src/luent-islands.tsx'),
+      entry: resolve(import.meta.dirname, './src/luent-islands.tsx'),
       formats: ['es'],
       fileName: 'index'
     },
     outDir: '.vitepress/.luent-islands/client',
-    emptyOutDir: false
+    emptyOutDir: true
   }
 })

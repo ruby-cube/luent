@@ -7,7 +7,7 @@ import { createSharedViteConfig } from '../shared/vite.shared.js'
 export default defineConfig({
   ...createSharedViteConfig(),
   build: {
-    ssr: resolve(__dirname, './src/luent-islands.tsx'),
+    ssr: resolve(import.meta.dirname, './src/luent-islands.tsx'),
     outDir: '.vitepress/.luent-islands/server',
     emptyOutDir: false,
     rollupOptions: {

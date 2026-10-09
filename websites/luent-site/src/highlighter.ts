@@ -1,9 +1,13 @@
-import { createHighlighter } from 'shiki'
-import { shikiLanguages, shikiThemeNames, shikiThemes } from '../.vitepress/theme/shiki-setup'
+import { createHighlighterCore } from 'shiki/core'
+import { createJavaScriptRegexEngine } from 'shiki/engine/javascript'
+import tsGrammar from 'shiki/dist/langs/typescript.mjs'
+import tsxGrammar from 'shiki/dist/langs/tsx.mjs'
+import { nsxGrammar, shikiThemeNames, shikiThemes } from '../.vitepress/theme/shiki-setup'
 
-const highlighterPromise = createHighlighter({
-  themes: [...shikiThemes],
-  langs: [...shikiLanguages]
+const highlighterPromise = createHighlighterCore({
+  engine: createJavaScriptRegexEngine(),
+  themes: shikiThemes as any,
+  langs: [...tsGrammar, ...tsxGrammar, nsxGrammar] as any
 })
 
 export async function highlightCode(code: string, lang: string) {

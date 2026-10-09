@@ -13,7 +13,7 @@ hero:
 
 features:
   - title: Readable syntax
-    details: Provides visual organization and clarity for rapid code understanding.
+    details: Provides visual organization and clarity for rapid code comprehension.
   - title: Language coherence
     details: Designed with new yet familiar syntax with predictable semantics.
   - title: Improved type safety

@@ -1,4 +1,4 @@
-<div id="readme-top" style="text-align: center;">
+<div id="readme-top" align="center">
 <img width="200" alt="luent logo" src="assets/luent-logo-padded-light.png#gh-light-mode-only">
 <img width="200" alt="luent logo" src="assets/luent-logo-padded-dark.png#gh-dark-mode-only">
   
@@ -61,7 +61,7 @@ function Counter() {
 ## Motivation
 Modern frameworks bring powerful innovations to web development, but often introduce cognitive overhead through syntax, abstractions, and patterns that run counter to native web technologies and developer intuition.
 
-This project explores ways to bring more clarity and consistency to the development process that would benefit human developers and coding agents alike.
+This project explores ways to improve the clarity and consistency of complex, evolving codebases for human developers and coding agents alike.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
@@ -117,7 +117,7 @@ This JSX template ...
 
 ## Roadmap
 
-This project is early-stage. The current goal is to establish intuitive and expressive APIs that enhance developer productivity and application maintainability.
+Our current goal is to establish clear, consistent, and expressive APIs that enhance developer productivity and application maintainability.
 
 Once the API stabilizes, development will increasingly focus on runtime efficiency, tree-shakability, smaller bundle sizes, and shifting more work from runtime to compile time.
 
@@ -161,7 +161,7 @@ Once the API stabilizes, development will increasingly focus on runtime efficien
 
 ## Acknowledgments
 
-This project builds upon ideas pioneered by frameworks that have shaped modern web development. It draws inspiration from the consistency of React, the intuitiveness of Vue, the aesthetics of Svelte, the insightfulness of Solid, and the thoroughness of Angular.
+Luent builds upon ideas pioneered by frameworks that have shaped modern web development. It draws inspiration from the consistency of React, the intuitiveness of Vue, the aesthetics of Svelte, the insightfulness of Solid, and the thoroughness of Angular.
 
 Particular acknowledgement to the people and projects I've especially admired:
 
