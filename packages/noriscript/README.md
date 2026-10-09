@@ -7,7 +7,7 @@
 
 # NoriScript
 
-NoriScript is an experimental TypeScript + JSX language extension designed to improve the readability, clarity, and type safety of JSX and accessor/signal-based reactive code. Its syntax design is guided by [our language design principles](#design-principles).
+NoriScript is an experimental TypeScript + JSX language extension designed to improve the readability, clarity, and type safety of JSX and reactive code based on getters (more popularly known as signals). Its syntax design is guided by [our language design principles](#design-principles).
 
 > **This project is in early development.** Most core features have been designed and implemented, but substantial tooling work remains before the extension is fully usable. 
 <!-- To get a sense of the syntax, explore these [code glimpses](#code-glimpse) and [examples](). -->
